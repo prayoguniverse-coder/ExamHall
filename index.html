@@ -1,277 +1,785 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ExamHall — Online Exam Portal</title>
-<link rel="stylesheet" href="style.css">
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>ExamHall</title>
+
+  <link rel="stylesheet" href="style.css">
+
 </head>
+
 <body>
 
-<!-- ============================================================
-     TOAST (for user-friendly error/success messages)
-============================================================= -->
-<div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <!-- ================= LOGIN PAGE ================= -->
 
-<!-- ============================================================
-     PAGE: LOGIN
-============================================================= -->
-<section id="page-login" class="page page-login active">
-  <div class="login-shell">
-    <div class="login-brand">
-      <div class="brand-mark">EH</div>
-      <h1>ExamHall</h1>
-      <p>A focused place to test what you know.</p>
-    </div>
+  <div id="loginPage" class="auth-page">
 
-    <div class="login-card">
-      <div class="role-tabs" role="tablist">
-        <button class="role-tab active" data-role="student" role="tab" aria-selected="true">Student</button>
-        <button class="role-tab" data-role="teacher" role="tab" aria-selected="false">Teacher</button>
+    <div class="auth-card">
+
+      <div class="brand">
+        <div class="brand-icon">E</div>
+
+        <h1>ExamHall</h1>
+
+        <p>Online Examination Portal</p>
       </div>
 
-      <form id="login-form" class="login-form">
-        <label class="field">
-          <span id="id-label">Student ID</span>
-          <input type="text" id="login-id" autocomplete="username" placeholder="e.g. student01" required>
-        </label>
-        <label class="field">
-          <span>Password</span>
-          <input type="password" id="login-password" autocomplete="current-password" placeholder="••••••••" required>
-        </label>
-        <p id="login-error" class="field-error" hidden></p>
-        <button type="submit" class="btn btn-primary btn-block">Log in</button>
+
+      <!-- AUTH MODE -->
+
+      <div class="auth-tabs">
+
+        <button
+          id="loginTab"
+          class="auth-tab active"
+          type="button"
+        >
+          Login
+        </button>
+
+        <button
+          id="signupTab"
+          class="auth-tab"
+          type="button"
+        >
+          Student Signup
+        </button>
+
+      </div>
+
+
+      <!-- LOGIN FORM -->
+
+      <form id="loginForm">
+
+        <label>Email</label>
+
+        <input
+          type="email"
+          id="loginEmail"
+          placeholder="student@example.com"
+          autocomplete="email"
+          required
+        >
+
+
+        <label>Password</label>
+
+        <input
+          type="password"
+          id="loginPassword"
+          placeholder="Enter password"
+          autocomplete="current-password"
+          required
+        >
+
+
+        <p id="loginError" class="error-message"></p>
+
+
+        <button
+          type="submit"
+          class="primary-btn"
+          id="loginBtn"
+        >
+          Login
+        </button>
+
       </form>
 
-      <div class="demo-hint">
-        <strong>Demo credentials</strong>
-        <div id="demo-hint-text">student01 / 123456</div>
+
+      <!-- SIGNUP FORM -->
+
+      <form
+        id="signupForm"
+        class="hidden"
+      >
+
+        <label>Full Name</label>
+
+        <input
+          type="text"
+          id="signupName"
+          placeholder="Enter your full name"
+          required
+        >
+
+
+        <label>Email</label>
+
+        <input
+          type="email"
+          id="signupEmail"
+          placeholder="student@example.com"
+          required
+        >
+
+
+        <label>Password</label>
+
+        <input
+          type="password"
+          id="signupPassword"
+          placeholder="Minimum 6 characters"
+          minlength="6"
+          required
+        >
+
+
+        <label>Confirm Password</label>
+
+        <input
+          type="password"
+          id="signupConfirmPassword"
+          placeholder="Confirm password"
+          minlength="6"
+          required
+        >
+
+
+        <p id="signupError" class="error-message"></p>
+
+        <p id="signupSuccess" class="success-message"></p>
+
+
+        <button
+          type="submit"
+          class="primary-btn"
+          id="signupBtn"
+        >
+          Create Student Account
+        </button>
+
+      </form>
+
+
+      <div class="demo-note">
+
+        <strong>ExamHall</strong>
+
+        <span>
+          Secure online examination system
+        </span>
+
       </div>
+
     </div>
+
   </div>
-</section>
 
-<!-- ============================================================
-     APP SHELL (shown after login) — sidebar + content area
-============================================================= -->
-<div id="app-shell" class="app-shell" hidden>
 
-  <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Open menu">☰</button>
-  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <!-- ================= APP ================= -->
 
-  <aside id="sidebar" class="sidebar">
-    <div class="sidebar-top">
-      <div class="brand-mark small">EH</div>
-      <span class="brand-name">ExamHall</span>
-    </div>
+  <div
+    id="app"
+    class="app hidden"
+  >
 
-    <div class="sidebar-user">
-      <div class="avatar" id="sidebar-avatar">?</div>
-      <div>
-        <div class="sidebar-user-name" id="sidebar-user-name">—</div>
-        <div class="sidebar-user-role" id="sidebar-user-role">—</div>
-      </div>
-    </div>
+    <!-- SIDEBAR -->
 
-    <!-- Student nav -->
-    <nav id="student-nav" class="side-nav" hidden>
-      <button class="nav-link" data-target="student-dashboard">📊 Dashboard</button>
-      <button class="nav-link" data-target="student-result">📄 My Result</button>
-      <button class="nav-link" data-target="student-history">🕘 Attempt History</button>
-    </nav>
+    <aside class="sidebar">
 
-    <!-- Teacher nav -->
-    <nav id="teacher-nav" class="side-nav" hidden>
-      <button class="nav-link" data-target="teacher-dashboard">📊 Dashboard</button>
-      <button class="nav-link" data-target="teacher-reports">🚩 Reported Questions</button>
-    </nav>
+      <div class="sidebar-brand">
 
-    <button id="logout-btn" class="btn btn-ghost btn-block logout-btn">Log out</button>
-  </aside>
+        <div class="brand-icon small">
+          E
+        </div>
 
-  <main id="main-content" class="main-content">
-
-    <!-- ---------------- STUDENT DASHBOARD ---------------- -->
-    <section id="student-dashboard" class="view">
-      <header class="view-header">
         <div>
-          <h2>Welcome back, <span id="dash-student-name">—</span></h2>
-          <p class="muted">Student ID: <span id="dash-student-id">—</span></p>
-        </div>
-      </header>
+          <strong>ExamHall</strong>
 
-      <div class="stat-grid">
-        <div class="stat-card">
-          <div class="stat-label">Official First-Attempt Score</div>
-          <div class="stat-value" id="dash-official-score">—</div>
+          <small>Online Examination</small>
         </div>
-        <div class="stat-card">
-          <div class="stat-label">Percentage</div>
-          <div class="stat-value" id="dash-official-percent">—</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Total Attempts</div>
-          <div class="stat-value" id="dash-attempt-count">0</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">First Attempt Date</div>
-          <div class="stat-value stat-value-small" id="dash-first-date">—</div>
-        </div>
+
       </div>
 
-      <div class="panel">
-        <div class="panel-header">
-          <h3>Available Exams</h3>
-        </div>
-        <div id="exam-list" class="exam-list"></div>
-      </div>
-    </section>
 
-    <!-- ---------------- EXAM PAGE ---------------- -->
-    <section id="exam-page" class="view">
-      <div class="exam-layout">
-        <div class="exam-main">
-          <div class="exam-topbar">
-            <h2 id="exam-title">—</h2>
-            <span class="badge" id="exam-progress-badge">Question 1 of 10</span>
-          </div>
+      <!-- USER -->
 
-          <div class="question-card">
-            <p class="question-text" id="question-text">—</p>
-            <div class="options-list" id="options-list"></div>
-          </div>
+      <div class="user-card">
 
-          <div class="exam-controls">
-            <button id="prev-btn" class="btn btn-secondary">← Previous</button>
-            <button id="report-open-btn" class="btn btn-ghost">🚩 Report Question</button>
-            <button id="next-btn" class="btn btn-secondary">Next →</button>
-            <button id="submit-exam-btn" class="btn btn-danger" hidden>Submit Exam</button>
-          </div>
+        <div
+          id="userAvatar"
+          class="avatar"
+        >
+          U
         </div>
 
-        <aside class="exam-side">
-          <h4>Question Navigator</h4>
-          <div class="nav-grid" id="nav-grid"></div>
-          <div class="legend">
-            <span><i class="dot dot-current"></i> Current</span>
-            <span><i class="dot dot-attempted"></i> Attempted</span>
-            <span><i class="dot dot-unattempted"></i> Unattempted</span>
+        <div class="user-details">
+
+          <strong id="userName">
+            User
+          </strong>
+
+          <span id="userRole">
+            Student
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- STUDENT MENU -->
+
+      <nav
+        id="studentMenu"
+        class="sidebar-menu"
+      >
+
+        <button
+          class="menu-btn active"
+          data-page="studentDashboard"
+        >
+          <span>📊</span>
+          Dashboard
+        </button>
+
+        <button
+          class="menu-btn"
+          data-page="studentResults"
+        >
+          <span>📄</span>
+          My Results
+        </button>
+
+        <button
+          class="menu-btn"
+          data-page="studentHistory"
+        >
+          <span>🕘</span>
+          Attempt History
+        </button>
+
+      </nav>
+
+
+      <!-- TEACHER MENU -->
+
+      <nav
+        id="teacherMenu"
+        class="sidebar-menu hidden"
+      >
+
+        <button
+          class="menu-btn active"
+          data-page="teacherDashboard"
+        >
+          <span>📊</span>
+          Dashboard
+        </button>
+
+        <button
+          class="menu-btn"
+          data-page="createExam"
+        >
+          <span>➕</span>
+          Create Exam
+        </button>
+
+        <button
+          class="menu-btn"
+          data-page="teacherScores"
+        >
+          <span>📈</span>
+          Student Scores
+        </button>
+
+      </nav>
+
+
+      <button
+        id="logoutBtn"
+        class="logout-btn"
+      >
+        🚪 Logout
+      </button>
+
+    </aside>
+
+
+    <!-- MAIN -->
+
+    <main class="main-content">
+
+
+      <!-- ================= STUDENT DASHBOARD ================= -->
+
+      <section
+        id="studentDashboard"
+        class="page"
+      >
+
+        <div class="page-header">
+
+          <div>
+
+            <p class="eyebrow">
+              STUDENT
+            </p>
+
+            <h2>
+              Welcome,
+              <span id="studentWelcome">
+                Student
+              </span>
+            </h2>
+
+            <p>
+              Ready to continue your learning journey?
+            </p>
+
           </div>
-        </aside>
-      </div>
-    </section>
 
-    <!-- ---------------- STUDENT RESULT PAGE ---------------- -->
-    <section id="student-result" class="view">
-      <header class="view-header"><h2>My Result — First Attempt (Official)</h2></header>
-      <div id="student-result-body"></div>
-    </section>
+        </div>
 
-    <!-- ---------------- STUDENT ATTEMPT HISTORY ---------------- -->
-    <section id="student-history" class="view">
-      <header class="view-header"><h2>Attempt History</h2></header>
-      <div id="student-history-body"></div>
-    </section>
 
-    <!-- ---------------- TEACHER DASHBOARD ---------------- -->
-    <section id="teacher-dashboard" class="view">
-      <header class="view-header"><h2>Teacher Dashboard</h2></header>
+        <div class="stats-grid">
 
-      <div class="stat-grid">
-        <div class="stat-card"><div class="stat-label">Total Students</div><div class="stat-value" id="t-stat-students">0</div></div>
-        <div class="stat-card"><div class="stat-label">Total Exams</div><div class="stat-value" id="t-stat-exams">0</div></div>
-        <div class="stat-card"><div class="stat-label">Total Attempts</div><div class="stat-value" id="t-stat-attempts">0</div></div>
-        <div class="stat-card"><div class="stat-label">Pending Reports</div><div class="stat-value" id="t-stat-pending">0</div></div>
-      </div>
+          <div class="stat-card">
 
-      <div class="panel">
-        <div class="panel-header"><h3>Students</h3></div>
-        <div class="table-wrap">
-          <table class="data-table">
+            <span>Available Exams</span>
+
+            <strong id="availableExams">
+              0
+            </strong>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <span>Total Attempts</span>
+
+            <strong id="attemptCount">
+              0
+            </strong>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <span>Average Score</span>
+
+            <strong id="averageScore">
+              0%
+            </strong>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <span>Best Score</span>
+
+            <strong id="bestScore">
+              0%
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="content-card">
+
+          <div class="card-header">
+
+            <div>
+
+              <h3>
+                Available Exams
+              </h3>
+
+              <p>
+                Exams assigned by your teachers
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div id="examList">
+
+            <div class="loading">
+              Loading exams...
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ================= STUDENT RESULTS ================= -->
+
+      <section
+        id="studentResults"
+        class="page hidden"
+      >
+
+        <div class="page-header">
+
+          <p class="eyebrow">
+            STUDENT
+          </p>
+
+          <h2>
+            My Results
+          </h2>
+
+          <p>
+            View your examination performance.
+          </p>
+
+        </div>
+
+
+        <div
+          id="myResults"
+          class="results-list"
+        ></div>
+
+      </section>
+
+
+      <!-- ================= STUDENT HISTORY ================= -->
+
+      <section
+        id="studentHistory"
+        class="page hidden"
+      >
+
+        <div class="page-header">
+
+          <p class="eyebrow">
+            STUDENT
+          </p>
+
+          <h2>
+            Attempt History
+          </h2>
+
+          <p>
+            Your previous examination attempts.
+          </p>
+
+        </div>
+
+
+        <div
+          id="historyList"
+          class="results-list"
+        ></div>
+
+      </section>
+
+
+      <!-- ================= TEACHER DASHBOARD ================= -->
+
+      <section
+        id="teacherDashboard"
+        class="page hidden"
+      >
+
+        <div class="page-header">
+
+          <p class="eyebrow">
+            TEACHER
+          </p>
+
+          <h2>
+            Teacher Dashboard
+          </h2>
+
+          <p>
+            Manage exams and monitor student performance.
+          </p>
+
+        </div>
+
+
+        <div class="stats-grid">
+
+          <div class="stat-card">
+
+            <span>Total Exams</span>
+
+            <strong id="teacherExamCount">
+              0
+            </strong>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <span>Total Attempts</span>
+
+            <strong id="teacherAttemptCount">
+              0
+            </strong>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <span>Students</span>
+
+            <strong id="teacherStudentCount">
+              0
+            </strong>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <span>Average Score</span>
+
+            <strong id="teacherAverage">
+              0%
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="content-card">
+
+          <div class="card-header">
+
+            <div>
+
+              <h3>
+                Created Exams
+              </h3>
+
+              <p>
+                Your examination list
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div id="teacherExamList"></div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ================= CREATE EXAM ================= -->
+
+      <section
+        id="createExam"
+        class="page hidden"
+      >
+
+        <div class="page-header">
+
+          <p class="eyebrow">
+            TEACHER
+          </p>
+
+          <h2>
+            Create New Exam
+          </h2>
+
+          <p>
+            Exam creation module will be connected in the next step.
+          </p>
+
+        </div>
+
+
+        <div class="content-card">
+
+          <div class="empty-state">
+
+            <div class="empty-icon">
+              ➕
+            </div>
+
+            <h3>
+              Exam Builder
+            </h3>
+
+            <p>
+              The complete exam builder with timer,
+              negative marking, retake rules,
+              subjects, chapters, images and explanations
+              will be added next.
+            </p>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ================= TEACHER SCORES ================= -->
+
+      <section
+        id="teacherScores"
+        class="page hidden"
+      >
+
+        <div class="page-header">
+
+          <p class="eyebrow">
+            TEACHER
+          </p>
+
+          <h2>
+            Student Scores
+          </h2>
+
+          <p>
+            Monitor student examination results.
+          </p>
+
+        </div>
+
+
+        <div class="content-card table-wrapper">
+
+          <table>
+
             <thead>
+
               <tr>
-                <th>Name</th><th>Student ID</th><th>Exam</th><th>First Score</th>
-                <th>%</th><th>Attempts</th><th>First Attempt</th><th>Last Attempt</th>
-                <th>Status</th><th></th>
+
+                <th>
+                  Student
+                </th>
+
+                <th>
+                  Exam
+                </th>
+
+                <th>
+                  Score
+                </th>
+
+                <th>
+                  Percentage
+                </th>
+
+                <th>
+                  Date
+                </th>
+
               </tr>
+
             </thead>
-            <tbody id="teacher-student-table"></tbody>
+
+            <tbody id="scoreTable">
+
+            </tbody>
+
           </table>
+
         </div>
-      </div>
-    </section>
 
-    <!-- ---------------- TEACHER: STUDENT DETAILS ---------------- -->
-    <section id="teacher-student-details" class="view">
-      <header class="view-header">
-        <button class="btn btn-ghost back-btn" data-target="teacher-dashboard">← Back to Students</button>
-        <h2 id="details-heading">Student Details</h2>
-      </header>
-      <div id="teacher-details-body"></div>
-    </section>
+      </section>
 
-    <!-- ---------------- TEACHER: REPORTED QUESTIONS ---------------- -->
-    <section id="teacher-reports" class="view">
-      <header class="view-header"><h2>Reported Questions</h2></header>
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Student</th><th>Exam</th><th>Question</th><th>Reason</th>
-              <th>Description</th><th>Correct Answer</th><th>Date</th><th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="teacher-reports-table"></tbody>
-        </table>
-      </div>
-    </section>
 
-  </main>
-</div>
+      <!-- ================= EXAM PAGE ================= -->
 
-<!-- ============================================================
-     REPORT QUESTION MODAL
-============================================================= -->
-<div id="report-modal" class="modal-overlay" hidden>
-  <div class="modal">
-    <div class="modal-header">
-      <h3>Report Question</h3>
-      <button id="report-close-btn" class="modal-close" aria-label="Close">✕</button>
-    </div>
-    <form id="report-form" class="modal-body">
-      <div class="report-question-preview" id="report-question-preview">—</div>
+      <section
+        id="examPage"
+        class="page hidden"
+      >
 
-      <label class="field">
-        <span>Student Name</span>
-        <input type="text" id="report-student-name" disabled>
-      </label>
-      <label class="field">
-        <span>Student ID</span>
-        <input type="text" id="report-student-id" disabled>
-      </label>
-      <label class="field">
-        <span>Report Reason</span>
-        <select id="report-reason" required>
-          <option value="Wrong Question">Wrong Question</option>
-          <option value="Wrong Correct Answer">Wrong Correct Answer</option>
-          <option value="Ambiguous Question">Ambiguous Question</option>
-          <option value="Typing/Error">Typing/Error</option>
-          <option value="Other">Other</option>
-        </select>
-      </label>
-      <label class="field">
-        <span>Description</span>
-        <textarea id="report-description" rows="3" placeholder="Explain the issue…" required></textarea>
-      </label>
+        <div class="page-header">
 
-      <div class="modal-actions">
-        <button type="button" id="report-cancel-btn" class="btn btn-ghost">Cancel</button>
-        <button type="submit" class="btn btn-primary">Submit Report</button>
-      </div>
-    </form>
+          <p class="eyebrow">
+            EXAM
+          </p>
+
+          <h2 id="examTitle">
+            Exam
+          </h2>
+
+          <p id="questionNumber">
+            Question 1
+          </p>
+
+        </div>
+
+
+        <div class="content-card">
+
+          <h3 id="questionText">
+            Question
+          </h3>
+
+          <div id="options"></div>
+
+        </div>
+
+
+        <div class="exam-actions">
+
+          <button
+            id="previousBtn"
+            class="secondary-btn"
+          >
+            Previous
+          </button>
+
+          <button
+            id="nextBtn"
+            class="primary-btn"
+          >
+            Next
+          </button>
+
+          <button
+            id="submitBtn"
+            class="danger-btn hidden"
+          >
+            Submit Exam
+          </button>
+
+        </div>
+
+
+        <div
+          id="questionNavigation"
+          class="question-navigation"
+        ></div>
+
+      </section>
+
+    </main>
+
   </div>
-</div>
 
-<script src="script.js"></script>
+
+  <!-- SUPABASE -->
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script src="script.js"></script>
+
 </body>
+
 </html>
