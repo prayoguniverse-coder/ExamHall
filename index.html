@@ -2,46 +2,77 @@
 <html lang="en">
 
 <head>
+
   <meta charset="UTF-8">
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
   <title>ExamHall</title>
 
   <link rel="stylesheet" href="style.css">
+
 </head>
 
 <body>
 
-  <!-- ================= LOGIN PAGE ================= -->
+  <!-- =====================================================
+       LOGIN PAGE
+  ====================================================== -->
 
   <div id="loginPage" class="auth-page">
 
     <div class="auth-card">
 
       <div class="brand">
-        <div class="brand-icon">E</div>
-        <h1>ExamHall</h1>
-        <p>Online Examination Portal</p>
+
+        <div class="brand-icon">
+          E
+        </div>
+
+        <h1>
+          ExamHall
+        </h1>
+
+        <p>
+          Online Examination Portal
+        </p>
+
       </div>
+
+
+      <!-- AUTH TABS -->
 
       <div class="auth-tabs">
 
-        <button id="loginTab" class="auth-tab active" type="button">
+        <button
+          id="loginTab"
+          class="auth-tab active"
+          type="button"
+        >
           Login
         </button>
 
-        <button id="signupTab" class="auth-tab" type="button">
+        <button
+          id="signupTab"
+          class="auth-tab"
+          type="button"
+        >
           Student Signup
         </button>
 
       </div>
 
+
       <!-- LOGIN -->
 
       <form id="loginForm">
 
-        <label>Email</label>
+        <label for="loginEmail">
+          Email
+        </label>
 
         <input
           type="email"
@@ -51,7 +82,10 @@
           required
         >
 
-        <label>Password</label>
+
+        <label for="loginPassword">
+          Password
+        </label>
 
         <input
           type="password"
@@ -61,7 +95,12 @@
           required
         >
 
-        <p id="loginError" class="error-message"></p>
+
+        <p
+          id="loginError"
+          class="error-message"
+        ></p>
+
 
         <button
           type="submit"
@@ -73,11 +112,17 @@
 
       </form>
 
+
       <!-- SIGNUP -->
 
-      <form id="signupForm" class="hidden">
+      <form
+        id="signupForm"
+        class="hidden"
+      >
 
-        <label>Full Name</label>
+        <label for="signupName">
+          Full Name
+        </label>
 
         <input
           type="text"
@@ -86,7 +131,10 @@
           required
         >
 
-        <label>Email</label>
+
+        <label for="signupEmail">
+          Email
+        </label>
 
         <input
           type="email"
@@ -95,7 +143,10 @@
           required
         >
 
-        <label>Password</label>
+
+        <label for="signupPassword">
+          Password
+        </label>
 
         <input
           type="password"
@@ -105,7 +156,10 @@
           required
         >
 
-        <label>Confirm Password</label>
+
+        <label for="signupConfirmPassword">
+          Confirm Password
+        </label>
 
         <input
           type="password"
@@ -115,9 +169,17 @@
           required
         >
 
-        <p id="signupError" class="error-message"></p>
 
-        <p id="signupSuccess" class="success-message"></p>
+        <p
+          id="signupError"
+          class="error-message"
+        ></p>
+
+        <p
+          id="signupSuccess"
+          class="success-message"
+        ></p>
+
 
         <button
           type="submit"
@@ -129,9 +191,17 @@
 
       </form>
 
+
       <div class="demo-note">
-        <strong>ExamHall</strong>
-        <span>Secure online examination system</span>
+
+        <strong>
+          ExamHall
+        </strong>
+
+        <span>
+          Secure online examination system
+        </span>
+
       </div>
 
     </div>
@@ -139,13 +209,25 @@
   </div>
 
 
-  <!-- ================= APP ================= -->
 
-  <div id="app" class="app hidden">
+  <!-- =====================================================
+       MAIN APPLICATION
+  ====================================================== -->
 
-    <!-- SIDEBAR -->
+  <div
+    id="app"
+    class="app hidden"
+  >
+
+
+    <!-- =================================================
+         SIDEBAR
+    ================================================== -->
 
     <aside class="sidebar">
+
+
+      <!-- BRAND -->
 
       <div class="sidebar-brand">
 
@@ -154,17 +236,28 @@
         </div>
 
         <div>
-          <strong>ExamHall</strong>
-          <small>Online Examination</small>
+
+          <strong>
+            ExamHall
+          </strong>
+
+          <small>
+            Online Examination
+          </small>
+
         </div>
 
       </div>
+
 
       <!-- USER -->
 
       <div class="user-card">
 
-        <div id="userAvatar" class="avatar">
+        <div
+          id="userAvatar"
+          class="avatar"
+        >
           U
         </div>
 
@@ -185,81 +278,138 @@
 
       <!-- STUDENT MENU -->
 
-      <nav id="studentMenu" class="sidebar-menu">
+      <nav
+        id="studentMenu"
+        class="sidebar-menu"
+      >
 
         <button
           class="menu-btn active"
           data-page="studentDashboard"
         >
-          <span>📊</span>
+
+          <span>
+            📊
+          </span>
+
           Dashboard
+
         </button>
+
 
         <button
           class="menu-btn"
           data-page="studentResults"
         >
-          <span>📄</span>
+
+          <span>
+            📄
+          </span>
+
           My Results
+
         </button>
+
 
         <button
           class="menu-btn"
           data-page="studentHistory"
         >
-          <span>🕘</span>
+
+          <span>
+            🕘
+          </span>
+
           Attempt History
+
         </button>
 
       </nav>
 
 
+
       <!-- TEACHER MENU -->
 
-      <nav id="teacherMenu" class="sidebar-menu hidden">
+      <nav
+        id="teacherMenu"
+        class="sidebar-menu hidden"
+      >
 
         <button
           class="menu-btn active"
           data-page="teacherDashboard"
         >
-          <span>📊</span>
+
+          <span>
+            📊
+          </span>
+
           Dashboard
+
         </button>
+
 
         <button
           class="menu-btn"
           data-page="createExam"
         >
-          <span>➕</span>
+
+          <span>
+            ➕
+          </span>
+
           Create Exam
+
         </button>
+
 
         <button
           class="menu-btn"
           data-page="teacherScores"
         >
-          <span>📈</span>
+
+          <span>
+            📈
+          </span>
+
           Student Scores
+
         </button>
 
       </nav>
 
 
-      <button id="logoutBtn" class="logout-btn">
+      <!-- LOGOUT -->
+
+      <button
+        id="logoutBtn"
+        class="logout-btn"
+      >
+
         🚪 Logout
+
       </button>
 
     </aside>
 
 
-    <!-- MAIN -->
+
+    <!-- =================================================
+         MAIN CONTENT
+    ================================================== -->
 
     <main class="main-content">
 
 
-      <!-- ================= STUDENT DASHBOARD ================= -->
 
-      <section id="studentDashboard" class="page">
+      <!-- =================================================
+           STUDENT DASHBOARD
+      ================================================== -->
+
+      <section
+        id="studentDashboard"
+        class="page"
+      >
 
         <div class="page-header">
 
@@ -270,10 +420,12 @@
             </p>
 
             <h2>
+
               Welcome,
               <span id="studentWelcome">
                 Student
               </span>
+
             </h2>
 
             <p>
@@ -287,24 +439,56 @@
 
         <div class="stats-grid">
 
-          <div class="stat-card">
-            <span>Available Exams</span>
-            <strong id="availableExams">0</strong>
-          </div>
 
           <div class="stat-card">
-            <span>Total Attempts</span>
-            <strong id="attemptCount">0</strong>
+
+            <span>
+              Available Exams
+            </span>
+
+            <strong id="availableExams">
+              0
+            </strong>
+
           </div>
 
-          <div class="stat-card">
-            <span>Average Score</span>
-            <strong id="averageScore">0%</strong>
-          </div>
 
           <div class="stat-card">
-            <span>Best Score</span>
-            <strong id="bestScore">0%</strong>
+
+            <span>
+              Total Attempts
+            </span>
+
+            <strong id="attemptCount">
+              0
+            </strong>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <span>
+              Average Score
+            </span>
+
+            <strong id="averageScore">
+              0%
+            </strong>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <span>
+              Best Score
+            </span>
+
+            <strong id="bestScore">
+              0%
+            </strong>
+
           </div>
 
         </div>
@@ -315,14 +499,19 @@
           <div class="card-header">
 
             <div>
-              <h3>Available Exams</h3>
+
+              <h3>
+                Available Exams
+              </h3>
 
               <p>
                 Exams assigned by your teachers
               </p>
+
             </div>
 
           </div>
+
 
           <div id="examList">
 
@@ -337,9 +526,15 @@
       </section>
 
 
-      <!-- ================= STUDENT RESULTS ================= -->
 
-      <section id="studentResults" class="page hidden">
+      <!-- =================================================
+           STUDENT RESULTS
+      ================================================== -->
+
+      <section
+        id="studentResults"
+        class="page hidden"
+      >
 
         <div class="page-header">
 
@@ -357,14 +552,24 @@
 
         </div>
 
-        <div id="myResults" class="results-list"></div>
+
+        <div
+          id="myResults"
+          class="results-list"
+        ></div>
 
       </section>
 
 
-      <!-- ================= STUDENT HISTORY ================= -->
 
-      <section id="studentHistory" class="page hidden">
+      <!-- =================================================
+           STUDENT HISTORY
+      ================================================== -->
+
+      <section
+        id="studentHistory"
+        class="page hidden"
+      >
 
         <div class="page-header">
 
@@ -382,14 +587,24 @@
 
         </div>
 
-        <div id="historyList" class="results-list"></div>
+
+        <div
+          id="historyList"
+          class="results-list"
+        ></div>
 
       </section>
 
 
-      <!-- ================= TEACHER DASHBOARD ================= -->
 
-      <section id="teacherDashboard" class="page hidden">
+      <!-- =================================================
+           TEACHER DASHBOARD
+      ================================================== -->
+
+      <section
+        id="teacherDashboard"
+        class="page hidden"
+      >
 
         <div class="page-header">
 
@@ -410,24 +625,56 @@
 
         <div class="stats-grid">
 
-          <div class="stat-card">
-            <span>Total Exams</span>
-            <strong id="teacherExamCount">0</strong>
-          </div>
 
           <div class="stat-card">
-            <span>Total Attempts</span>
-            <strong id="teacherAttemptCount">0</strong>
+
+            <span>
+              Total Exams
+            </span>
+
+            <strong id="teacherExamCount">
+              0
+            </strong>
+
           </div>
 
-          <div class="stat-card">
-            <span>Students</span>
-            <strong id="teacherStudentCount">0</strong>
-          </div>
 
           <div class="stat-card">
-            <span>Average Score</span>
-            <strong id="teacherAverage">0%</strong>
+
+            <span>
+              Total Attempts
+            </span>
+
+            <strong id="teacherAttemptCount">
+              0
+            </strong>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <span>
+              Students
+            </span>
+
+            <strong id="teacherStudentCount">
+              0
+            </strong>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <span>
+              Average Score
+            </span>
+
+            <strong id="teacherAverage">
+              0%
+            </strong>
+
           </div>
 
         </div>
@@ -451,6 +698,7 @@
 
           </div>
 
+
           <div id="teacherExamList"></div>
 
         </div>
@@ -458,9 +706,15 @@
       </section>
 
 
-      <!-- ================= CREATE EXAM ================= -->
 
-      <section id="createExam" class="page hidden">
+      <!-- =================================================
+           CREATE EXAM BUILDER
+      ================================================== -->
+
+      <section
+        id="createExam"
+        class="page hidden"
+      >
 
         <div class="page-header">
 
@@ -473,299 +727,387 @@
           </h2>
 
           <p>
-            Create and publish your examination.
+            Create, configure and publish your examination.
           </p>
 
         </div>
 
 
-        <form id="createExamForm" class="content-card">
 
-          <div class="form-section">
+        <!-- =============================================
+             EXAM BASIC INFORMATION
+        ============================================== -->
 
-            <h3>Basic Information</h3>
+        <div class="content-card">
 
-            <div class="form-grid">
+          <div class="card-header">
 
-              <div class="form-field full">
+            <h3>
+              📝 Exam Information
+            </h3>
 
-                <label for="examTitleInput">
-                  Exam Title *
-                </label>
+            <p>
+              Enter the basic details of your examination.
+            </p>
 
-                <input
-                  type="text"
-                  id="examTitleInput"
-                  placeholder="Example: Mathematics Unit Test 1"
-                  required
-                >
-
-              </div>
+          </div>
 
 
-              <div class="form-field full">
-
-                <label for="examDescriptionInput">
-                  Description
-                </label>
-
-                <textarea
-                  id="examDescriptionInput"
-                  placeholder="Enter exam instructions or description"
-                  rows="4"
-                ></textarea>
-
-              </div>
+          <div class="form-grid">
 
 
-              <div class="form-field">
+            <div class="form-group full-width">
 
-                <label for="examSubject">
-                  Subject
-                </label>
+              <label for="examTitleInput">
+                Exam Title *
+              </label>
 
-                <select id="examSubject">
+              <input
+                type="text"
+                id="examTitleInput"
+                placeholder="Example: Mathematics Unit Test 1"
+              >
 
-                  <option value="">
-                    Select Subject
-                  </option>
-
-                </select>
-
-              </div>
+            </div>
 
 
-              <div class="form-field">
+            <div class="form-group full-width">
 
-                <label for="examChapter">
-                  Chapter
-                </label>
+              <label for="examDescriptionInput">
+                Description
+              </label>
 
-                <select id="examChapter">
+              <textarea
+                id="examDescriptionInput"
+                rows="4"
+                placeholder="Enter exam instructions or description..."
+              ></textarea>
 
-                  <option value="">
-                    Select Chapter
-                  </option>
+            </div>
 
-                </select>
 
-              </div>
+            <div class="form-group">
+
+              <label for="examSubjectSelect">
+                Subject
+              </label>
+
+              <select id="examSubjectSelect">
+
+                <option value="">
+                  Select Subject
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label for="examChapterSelect">
+                Chapter
+              </label>
+
+              <select id="examChapterSelect">
+
+                <option value="">
+                  Select Chapter
+                </option>
+
+              </select>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- =============================================
+             EXAM SETTINGS
+        ============================================== -->
+
+        <div class="content-card">
+
+          <div class="card-header">
+
+            <h3>
+              ⚙️ Exam Settings
+            </h3>
+
+            <p>
+              Configure marks, timer and attempt rules.
+            </p>
+
+          </div>
+
+
+          <div class="form-grid">
+
+
+            <div class="form-group">
+
+              <label for="examDurationInput">
+                Duration (Minutes) *
+              </label>
+
+              <input
+                type="number"
+                id="examDurationInput"
+                min="1"
+                value="30"
+              >
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label for="examPassingInput">
+                Passing Percentage
+              </label>
+
+              <input
+                type="number"
+                id="examPassingInput"
+                min="0"
+                max="100"
+                value="40"
+              >
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label for="examNegativeInput">
+                Negative Marking
+              </label>
+
+              <input
+                type="number"
+                id="examNegativeInput"
+                min="0"
+                step="0.01"
+                value="0"
+              >
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label for="examAttemptsInput">
+                Maximum Attempts
+              </label>
+
+              <input
+                type="number"
+                id="examAttemptsInput"
+                min="1"
+                value="1"
+              >
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label for="examStartInput">
+                Start Date & Time
+              </label>
+
+              <input
+                type="datetime-local"
+                id="examStartInput"
+              >
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label for="examEndInput">
+                End Date & Time
+              </label>
+
+              <input
+                type="datetime-local"
+                id="examEndInput"
+              >
 
             </div>
 
           </div>
 
 
-          <div class="form-section">
 
-            <h3>Exam Settings</h3>
-
-            <div class="form-grid">
-
-              <div class="form-field">
-
-                <label for="examDuration">
-                  Duration (Minutes) *
-                </label>
-
-                <input
-                  type="number"
-                  id="examDuration"
-                  min="1"
-                  value="30"
-                  required
-                >
-
-              </div>
+          <div class="settings-list">
 
 
-              <div class="form-field">
+            <label class="checkbox-row">
 
-                <label for="examTotalMarks">
-                  Total Marks *
-                </label>
+              <input
+                type="checkbox"
+                id="randomizeQuestionsInput"
+              >
 
-                <input
-                  type="number"
-                  id="examTotalMarks"
-                  min="1"
-                  step="0.01"
-                  value="10"
-                  required
-                >
-
-              </div>
-
-
-              <div class="form-field">
-
-                <label for="examPassingPercentage">
-                  Passing Percentage
-                </label>
-
-                <input
-                  type="number"
-                  id="examPassingPercentage"
-                  min="0"
-                  max="100"
-                  value="40"
-                >
-
-              </div>
-
-
-              <div class="form-field">
-
-                <label for="examNegativeMarking">
-                  Negative Marking
-                </label>
-
-                <input
-                  type="number"
-                  id="examNegativeMarking"
-                  min="0"
-                  step="0.01"
-                  value="0"
-                >
+              <span>
+                <strong>
+                  Randomize Questions
+                </strong>
 
                 <small>
-                  Marks deducted for a wrong answer.
+                  Show questions in a random order.
+                </small>
+              </span>
+
+            </label>
+
+
+            <label class="checkbox-row">
+
+              <input
+                type="checkbox"
+                id="randomizeOptionsInput"
+              >
+
+              <span>
+                <strong>
+                  Randomize Options
+                </strong>
+
+                <small>
+                  Randomize answer options for students.
                 </small>
 
-              </div>
+              </span>
+
+            </label>
 
 
-              <div class="form-field">
+            <label class="checkbox-row">
 
-                <label for="examMaxAttempts">
-                  Maximum Attempts
-                </label>
+              <input
+                type="checkbox"
+                id="showResultInput"
+                checked
+              >
 
-                <input
-                  type="number"
-                  id="examMaxAttempts"
-                  min="1"
-                  value="1"
-                >
+              <span>
 
-              </div>
-
-            </div>
-
-          </div>
-
-
-          <div class="form-section">
-
-            <h3>Exam Behaviour</h3>
-
-            <div class="settings-grid">
-
-              <label class="checkbox-item">
-
-                <input
-                  type="checkbox"
-                  id="randomizeQuestions"
-                >
-
-                <span>
-                  Randomize Questions
-                </span>
-
-              </label>
-
-
-              <label class="checkbox-item">
-
-                <input
-                  type="checkbox"
-                  id="randomizeOptions"
-                >
-
-                <span>
-                  Randomize Options
-                </span>
-
-              </label>
-
-
-              <label class="checkbox-item">
-
-                <input
-                  type="checkbox"
-                  id="showResultImmediately"
-                  checked
-                >
-
-                <span>
+                <strong>
                   Show Result Immediately
-                </span>
+                </strong>
 
-              </label>
+                <small>
+                  Show score after exam submission.
+                </small>
+
+              </span>
+
+            </label>
 
 
-              <label class="checkbox-item">
+            <label class="checkbox-row">
 
-                <input
-                  type="checkbox"
-                  id="showExplanations"
-                >
+              <input
+                type="checkbox"
+                id="showExplanationInput"
+              >
 
-                <span>
+              <span>
+
+                <strong>
                   Show Explanations
-                </span>
+                </strong>
 
-              </label>
+                <small>
+                  Show answer explanations after submission.
+                </small>
+
+              </span>
+
+            </label>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- =============================================
+             QUESTIONS
+        ============================================== -->
+
+        <div class="content-card">
+
+          <div class="card-header exam-builder-header">
+
+            <div>
+
+              <h3>
+                ❓ Questions
+              </h3>
+
+              <p>
+                Add questions, options, marks and explanations.
+              </p>
+
+            </div>
+
+
+            <button
+              type="button"
+              id="addQuestionBtn"
+              class="primary-btn"
+            >
+              ➕ Add Question
+            </button>
+
+          </div>
+
+
+          <div
+            id="questionBuilderList"
+            class="question-builder-list"
+          >
+
+            <div
+              id="noQuestionsMessage"
+              class="empty-state"
+            >
+
+              <div class="empty-icon">
+                ❓
+              </div>
+
+              <h3>
+                No questions added
+              </h3>
+
+              <p>
+                Click "Add Question" to create your first question.
+              </p>
 
             </div>
 
           </div>
 
-
-          <div class="form-section">
-
-            <h3>Exam Schedule</h3>
-
-            <div class="form-grid">
-
-              <div class="form-field">
-
-                <label for="examStartAt">
-                  Start Date & Time
-                </label>
-
-                <input
-                  type="datetime-local"
-                  id="examStartAt"
-                >
-
-              </div>
+        </div>
 
 
-              <div class="form-field">
 
-                <label for="examEndAt">
-                  End Date & Time
-                </label>
+        <!-- =============================================
+             EXAM ACTIONS
+        ============================================== -->
 
-                <input
-                  type="datetime-local"
-                  id="examEndAt"
-                >
+        <div class="content-card">
 
-              </div>
+          <div class="exam-builder-actions">
 
-            </div>
-
-          </div>
-
-
-          <p id="examFormError" class="error-message"></p>
-
-          <p id="examFormSuccess" class="success-message"></p>
-
-
-          <div class="exam-form-actions">
 
             <button
               type="button"
@@ -777,23 +1119,35 @@
 
 
             <button
-              type="submit"
+              type="button"
               id="publishExamBtn"
               class="primary-btn"
             >
-              📢 Publish Exam
+              🚀 Publish Exam
             </button>
 
           </div>
 
-        </form>
+
+          <p
+            id="examBuilderMessage"
+            class="form-message"
+          ></p>
+
+        </div>
 
       </section>
 
 
-      <!-- ================= TEACHER SCORES ================= -->
 
-      <section id="teacherScores" class="page hidden">
+      <!-- =================================================
+           TEACHER SCORES
+      ================================================== -->
+
+      <section
+        id="teacherScores"
+        class="page hidden"
+      >
 
         <div class="page-header">
 
@@ -820,11 +1174,25 @@
 
               <tr>
 
-                <th>Student</th>
-                <th>Exam</th>
-                <th>Score</th>
-                <th>Percentage</th>
-                <th>Date</th>
+                <th>
+                  Student
+                </th>
+
+                <th>
+                  Exam
+                </th>
+
+                <th>
+                  Score
+                </th>
+
+                <th>
+                  Percentage
+                </th>
+
+                <th>
+                  Date
+                </th>
 
               </tr>
 
@@ -839,9 +1207,15 @@
       </section>
 
 
-      <!-- ================= EXAM PAGE ================= -->
 
-      <section id="examPage" class="page hidden">
+      <!-- =================================================
+           EXAM PAGE
+      ================================================== -->
+
+      <section
+        id="examPage"
+        class="page hidden"
+      >
 
         <div class="page-header">
 
@@ -866,6 +1240,8 @@
             Question
           </h3>
 
+          <div id="questionImageContainer"></div>
+
           <div id="options"></div>
 
         </div>
@@ -880,12 +1256,14 @@
             Previous
           </button>
 
+
           <button
             id="nextBtn"
             class="primary-btn"
           >
             Next
           </button>
+
 
           <button
             id="submitBtn"
@@ -904,12 +1282,16 @@
 
       </section>
 
+
     </main>
 
   </div>
 
 
-  <!-- SUPABASE -->
+
+  <!-- =====================================================
+       SUPABASE
+  ====================================================== -->
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
