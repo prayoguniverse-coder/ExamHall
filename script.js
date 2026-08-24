@@ -1,6 +1,6 @@
 /* =========================================================
    EXAMHALL
-   STEP 2 - EXAM BUILDER + SUPABASE
+   STEP 6A - AUTH + DASHBOARD + CREATE EXAM
 ========================================================= */
 
 
@@ -27,15 +27,6 @@ const supabaseClient =
 
 let currentUser = null;
 let currentProfile = null;
-
-let builderQuestions = [];
-let currentExamId = null;
-
-let currentExam = null;
-let currentQuestions = [];
-let currentQuestionIndex = 0;
-let currentAttemptId = null;
-let examTimerInterval = null;
 
 
 /* =========================================================
@@ -74,36 +65,30 @@ const signupSuccess =
    AUTH TABS
 ========================================================= */
 
-loginTab.addEventListener(
-  "click",
-  () => {
+loginTab.addEventListener("click", function () {
 
-    loginTab.classList.add("active");
-    signupTab.classList.remove("active");
+  loginTab.classList.add("active");
+  signupTab.classList.remove("active");
 
-    loginForm.classList.remove("hidden");
-    signupForm.classList.add("hidden");
+  loginForm.classList.remove("hidden");
+  signupForm.classList.add("hidden");
 
-    clearMessages();
+  clearMessages();
 
-  }
-);
+});
 
 
-signupTab.addEventListener(
-  "click",
-  () => {
+signupTab.addEventListener("click", function () {
 
-    signupTab.classList.add("active");
-    loginTab.classList.remove("active");
+  signupTab.classList.add("active");
+  loginTab.classList.remove("active");
 
-    signupForm.classList.remove("hidden");
-    loginForm.classList.add("hidden");
+  signupForm.classList.remove("hidden");
+  loginForm.classList.add("hidden");
 
-    clearMessages();
+  clearMessages();
 
-  }
-);
+});
 
 
 /* =========================================================
@@ -112,17 +97,9 @@ signupTab.addEventListener(
 
 function clearMessages() {
 
-  if (loginError) {
-    loginError.textContent = "";
-  }
-
-  if (signupError) {
-    signupError.textContent = "";
-  }
-
-  if (signupSuccess) {
-    signupSuccess.textContent = "";
-  }
+  loginError.textContent = "";
+  signupError.textContent = "";
+  signupSuccess.textContent = "";
 
 }
 
@@ -133,7 +110,7 @@ function clearMessages() {
 
 loginForm.addEventListener(
   "submit",
-  async event => {
+  async function (event) {
 
     event.preventDefault();
 
@@ -147,9 +124,9 @@ loginForm.addEventListener(
         .toLowerCase();
 
     const password =
-      document
-        .getElementById("loginPassword")
-        .value;
+      document.getElementById(
+        "loginPassword"
+      ).value;
 
     if (!email || !password) {
 
@@ -161,7 +138,9 @@ loginForm.addEventListener(
     }
 
     const button =
-      document.getElementById("loginBtn");
+      document.getElementById(
+        "loginBtn"
+      );
 
     button.disabled = true;
     button.textContent = "Logging in...";
@@ -173,8 +152,10 @@ loginForm.addEventListener(
         error
       } =
         await supabaseClient.auth.signInWithPassword({
+
           email,
           password
+
         });
 
       if (error) {
@@ -192,7 +173,9 @@ loginForm.addEventListener(
       console.error(error);
 
       loginError.textContent =
-        getFriendlyAuthError(error.message);
+        getFriendlyAuthError(
+          error.message
+        );
 
     }
 
@@ -213,7 +196,7 @@ loginForm.addEventListener(
 
 signupForm.addEventListener(
   "submit",
-  async event => {
+  async function (event) {
 
     event.preventDefault();
 
@@ -233,14 +216,14 @@ signupForm.addEventListener(
         .toLowerCase();
 
     const password =
-      document
-        .getElementById("signupPassword")
-        .value;
+      document.getElementById(
+        "signupPassword"
+      ).value;
 
     const confirmPassword =
-      document
-        .getElementById("signupConfirmPassword")
-        .value;
+      document.getElementById(
+        "signupConfirmPassword"
+      ).value;
 
     if (!name) {
 
@@ -270,7 +253,9 @@ signupForm.addEventListener(
     }
 
     const button =
-      document.getElementById("signupBtn");
+      document.getElementById(
+        "signupBtn"
+      );
 
     button.disabled = true;
     button.textContent = "Creating account...";
@@ -287,9 +272,11 @@ signupForm.addEventListener(
           password,
 
           options: {
+
             data: {
               full_name: name
             }
+
           }
 
         });
@@ -320,7 +307,9 @@ signupForm.addEventListener(
       console.error(error);
 
       signupError.textContent =
-        getFriendlyAuthError(error.message);
+        getFriendlyAuthError(
+          error.message
+        );
 
     }
 
@@ -404,8 +393,6 @@ function openDashboard() {
 
     showPage("teacherDashboard");
 
-    loadTeacherDashboard();
-
   }
 
   else {
@@ -419,8 +406,6 @@ function openDashboard() {
       .classList.add("hidden");
 
     showPage("studentDashboard");
-
-    loadStudentDashboard();
 
   }
 
@@ -439,7 +424,8 @@ function updateUserUI() {
 
   document.getElementById(
     "userName"
-  ).textContent = name;
+  ).textContent =
+    name;
 
   document.getElementById(
     "userRole"
@@ -471,11 +457,11 @@ function updateUserUI() {
 
 document
   .querySelectorAll(".menu-btn")
-  .forEach(button => {
+  .forEach(function (button) {
 
     button.addEventListener(
       "click",
-      () => {
+      function () {
 
         showPage(
           button.dataset.page
@@ -491,14 +477,16 @@ function showPage(pageId) {
 
   document
     .querySelectorAll(".page")
-    .forEach(page => {
+    .forEach(function (page) {
 
       page.classList.add("hidden");
 
     });
 
   const page =
-    document.getElementById(pageId);
+    document.getElementById(
+      pageId
+    );
 
   if (!page) {
     return;
@@ -508,7 +496,7 @@ function showPage(pageId) {
 
   document
     .querySelectorAll(".menu-btn")
-    .forEach(button => {
+    .forEach(function (button) {
 
       button.classList.remove("active");
 
@@ -539,12 +527,12 @@ function showPage(pageId) {
     loadTeacherDashboard();
   }
 
-  if (pageId === "createExam") {
-    initializeExamBuilder();
-  }
-
   if (pageId === "teacherScores") {
     loadTeacherScores();
+  }
+
+  if (pageId === "createExam") {
+    initializeCreateExam();
   }
 
 }
@@ -560,10 +548,9 @@ async function loadStudentDashboard() {
     return;
   }
 
-  const list =
-    document.getElementById("examList");
-
-  list.innerHTML =
+  document.getElementById(
+    "examList"
+  ).innerHTML =
     `<div class="loading">
       Loading exams...
     </div>`;
@@ -583,12 +570,13 @@ async function loadStudentDashboard() {
           duration_minutes,
           total_marks,
           max_attempts,
-          start_at,
-          end_at,
           subjects(name),
           chapters(name)
         `)
-        .eq("is_published", true)
+        .eq(
+          "is_published",
+          true
+        )
         .order(
           "created_at",
           {
@@ -615,7 +603,9 @@ async function loadStudentDashboard() {
 
     console.error(error);
 
-    list.innerHTML =
+    document.getElementById(
+      "examList"
+    ).innerHTML =
       `<p>
         Unable to load exams.
       </p>`;
@@ -626,13 +616,15 @@ async function loadStudentDashboard() {
 
 
 /* =========================================================
-   AVAILABLE EXAMS
+   SHOW AVAILABLE EXAMS
 ========================================================= */
 
 function showAvailableExams(exams) {
 
   const list =
-    document.getElementById("examList");
+    document.getElementById(
+      "examList"
+    );
 
   list.innerHTML = "";
 
@@ -656,13 +648,16 @@ function showAvailableExams(exams) {
       </div>`;
 
     return;
+
   }
 
 
-  exams.forEach(exam => {
+  exams.forEach(function (exam) {
 
     const item =
-      document.createElement("div");
+      document.createElement(
+        "div"
+      );
 
     item.className =
       "exam-item";
@@ -688,9 +683,8 @@ function showAvailableExams(exams) {
           •
           ${escapeHTML(chapter)}
           •
-          ${exam.duration_minutes} Minutes
-          •
-          ${exam.total_marks} Marks
+          ${exam.duration_minutes}
+          Minutes
         </p>
 
       </div>
@@ -708,7 +702,13 @@ function showAvailableExams(exams) {
       .querySelector("button")
       .addEventListener(
         "click",
-        () => startExam(exam.id)
+        function () {
+
+          alert(
+            "Student Exam module next step mein activate hoga."
+          );
+
+        }
       );
 
     list.appendChild(item);
@@ -731,7 +731,7 @@ async function loadStudentStats() {
     await supabaseClient
       .from("exam_attempts")
       .select(
-        "percentage,status"
+        "percentage, status"
       )
       .eq(
         "student_id",
@@ -749,6 +749,7 @@ async function loadStudentStats() {
   if (error) {
 
     console.error(error);
+
     return;
 
   }
@@ -765,32 +766,44 @@ async function loadStudentStats() {
 
     document.getElementById(
       "averageScore"
-    ).textContent = "0%";
+    ).textContent =
+      "0%";
 
     document.getElementById(
       "bestScore"
-    ).textContent = "0%";
+    ).textContent =
+      "0%";
 
     return;
+
   }
 
   const percentages =
-    attempts.map(
-      item =>
-        Number(item.percentage || 0)
-    );
+    attempts.map(function (item) {
+
+      return Number(
+        item.percentage
+      );
+
+    });
 
   const average =
     Math.round(
       percentages.reduce(
-        (a, b) => a + b,
+        function (total, value) {
+
+          return total + value;
+
+        },
         0
       ) /
       percentages.length
     );
 
   const best =
-    Math.max(...percentages);
+    Math.max(
+      ...percentages
+    );
 
   document.getElementById(
     "averageScore"
@@ -893,10 +906,12 @@ async function loadStudentResults() {
 
   }
 
-  data.forEach(result => {
+  data.forEach(function (result) {
 
     const item =
-      document.createElement("div");
+      document.createElement(
+        "div"
+      );
 
     item.className =
       "result-item";
@@ -923,13 +938,13 @@ async function loadStudentResults() {
       <div class="score">
 
         ${Number(
-          result.score || 0
+          result.score
         ).toFixed(2)}
 
         <br>
 
         ${Number(
-          result.percentage || 0
+          result.percentage
         )}%
 
       </div>
@@ -944,7 +959,7 @@ async function loadStudentResults() {
 
 
 /* =========================================================
-   STUDENT HISTORY
+   HISTORY
 ========================================================= */
 
 async function loadStudentHistory() {
@@ -1021,10 +1036,12 @@ async function loadStudentHistory() {
 
   }
 
-  data.forEach(attempt => {
+  data.forEach(function (attempt) {
 
     const item =
-      document.createElement("div");
+      document.createElement(
+        "div"
+      );
 
     item.className =
       "result-item";
@@ -1043,7 +1060,9 @@ async function loadStudentHistory() {
         <p>
           Attempt #${attempt.attempt_number}
           •
-          ${escapeHTML(attempt.status)}
+          ${escapeHTML(
+            attempt.status
+          )}
         </p>
 
       </div>
@@ -1051,7 +1070,7 @@ async function loadStudentHistory() {
       <div class="score">
 
         ${Number(
-          attempt.percentage || 0
+          attempt.percentage
         )}%
 
       </div>
@@ -1103,6 +1122,7 @@ async function loadTeacherDashboard() {
   if (error) {
 
     console.error(error);
+
     return;
 
   }
@@ -1120,22 +1140,23 @@ async function loadTeacherDashboard() {
     await supabaseClient
       .from("exam_attempts")
       .select(
-        "student_id,percentage,status"
+        "student_id, percentage, status"
       );
 
   if (!attemptsError) {
 
     const completed =
-      attempts.filter(
-        attempt =>
-          [
-            "submitted",
-            "auto_submitted",
-            "expired"
-          ].includes(
-            attempt.status
-          )
-      );
+      attempts.filter(function (attempt) {
+
+        return [
+          "submitted",
+          "auto_submitted",
+          "expired"
+        ].includes(
+          attempt.status
+        );
+
+      });
 
     document.getElementById(
       "teacherAttemptCount"
@@ -1144,10 +1165,11 @@ async function loadTeacherDashboard() {
 
     const students =
       new Set(
-        completed.map(
-          item =>
-            item.student_id
-        )
+        completed.map(function (item) {
+
+          return item.student_id;
+
+        })
       );
 
     document.getElementById(
@@ -1160,11 +1182,17 @@ async function loadTeacherDashboard() {
       const average =
         Math.round(
           completed.reduce(
-            (total, item) =>
-              total +
-              Number(
-                item.percentage || 0
-              ),
+            function (
+              total,
+              item
+            ) {
+
+              return total +
+                Number(
+                  item.percentage
+                );
+
+            },
             0
           ) /
           completed.length
@@ -1201,7 +1229,7 @@ async function loadTeacherDashboard() {
         </h3>
 
         <p>
-          Create your first exam from Create Exam.
+          Create your first exam from the Create Exam section.
         </p>
 
       </div>`;
@@ -1211,10 +1239,12 @@ async function loadTeacherDashboard() {
   }
 
 
-  exams.forEach(exam => {
+  exams.forEach(function (exam) {
 
     const item =
-      document.createElement("div");
+      document.createElement(
+        "div"
+      );
 
     item.className =
       "exam-item";
@@ -1224,7 +1254,9 @@ async function loadTeacherDashboard() {
       <div>
 
         <h4>
-          ${escapeHTML(exam.title)}
+          ${escapeHTML(
+            exam.title
+          )}
         </h4>
 
         <p>
@@ -1232,22 +1264,25 @@ async function loadTeacherDashboard() {
             exam.subjects?.name ||
             "General"
           )}
-
           •
-
           ${exam.duration_minutes}
           Minutes
-
         </p>
 
       </div>
 
-      <strong>
+      <strong class="${
+        exam.is_published
+          ? "published-status"
+          : "draft-status"
+      }">
+
         ${
           exam.is_published
             ? "Published"
             : "Draft"
         }
+
       </strong>
 
     `;
@@ -1335,10 +1370,12 @@ async function loadTeacherScores() {
 
   }
 
-  data.forEach(result => {
+  data.forEach(function (result) {
 
     const row =
-      document.createElement("tr");
+      document.createElement(
+        "tr"
+      );
 
     row.innerHTML = `
 
@@ -1358,13 +1395,13 @@ async function loadTeacherScores() {
 
       <td>
         ${Number(
-          result.score || 0
+          result.score
         ).toFixed(2)}
       </td>
 
       <td>
         ${Number(
-          result.percentage || 0
+          result.percentage
         )}%
       </td>
 
@@ -1384,61 +1421,27 @@ async function loadTeacherScores() {
 
 
 /* =========================================================
-   EXAM BUILDER
+   CREATE EXAM
 ========================================================= */
 
-let examBuilderInitialized = false;
+let createExamInitialized = false;
 
 
-async function initializeExamBuilder() {
+/* ---------------------------------------------------------
+   INITIALIZE
+--------------------------------------------------------- */
 
-  if (examBuilderInitialized) {
+async function initializeCreateExam() {
+
+  if (!currentUser) {
     return;
   }
 
-  examBuilderInitialized = true;
+  if (!createExamInitialized) {
 
-  builderQuestions = [];
+    setupCreateExamEvents();
 
-  const addButton =
-    document.getElementById(
-      "addQuestionBtn"
-    );
-
-  if (addButton) {
-
-    addButton.addEventListener(
-      "click",
-      addQuestion
-    );
-
-  }
-
-  const saveButton =
-    document.getElementById(
-      "saveDraftBtn"
-    );
-
-  if (saveButton) {
-
-    saveButton.addEventListener(
-      "click",
-      () => saveExam(false)
-    );
-
-  }
-
-  const publishButton =
-    document.getElementById(
-      "publishExamBtn"
-    );
-
-  if (publishButton) {
-
-    publishButton.addEventListener(
-      "click",
-      () => saveExam(true)
-    );
+    createExamInitialized = true;
 
   }
 
@@ -1453,14 +1456,19 @@ async function initializeExamBuilder() {
 
 async function loadSubjects() {
 
-  const select =
+  const subjectSelect =
     document.getElementById(
-      "examSubjectSelect"
+      "examSubject"
     );
 
-  if (!select) {
+  if (!subjectSelect) {
     return;
   }
+
+  subjectSelect.innerHTML =
+    `<option value="">
+      Select Subject
+    </option>`;
 
   const {
     data,
@@ -1469,7 +1477,7 @@ async function loadSubjects() {
     await supabaseClient
       .from("subjects")
       .select(
-        "id,name"
+        "id, name"
       )
       .order(
         "name",
@@ -1485,16 +1493,16 @@ async function loadSubjects() {
       error
     );
 
+    subjectSelect.innerHTML =
+      `<option value="">
+        Unable to load subjects
+      </option>`;
+
     return;
 
   }
 
-  select.innerHTML =
-    `<option value="">
-      Select Subject
-    </option>`;
-
-  data.forEach(subject => {
+  (data || []).forEach(function (subject) {
 
     const option =
       document.createElement(
@@ -1507,19 +1515,11 @@ async function loadSubjects() {
     option.textContent =
       subject.name;
 
-    select.appendChild(option);
+    subjectSelect.appendChild(
+      option
+    );
 
   });
-
-
-  select.onchange =
-    async function () {
-
-      await loadChapters(
-        select.value
-      );
-
-    };
 
 }
 
@@ -1528,20 +1528,14 @@ async function loadSubjects() {
    LOAD CHAPTERS
 ========================================================= */
 
-async function loadChapters(
-  subjectId
-) {
+async function loadChapters(subjectId) {
 
-  const select =
+  const chapterSelect =
     document.getElementById(
-      "examChapterSelect"
+      "examChapter"
     );
 
-  if (!select) {
-    return;
-  }
-
-  select.innerHTML =
+  chapterSelect.innerHTML =
     `<option value="">
       Select Chapter
     </option>`;
@@ -1557,7 +1551,7 @@ async function loadChapters(
     await supabaseClient
       .from("chapters")
       .select(
-        "id,name"
+        "id, name"
       )
       .eq(
         "subject_id",
@@ -1577,11 +1571,16 @@ async function loadChapters(
       error
     );
 
+    chapterSelect.innerHTML =
+      `<option value="">
+        Unable to load chapters
+      </option>`;
+
     return;
 
   }
 
-  data.forEach(chapter => {
+  (data || []).forEach(function (chapter) {
 
     const option =
       document.createElement(
@@ -1594,7 +1593,9 @@ async function loadChapters(
     option.textContent =
       chapter.name;
 
-    select.appendChild(option);
+    chapterSelect.appendChild(
+      option
+    );
 
   });
 
@@ -1602,584 +1603,75 @@ async function loadChapters(
 
 
 /* =========================================================
-   ADD QUESTION
+   CREATE EXAM EVENTS
 ========================================================= */
 
-function addQuestion() {
+function setupCreateExamEvents() {
 
-  const question = {
-
-    id:
-      Date.now(),
-
-    question_text:
-      "",
-
-    image_url:
-      "",
-
-    option_a:
-      "",
-
-    option_b:
-      "",
-
-    option_c:
-      "",
-
-    option_d:
-      "",
-
-    correct_answer:
-      "A",
-
-    explanation:
-      "",
-
-    marks:
-      1,
-
-    negative_marks:
-      0
-
-  };
-
-  builderQuestions.push(question);
-
-  renderQuestionBuilder();
-
-}
-
-
-/* =========================================================
-   REMOVE QUESTION
-========================================================= */
-
-function removeQuestion(
-  questionId
-) {
-
-  builderQuestions =
-    builderQuestions.filter(
-      question =>
-        question.id !== questionId
-    );
-
-  renderQuestionBuilder();
-
-}
-
-
-/* =========================================================
-   UPDATE QUESTION
-========================================================= */
-
-function updateQuestion(
-  questionId,
-  field,
-  value
-) {
-
-  const question =
-    builderQuestions.find(
-      item =>
-        item.id === questionId
-    );
-
-  if (!question) {
-    return;
-  }
-
-  question[field] = value;
-
-}
-
-
-/* =========================================================
-   RENDER QUESTIONS
-========================================================= */
-
-function renderQuestionBuilder() {
-
-  const container =
+  const subjectSelect =
     document.getElementById(
-      "questionBuilderList"
+      "examSubject"
     );
 
-  if (!container) {
-    return;
-  }
-
-  container.innerHTML = "";
-
-  if (!builderQuestions.length) {
-
-    container.innerHTML =
-      `<div
-        id="noQuestionsMessage"
-        class="empty-state"
-      >
-
-        <div class="empty-icon">
-          ❓
-        </div>
-
-        <h3>
-          No questions added
-        </h3>
-
-        <p>
-          Click "Add Question" to create your first question.
-        </p>
-
-      </div>`;
-
-    return;
-
-  }
-
-
-  builderQuestions.forEach(
-    (question, index) => {
-
-      const card =
-        document.createElement(
-          "div"
-        );
-
-      card.className =
-        "question-builder-card";
-
-
-      card.innerHTML = `
-
-        <div class="question-builder-title">
-
-          <div>
-
-            <strong>
-              Question ${index + 1}
-            </strong>
-
-            <span>
-              Configure question
-            </span>
-
-          </div>
-
-          <button
-            type="button"
-            class="remove-question-btn"
-          >
-            🗑️ Remove
-          </button>
-
-        </div>
-
-
-        <div class="form-grid">
-
-
-          <div class="form-group full-width">
-
-            <label>
-              Question *
-            </label>
-
-            <textarea
-              class="builder-question-text"
-              rows="3"
-              placeholder="Enter question..."
-            >${escapeHTML(
-              question.question_text
-            )}</textarea>
-
-          </div>
-
-
-          <div class="form-group full-width">
-
-            <label>
-              Question Image URL
-            </label>
-
-            <input
-              type="url"
-              class="builder-image-url"
-              placeholder="https://..."
-              value="${escapeAttribute(
-                question.image_url
-              )}"
-            >
-
-          </div>
-
-
-          <div class="form-group">
-
-            <label>
-              Option A *
-            </label>
-
-            <input
-              type="text"
-              class="builder-option-a"
-              value="${escapeAttribute(
-                question.option_a
-              )}"
-              placeholder="Option A"
-            >
-
-          </div>
-
-
-          <div class="form-group">
-
-            <label>
-              Option B *
-            </label>
-
-            <input
-              type="text"
-              class="builder-option-b"
-              value="${escapeAttribute(
-                question.option_b
-              )}"
-              placeholder="Option B"
-            >
-
-          </div>
-
-
-          <div class="form-group">
-
-            <label>
-              Option C
-            </label>
-
-            <input
-              type="text"
-              class="builder-option-c"
-              value="${escapeAttribute(
-                question.option_c
-              )}"
-              placeholder="Option C"
-            >
-
-          </div>
-
-
-          <div class="form-group">
-
-            <label>
-              Option D
-            </label>
-
-            <input
-              type="text"
-              class="builder-option-d"
-              value="${escapeAttribute(
-                question.option_d
-              )}"
-              placeholder="Option D"
-            >
-
-          </div>
-
-
-          <div class="form-group">
-
-            <label>
-              Correct Answer *
-            </label>
-
-            <select
-              class="builder-correct-answer"
-            >
-
-              <option
-                value="A"
-                ${
-                  question.correct_answer === "A"
-                    ? "selected"
-                    : ""
-                }
-              >
-                Option A
-              </option>
-
-              <option
-                value="B"
-                ${
-                  question.correct_answer === "B"
-                    ? "selected"
-                    : ""
-                }
-              >
-                Option B
-              </option>
-
-              <option
-                value="C"
-                ${
-                  question.correct_answer === "C"
-                    ? "selected"
-                    : ""
-                }
-              >
-                Option C
-              </option>
-
-              <option
-                value="D"
-                ${
-                  question.correct_answer === "D"
-                    ? "selected"
-                    : ""
-                }
-              >
-                Option D
-              </option>
-
-            </select>
-
-          </div>
-
-
-          <div class="form-group">
-
-            <label>
-              Marks *
-            </label>
-
-            <input
-              type="number"
-              class="builder-marks"
-              min="0"
-              step="0.01"
-              value="${question.marks}"
-            >
-
-          </div>
-
-
-          <div class="form-group">
-
-            <label>
-              Negative Marks
-            </label>
-
-            <input
-              type="number"
-              class="builder-negative-marks"
-              min="0"
-              step="0.01"
-              value="${question.negative_marks}"
-            >
-
-          </div>
-
-
-          <div class="form-group full-width">
-
-            <label>
-              Explanation
-            </label>
-
-            <textarea
-              class="builder-explanation"
-              rows="3"
-              placeholder="Explain the correct answer..."
-            >${escapeHTML(
-              question.explanation
-            )}</textarea>
-
-          </div>
-
-        </div>
-
-      `;
-
-
-      const removeButton =
-        card.querySelector(
-          ".remove-question-btn"
-        );
-
-      removeButton.addEventListener(
-        "click",
-        () =>
-          removeQuestion(
-            question.id
-          )
+  const form =
+    document.getElementById(
+      "createExamForm"
+    );
+
+  const publishButton =
+    document.getElementById(
+      "publishExamBtn"
+    );
+
+  const resetButton =
+    document.getElementById(
+      "resetExamBtn"
+    );
+
+
+  subjectSelect.addEventListener(
+    "change",
+    function () {
+
+      loadChapters(
+        subjectSelect.value
       );
 
+    }
+  );
 
-      const text =
-        card.querySelector(
-          ".builder-question-text"
-        );
 
-      text.addEventListener(
-        "input",
-        event =>
-          updateQuestion(
-            question.id,
-            "question_text",
-            event.target.value
-          )
+  form.addEventListener(
+    "submit",
+    async function (event) {
+
+      event.preventDefault();
+
+      await createExam(
+        false
       );
 
+    }
+  );
 
-      const image =
-        card.querySelector(
-          ".builder-image-url"
-        );
 
-      image.addEventListener(
-        "input",
-        event =>
-          updateQuestion(
-            question.id,
-            "image_url",
-            event.target.value
-          )
+  publishButton.addEventListener(
+    "click",
+    async function () {
+
+      await createExam(
+        true
       );
 
-
-      const optionA =
-        card.querySelector(
-          ".builder-option-a"
-        );
-
-      optionA.addEventListener(
-        "input",
-        event =>
-          updateQuestion(
-            question.id,
-            "option_a",
-            event.target.value
-          )
-      );
+    }
+  );
 
 
-      const optionB =
-        card.querySelector(
-          ".builder-option-b"
-        );
+  resetButton.addEventListener(
+    "click",
+    function () {
 
-      optionB.addEventListener(
-        "input",
-        event =>
-          updateQuestion(
-            question.id,
-            "option_b",
-            event.target.value
-          )
-      );
-
-
-      const optionC =
-        card.querySelector(
-          ".builder-option-c"
-        );
-
-      optionC.addEventListener(
-        "input",
-        event =>
-          updateQuestion(
-            question.id,
-            "option_c",
-            event.target.value
-          )
-      );
-
-
-      const optionD =
-        card.querySelector(
-          ".builder-option-d"
-        );
-
-      optionD.addEventListener(
-        "input",
-        event =>
-          updateQuestion(
-            question.id,
-            "option_d",
-            event.target.value
-          )
-      );
-
-
-      const correct =
-        card.querySelector(
-          ".builder-correct-answer"
-        );
-
-      correct.addEventListener(
-        "change",
-        event =>
-          updateQuestion(
-            question.id,
-            "correct_answer",
-            event.target.value
-          )
-      );
-
-
-      const marks =
-        card.querySelector(
-          ".builder-marks"
-        );
-
-      marks.addEventListener(
-        "input",
-        event =>
-          updateQuestion(
-            question.id,
-            "marks",
-            Number(
-              event.target.value
-            )
-          )
-      );
-
-
-      const negative =
-        card.querySelector(
-          ".builder-negative-marks"
-        );
-
-      negative.addEventListener(
-        "input",
-        event =>
-          updateQuestion(
-            question.id,
-            "negative_marks",
-            Number(
-              event.target.value
-            )
-          )
-      );
-
-
-      const explanation =
-        card.querySelector(
-          ".builder-explanation"
-        );
-
-      explanation.addEventListener(
-        "input",
-        event =>
-          updateQuestion(
-            question.id,
-            "explanation",
-            event.target.value
-          )
-      );
-
-
-      container.appendChild(card);
+      resetCreateExamForm();
 
     }
   );
@@ -2188,24 +1680,12 @@ function renderQuestionBuilder() {
 
 
 /* =========================================================
-   SAVE / PUBLISH EXAM
+   GET CREATE EXAM DATA
 ========================================================= */
 
-async function saveExam(
-  publish
+function getCreateExamData(
+  isPublished
 ) {
-
-  if (!currentUser) {
-
-    showBuilderMessage(
-      "Please login first.",
-      true
-    );
-
-    return;
-
-  }
-
 
   const title =
     document
@@ -2223,200 +1703,156 @@ async function saveExam(
       .value
       .trim();
 
-  const subjectValue =
-    document
-      .getElementById(
-        "examSubjectSelect"
-      )
-      .value;
+  const subjectId =
+    document.getElementById(
+      "examSubject"
+    ).value;
 
-  const chapterValue =
-    document
-      .getElementById(
-        "examChapterSelect"
-      )
-      .value;
+  const chapterId =
+    document.getElementById(
+      "examChapter"
+    ).value;
 
   const duration =
     Number(
-      document
-        .getElementById(
-          "examDurationInput"
-        )
-        .value
+      document.getElementById(
+        "durationMinutes"
+      ).value
     );
 
-  const passing =
+  const totalMarks =
     Number(
-      document
-        .getElementById(
-          "examPassingInput"
-        )
-        .value
+      document.getElementById(
+        "totalMarks"
+      ).value
     );
 
-  const negative =
+  const passingPercentage =
     Number(
-      document
-        .getElementById(
-          "examNegativeInput"
-        )
-        .value
+      document.getElementById(
+        "passingPercentage"
+      ).value
+    );
+
+  const negativeMarking =
+    Number(
+      document.getElementById(
+        "negativeMarking"
+      ).value || 0
     );
 
   const maxAttempts =
     Number(
-      document
-        .getElementById(
-          "examAttemptsInput"
-        )
-        .value
+      document.getElementById(
+        "maxAttempts"
+      ).value
     );
-
-  const startValue =
-    document
-      .getElementById(
-        "examStartInput"
-      )
-      .value;
-
-  const endValue =
-    document
-      .getElementById(
-        "examEndInput"
-      )
-      .value;
 
   const randomizeQuestions =
-    document
-      .getElementById(
-        "randomizeQuestionsInput"
-      )
-      .checked;
+    document.getElementById(
+      "randomizeQuestions"
+    ).checked;
 
   const randomizeOptions =
-    document
-      .getElementById(
-        "randomizeOptionsInput"
-      )
-      .checked;
+    document.getElementById(
+      "randomizeOptions"
+    ).checked;
 
-  const showResult =
-    document
-      .getElementById(
-        "showResultInput"
-      )
-      .checked;
+  const showResultImmediately =
+    document.getElementById(
+      "showResultImmediately"
+    ).checked;
 
   const showExplanations =
-    document
-      .getElementById(
-        "showExplanationInput"
-      )
-      .checked;
+    document.getElementById(
+      "showExplanations"
+    ).checked;
 
+  const startValue =
+    document.getElementById(
+      "startAt"
+    ).value;
 
-  /* VALIDATION */
+  const endValue =
+    document.getElementById(
+      "endAt"
+    ).value;
+
 
   if (!title) {
-
-    showBuilderMessage(
-      "Please enter exam title.",
-      true
+    throw new Error(
+      "Please enter exam title."
     );
-
-    return;
-
   }
-
 
   if (!duration || duration < 1) {
-
-    showBuilderMessage(
-      "Exam duration must be at least 1 minute.",
-      true
+    throw new Error(
+      "Duration must be at least 1 minute."
     );
-
-    return;
-
   }
 
+  if (!totalMarks || totalMarks <= 0) {
+    throw new Error(
+      "Total marks must be greater than 0."
+    );
+  }
 
   if (
-    passing < 0 ||
-    passing > 100
+    passingPercentage < 0 ||
+    passingPercentage > 100
   ) {
 
-    showBuilderMessage(
-      "Passing percentage must be between 0 and 100.",
-      true
+    throw new Error(
+      "Passing percentage must be between 0 and 100."
     );
-
-    return;
 
   }
 
+  if (
+    negativeMarking < 0
+  ) {
+
+    throw new Error(
+      "Negative marking cannot be negative."
+    );
+
+  }
 
   if (
+    !maxAttempts ||
     maxAttempts < 1
   ) {
 
-    showBuilderMessage(
-      "Maximum attempts must be at least 1.",
-      true
+    throw new Error(
+      "Maximum attempts must be at least 1."
     );
-
-    return;
 
   }
 
 
-  if (publish && !builderQuestions.length) {
+  if (
+    startValue &&
+    endValue
+  ) {
 
-    showBuilderMessage(
-      "Add at least one question before publishing.",
-      true
-    );
+    const start =
+      new Date(startValue);
 
-    return;
+    const end =
+      new Date(endValue);
 
-  }
+    if (end <= start) {
 
-
-  if (publish) {
-
-    const validation =
-      validateQuestions();
-
-    if (!validation.valid) {
-
-      showBuilderMessage(
-        validation.message,
-        true
+      throw new Error(
+        "End date/time must be after start date/time."
       );
-
-      return;
 
     }
 
   }
 
 
-  const totalMarks =
-    builderQuestions.reduce(
-      (
-        total,
-        question
-      ) =>
-        total +
-        Number(
-          question.marks || 0
-        ),
-      0
-    );
-
-
-  const payload = {
+  return {
 
     title,
 
@@ -2424,13 +1860,13 @@ async function saveExam(
       description || null,
 
     subject_id:
-      subjectValue
-        ? Number(subjectValue)
+      subjectId
+        ? Number(subjectId)
         : null,
 
     chapter_id:
-      chapterValue
-        ? Number(chapterValue)
+      chapterId
+        ? Number(chapterId)
         : null,
 
     created_by:
@@ -2443,10 +1879,10 @@ async function saveExam(
       totalMarks,
 
     passing_percentage:
-      passing,
+      passingPercentage,
 
     negative_marking:
-      negative,
+      negativeMarking,
 
     max_attempts:
       maxAttempts,
@@ -2458,13 +1894,13 @@ async function saveExam(
       randomizeOptions,
 
     show_result_immediately:
-      showResult,
+      showResultImmediately,
 
     show_explanations:
       showExplanations,
 
     is_published:
-      publish,
+      isPublished,
 
     start_at:
       startValue
@@ -2482,189 +1918,140 @@ async function saveExam(
 
   };
 
-
-  const button =
-    publish
-      ? document.getElementById(
-          "publishExamBtn"
-        )
-      : document.getElementById(
-          "saveDraftBtn"
-        );
+}
 
 
-  if (button) {
-    button.disabled = true;
-  }
+/* =========================================================
+   CREATE EXAM DATABASE INSERT
+========================================================= */
+
+async function createExam(
+  publish
+) {
+
+  const errorBox =
+    document.getElementById(
+      "createExamError"
+    );
+
+  const successBox =
+    document.getElementById(
+      "createExamSuccess"
+    );
+
+  const saveButton =
+    document.getElementById(
+      "saveDraftBtn"
+    );
+
+  const publishButton =
+    document.getElementById(
+      "publishExamBtn"
+    );
 
 
-  showBuilderMessage(
-    publish
-      ? "Publishing exam..."
-      : "Saving draft...",
-    false
-  );
+  errorBox.textContent = "";
+  successBox.textContent = "";
 
 
   try {
 
+    const examData =
+      getCreateExamData(
+        publish
+      );
+
+
+    if (publish) {
+
+      publishButton.disabled = true;
+      publishButton.textContent =
+        "Publishing...";
+
+    }
+
+    else {
+
+      saveButton.disabled = true;
+      saveButton.textContent =
+        "Saving...";
+
+    }
+
+
     const {
-      data: exam,
-      error: examError
+      data,
+      error
     } =
       await supabaseClient
         .from("exams")
-        .insert(payload)
+        .insert(
+          examData
+        )
         .select()
         .single();
 
 
-    if (examError) {
-      throw examError;
-    }
+    if (error) {
 
-
-    currentExamId =
-      exam.id;
-
-
-    /* SAVE QUESTIONS */
-
-    if (builderQuestions.length) {
-
-      const questionRows =
-        builderQuestions.map(
-          (
-            question,
-            index
-          ) => ({
-
-            exam_id:
-              exam.id,
-
-            question_text:
-              question.question_text
-                .trim(),
-
-            image_url:
-              question.image_url
-                .trim() ||
-              null,
-
-            option_a:
-              question.option_a
-                .trim(),
-
-            option_b:
-              question.option_b
-                .trim(),
-
-            option_c:
-              question.option_c
-                .trim() ||
-              null,
-
-            option_d:
-              question.option_d
-                .trim() ||
-              null,
-
-            correct_answer:
-              question.correct_answer,
-
-            explanation:
-              question.explanation
-                .trim() ||
-              null,
-
-            marks:
-              Number(
-                question.marks || 0
-              ),
-
-            negative_marks:
-              Number(
-                question.negative_marks || 0
-              ),
-
-            question_order:
-              index + 1
-
-          })
-        );
-
-
-      const {
-        error: questionsError
-      } =
-        await supabaseClient
-          .from("questions")
-          .insert(
-            questionRows
-          );
-
-
-      if (questionsError) {
-
-        /*
-          Exam was created but questions failed.
-        */
-
-        console.error(
-          questionsError
-        );
-
-        throw new Error(
-          "Exam created, but questions could not be saved. Check database policies."
-        );
-
-      }
+      throw error;
 
     }
 
 
-    showBuilderMessage(
+    successBox.textContent =
       publish
-        ? "🎉 Exam published successfully!"
-        : "💾 Exam draft saved successfully!",
-      false
-    );
+        ? "✅ Exam created and published successfully!"
+        : "✅ Exam saved as draft successfully!";
 
 
-    alert(
-      publish
-        ? "Exam published successfully!"
-        : "Exam draft saved successfully!"
-    );
+    document.getElementById(
+      "createExamForm"
+    ).reset();
 
 
-    resetExamBuilder();
+    document.getElementById(
+      "examChapter"
+    ).innerHTML =
+      `<option value="">
+        Select Chapter
+      </option>`;
 
 
     await loadTeacherDashboard();
+
+
+    console.log(
+      "Created Exam:",
+      data
+    );
+
 
   }
 
   catch (error) {
 
     console.error(
-      "Save exam error:",
+      "Create exam error:",
       error
     );
 
-    showBuilderMessage(
-      error.message ||
-      "Unable to save exam.",
-      true
-    );
+    errorBox.textContent =
+      getFriendlyDatabaseError(
+        error
+      );
 
   }
 
   finally {
 
-    if (button) {
-      button.disabled = false;
-    }
+    saveButton.disabled = false;
+    saveButton.textContent =
+      "💾 Save Draft";
+
+    publishButton.disabled = false;
+    publishButton.textContent =
+      "🚀 Create & Publish";
 
   }
 
@@ -2672,1298 +2059,90 @@ async function saveExam(
 
 
 /* =========================================================
-   VALIDATE QUESTIONS
+   RESET EXAM FORM
 ========================================================= */
 
-function validateQuestions() {
+function resetCreateExamForm() {
 
-  for (
-    let i = 0;
-    i < builderQuestions.length;
-    i++
-  ) {
-
-    const question =
-      builderQuestions[i];
-
-    if (
-      !question.question_text ||
-      !question.question_text.trim()
-    ) {
-
-      return {
-        valid: false,
-        message:
-          `Question ${i + 1}: Question text is required.`
-      };
-
-    }
-
-
-    if (
-      !question.option_a ||
-      !question.option_a.trim()
-    ) {
-
-      return {
-        valid: false,
-        message:
-          `Question ${i + 1}: Option A is required.`
-      };
-
-    }
-
-
-    if (
-      !question.option_b ||
-      !question.option_b.trim()
-    ) {
-
-      return {
-        valid: false,
-        message:
-          `Question ${i + 1}: Option B is required.`
-      };
-
-    }
-
-
-    if (
-      question.correct_answer === "C" &&
-      (
-        !question.option_c ||
-        !question.option_c.trim()
-      )
-    ) {
-
-      return {
-        valid: false,
-        message:
-          `Question ${i + 1}: Option C is empty.`
-      };
-
-    }
-
-
-    if (
-      question.correct_answer === "D" &&
-      (
-        !question.option_d ||
-        !question.option_d.trim()
-      )
-    ) {
-
-      return {
-        valid: false,
-        message:
-          `Question ${i + 1}: Option D is empty.`
-      };
-
-    }
-
-
-    if (
-      Number(question.marks) <= 0
-    ) {
-
-      return {
-        valid: false,
-        message:
-          `Question ${i + 1}: Marks must be greater than 0.`
-      };
-
-    }
-
-  }
-
-
-  return {
-    valid: true
-  };
-
-}
-
-
-/* =========================================================
-   BUILDER MESSAGE
-========================================================= */
-
-function showBuilderMessage(
-  message,
-  isError
-) {
-
-  const element =
+  const form =
     document.getElementById(
-      "examBuilderMessage"
+      "createExamForm"
     );
 
-  if (!element) {
-    return;
-  }
-
-  element.textContent =
-    message;
-
-  element.className =
-    isError
-      ? "form-message error-message"
-      : "form-message success-message";
-
-}
-
-
-/* =========================================================
-   RESET EXAM BUILDER
-========================================================= */
-
-function resetExamBuilder() {
-
-  builderQuestions = [];
-  currentExamId = null;
-
-  const fields = [
-
-    "examTitleInput",
-    "examDescriptionInput",
-    "examDurationInput",
-    "examPassingInput",
-    "examNegativeInput",
-    "examAttemptsInput",
-    "examStartInput",
-    "examEndInput"
-
-  ];
-
-
-  fields.forEach(id => {
-
-    const element =
-      document.getElementById(id);
-
-    if (!element) {
-      return;
-    }
-
-    if (
-      id === "examDurationInput"
-    ) {
-
-      element.value = 30;
-
-    }
-
-    else if (
-      id === "examPassingInput"
-    ) {
-
-      element.value = 40;
-
-    }
-
-    else if (
-      id === "examNegativeInput"
-    ) {
-
-      element.value = 0;
-
-    }
-
-    else if (
-      id === "examAttemptsInput"
-    ) {
-
-      element.value = 1;
-
-    }
-
-    else {
-
-      element.value = "";
-
-    }
-
-  });
-
+  form.reset();
 
   document.getElementById(
-    "examSubjectSelect"
-  ).value = "";
-
-  document.getElementById(
-    "examChapterSelect"
+    "examChapter"
   ).innerHTML =
     `<option value="">
       Select Chapter
     </option>`;
 
+  document.getElementById(
+    "createExamError"
+  ).textContent = "";
 
   document.getElementById(
-    "randomizeQuestionsInput"
-  ).checked = false;
-
-  document.getElementById(
-    "randomizeOptionsInput"
-  ).checked = false;
-
-  document.getElementById(
-    "showResultInput"
-  ).checked = true;
-
-  document.getElementById(
-    "showExplanationInput"
-  ).checked = false;
-
-
-  renderQuestionBuilder();
+    "createExamSuccess"
+  ).textContent = "";
 
 }
 
 
 /* =========================================================
-   START EXAM
+   DATABASE ERROR
 ========================================================= */
 
-async function startExam(
-  examId
+function getFriendlyDatabaseError(
+  error
 ) {
 
-  if (!currentUser) {
-    return;
-  }
-
-
-  try {
-
-    const {
-      data: exam,
-      error: examError
-    } =
-      await supabaseClient
-        .from("exams")
-        .select("*")
-        .eq(
-          "id",
-          examId
-        )
-        .eq(
-          "is_published",
-          true
-        )
-        .single();
-
-
-    if (examError) {
-      throw examError;
-    }
-
-
-    /* DATE CHECK */
-
-    const now =
-      new Date();
-
-
-    if (
-      exam.start_at &&
-      now <
-      new Date(
-        exam.start_at
-      )
-    ) {
-
-      alert(
-        "This exam has not started yet."
-      );
-
-      return;
-
-    }
-
-
-    if (
-      exam.end_at &&
-      now >
-      new Date(
-        exam.end_at
-      )
-    ) {
-
-      alert(
-        "This exam is no longer available."
-      );
-
-      return;
-
-    }
-
-
-    /* CHECK ATTEMPTS */
-
-    const {
-      data: attempts,
-      error: attemptsError
-    } =
-      await supabaseClient
-        .from("exam_attempts")
-        .select(
-          "id,attempt_number,status"
-        )
-        .eq(
-          "exam_id",
-          examId
-        )
-        .eq(
-          "student_id",
-          currentUser.id
-        );
-
-
-    if (attemptsError) {
-      throw attemptsError;
-    }
-
-
-    const completedAttempts =
-      (attempts || []).filter(
-        attempt =>
-          [
-            "submitted",
-            "auto_submitted",
-            "expired"
-          ].includes(
-            attempt.status
-          )
-      );
-
-
-    if (
-      completedAttempts.length >=
-      exam.max_attempts
-    ) {
-
-      alert(
-        `Maximum ${exam.max_attempts} attempt(s) allowed for this exam.`
-      );
-
-      return;
-
-    }
-
-
-    /* LOAD QUESTIONS */
-
-    const {
-      data: questions,
-      error: questionError
-    } =
-      await supabaseClient
-        .from("questions")
-        .select("*")
-        .eq(
-          "exam_id",
-          examId
-        )
-        .order(
-          "question_order",
-          {
-            ascending: true
-          }
-        );
-
-
-    if (questionError) {
-      throw questionError;
-    }
-
-
-    if (!questions.length) {
-
-      alert(
-        "This exam has no questions yet."
-      );
-
-      return;
-
-    }
-
-
-    currentExam = exam;
-
-    currentQuestions =
-      [...questions];
-
-
-    if (
-      exam.randomize_questions
-    ) {
-
-      shuffleArray(
-        currentQuestions
-      );
-
-    }
-
-
-    currentQuestionIndex = 0;
-
-
-    /* CREATE ATTEMPT */
-
-    const attemptNumber =
-      completedAttempts.length + 1;
-
-
-    const {
-      data: attempt,
-      error: attemptError
-    } =
-      await supabaseClient
-        .from("exam_attempts")
-        .insert({
-
-          exam_id:
-            exam.id,
-
-          student_id:
-            currentUser.id,
-
-          attempt_number:
-            attemptNumber,
-
-          started_at:
-            new Date().toISOString(),
-
-          status:
-            "in_progress",
-
-          score:
-            0,
-
-          correct_answers:
-            0,
-
-          wrong_answers:
-            0,
-
-          unanswered:
-            currentQuestions.length,
-
-          percentage:
-            0,
-
-          passed:
-            false
-
-        })
-        .select()
-        .single();
-
-
-    if (attemptError) {
-      throw attemptError;
-    }
-
-
-    currentAttemptId =
-      attempt.id;
-
-
-    showPage("examPage");
-
-    renderCurrentQuestion();
-
-  }
-
-  catch (error) {
-
-    console.error(
-      "Start exam error:",
-      error
+  const message =
+    String(
+      error?.message ||
+      error ||
+      ""
     );
 
-    alert(
-      error.message ||
-      "Unable to start exam."
-    );
+  const lower =
+    message.toLowerCase();
 
-  }
 
-}
-
-
-/* =========================================================
-   RENDER CURRENT QUESTION
-========================================================= */
-
-function renderCurrentQuestion() {
-
-  if (!currentQuestions.length) {
-    return;
-  }
-
-
-  const question =
-    currentQuestions[
-      currentQuestionIndex
-    ];
-
-
-  document.getElementById(
-    "examTitle"
-  ).textContent =
-    currentExam.title;
-
-
-  document.getElementById(
-    "questionNumber"
-  ).textContent =
-    `Question ${
-      currentQuestionIndex + 1
-    } of ${
-      currentQuestions.length
-    }`;
-
-
-  document.getElementById(
-    "questionText"
-  ).textContent =
-    question.question_text;
-
-
-  const imageContainer =
-    document.getElementById(
-      "questionImageContainer"
-    );
-
-
-  imageContainer.innerHTML = "";
-
-
-  if (question.image_url) {
-
-    const image =
-      document.createElement("img");
-
-    image.src =
-      question.image_url;
-
-    image.alt =
-      "Question image";
-
-    image.style.maxWidth =
-      "100%";
-
-    image.style.borderRadius =
-      "10px";
-
-    image.style.marginBottom =
-      "20px";
-
-    imageContainer.appendChild(
-      image
-    );
-
-  }
-
-
-  const options =
-    document.getElementById(
-      "options"
-    );
-
-  options.innerHTML = "";
-
-
-  const optionList = [
-
-    {
-      key: "A",
-      text: question.option_a
-    },
-
-    {
-      key: "B",
-      text: question.option_b
-    },
-
-    {
-      key: "C",
-      text: question.option_c
-    },
-
-    {
-      key: "D",
-      text: question.option_d
-    }
-
-  ].filter(
-    option =>
-      option.text
-  );
-
-
-  optionList.forEach(
-    option => {
-
-      const div =
-        document.createElement(
-          "div"
-        );
-
-      div.className =
-        "option";
-
-      div.dataset.answer =
-        option.key;
-
-      div.innerHTML = `
-
-        <strong>
-          ${option.key}.
-        </strong>
-
-        ${escapeHTML(
-          option.text
-        )}
-
-      `;
-
-
-      div.addEventListener(
-        "click",
-        () =>
-          selectAnswer(
-            question.id,
-            option.key
-          )
-      );
-
-
-      options.appendChild(div);
-
-    }
-  );
-
-
-  loadSavedAnswer(
-    question.id
-  );
-
-
-  updateExamButtons();
-
-  renderQuestionNavigation();
-
-}
-
-
-/* =========================================================
-   SELECT ANSWER
-========================================================= */
-
-async function selectAnswer(
-  questionId,
-  answer
-) {
-
-  if (!currentAttemptId) {
-    return;
-  }
-
-
-  const question =
-    currentQuestions.find(
-      item =>
-        item.id === questionId
-    );
-
-
-  if (!question) {
-    return;
-  }
-
-
-  const isCorrect =
-    answer ===
-    question.correct_answer;
-
-
-  let marks =
-    isCorrect
-      ? Number(question.marks || 0)
-      : -Number(
-          question.negative_marks || 0
-        );
-
-
-  const {
-    data: existing,
-    error: existingError
-  } =
-    await supabaseClient
-      .from("student_answers")
-      .select("id")
-      .eq(
-        "attempt_id",
-        currentAttemptId
-      )
-      .eq(
-        "question_id",
-        questionId
-      )
-      .maybeSingle();
-
-
-  if (existingError) {
-
-    console.error(
-      existingError
-    );
-
-    return;
-
-  }
-
-
-  try {
-
-    if (existing) {
-
-      const {
-        error
-      } =
-        await supabaseClient
-          .from("student_answers")
-          .update({
-
-            selected_answer:
-              answer,
-
-            is_correct:
-              isCorrect,
-
-            marks_obtained:
-              marks,
-
-            answered_at:
-              new Date().toISOString()
-
-          })
-          .eq(
-            "id",
-            existing.id
-          );
-
-
-      if (error) {
-        throw error;
-      }
-
-    }
-
-    else {
-
-      const {
-        error
-      } =
-        await supabaseClient
-          .from("student_answers")
-          .insert({
-
-            attempt_id:
-              currentAttemptId,
-
-            question_id:
-              questionId,
-
-            selected_answer:
-              answer,
-
-            is_correct:
-              isCorrect,
-
-            marks_obtained:
-              marks,
-
-            answered_at:
-              new Date().toISOString()
-
-          });
-
-
-      if (error) {
-        throw error;
-      }
-
-    }
-
-
-    loadSavedAnswer(
-      questionId
-    );
-
-    renderQuestionNavigation();
-
-  }
-
-  catch (error) {
-
-    console.error(
-      "Answer error:",
-      error
-    );
-
-    alert(
-      "Unable to save answer."
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   LOAD SAVED ANSWER
-========================================================= */
-
-async function loadSavedAnswer(
-  questionId
-) {
-
-  if (!currentAttemptId) {
-    return;
-  }
-
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("student_answers")
-      .select(
-        "selected_answer"
-      )
-      .eq(
-        "attempt_id",
-        currentAttemptId
-      )
-      .eq(
-        "question_id",
-        questionId
-      )
-      .maybeSingle();
-
-
-  if (error) {
-    return;
-  }
-
-
-  document
-    .querySelectorAll(
-      "#options .option"
+  if (
+    lower.includes(
+      "row-level security"
     )
-    .forEach(
-      element => {
+  ) {
 
-        element.classList.remove(
-          "selected"
-        );
+    return "Permission denied by Supabase RLS. Teacher exam INSERT policy needs to be enabled.";
 
-
-        if (
-          data &&
-          element.dataset.answer ===
-          data.selected_answer
-        ) {
-
-          element.classList.add(
-            "selected"
-          );
-
-        }
-
-      }
-    );
-
-}
-
-
-/* =========================================================
-   QUESTION NAVIGATION
-========================================================= */
-
-function renderQuestionNavigation() {
-
-  const container =
-    document.getElementById(
-      "questionNavigation"
-    );
-
-  if (!container) {
-    return;
-  }
-
-  container.innerHTML = "";
-
-
-  currentQuestions.forEach(
-    (
-      question,
-      index
-    ) => {
-
-      const button =
-        document.createElement(
-          "button"
-        );
-
-      button.type =
-        "button";
-
-      button.textContent =
-        index + 1;
-
-
-      if (
-        index ===
-        currentQuestionIndex
-      ) {
-
-        button.classList.add(
-          "active"
-        );
-
-      }
-
-
-      button.addEventListener(
-        "click",
-        () => {
-
-          currentQuestionIndex =
-            index;
-
-          renderCurrentQuestion();
-
-        }
-      );
-
-
-      container.appendChild(
-        button
-      );
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   EXAM BUTTONS
-========================================================= */
-
-document
-  .getElementById(
-    "previousBtn"
-  )
-  .addEventListener(
-    "click",
-    () => {
-
-      if (
-        currentQuestionIndex >
-        0
-      ) {
-
-        currentQuestionIndex--;
-
-        renderCurrentQuestion();
-
-      }
-
-    }
-  );
-
-
-document
-  .getElementById(
-    "nextBtn"
-  )
-  .addEventListener(
-    "click",
-    () => {
-
-      if (
-        currentQuestionIndex <
-        currentQuestions.length - 1
-      ) {
-
-        currentQuestionIndex++;
-
-        renderCurrentQuestion();
-
-      }
-
-    }
-  );
-
-
-document
-  .getElementById(
-    "submitBtn"
-  )
-  .addEventListener(
-    "click",
-    () => submitExam(false)
-  );
-
-
-function updateExamButtons() {
-
-  const previous =
-    document.getElementById(
-      "previousBtn"
-    );
-
-  const next =
-    document.getElementById(
-      "nextBtn"
-    );
-
-  const submit =
-    document.getElementById(
-      "submitBtn"
-    );
-
-
-  previous.disabled =
-    currentQuestionIndex === 0;
-
-
-  const isLast =
-    currentQuestionIndex ===
-    currentQuestions.length - 1;
-
-
-  next.classList.toggle(
-    "hidden",
-    isLast
-  );
-
-
-  submit.classList.toggle(
-    "hidden",
-    !isLast
-  );
-
-}
-
-
-/* =========================================================
-   SUBMIT EXAM
-========================================================= */
-
-async function submitExam(
-  autoSubmitted
-) {
-
-  if (!currentAttemptId) {
-    return;
   }
 
 
-  const confirmed =
-    autoSubmitted
-      ? true
-      : confirm(
-          "Are you sure you want to submit the exam?"
-        );
+  if (
+    lower.includes(
+      "foreign key"
+    )
+  ) {
 
-
-  if (!confirmed) {
-    return;
-  }
-
-
-  try {
-
-    const {
-      data: answers,
-      error
-    } =
-      await supabaseClient
-        .from("student_answers")
-        .select(`
-          is_correct,
-          marks_obtained,
-          selected_answer
-        `)
-        .eq(
-          "attempt_id",
-          currentAttemptId
-        );
-
-
-    if (error) {
-      throw error;
-    }
-
-
-    const totalQuestions =
-      currentQuestions.length;
-
-
-    const answered =
-      answers.filter(
-        answer =>
-          answer.selected_answer
-      );
-
-
-    const correct =
-      answers.filter(
-        answer =>
-          answer.is_correct
-      ).length;
-
-
-    const unanswered =
-      totalQuestions -
-      answered.length;
-
-
-    const score =
-      answers.reduce(
-        (
-          total,
-          answer
-        ) =>
-          total +
-          Number(
-            answer.marks_obtained || 0
-          ),
-        0
-      );
-
-
-    const totalMarks =
-      Number(
-        currentExam.total_marks || 0
-      );
-
-
-    const percentage =
-      totalMarks > 0
-        ? (
-            score /
-            totalMarks
-          ) *
-          100
-        : 0;
-
-
-    const passed =
-      percentage >=
-      Number(
-        currentExam.passing_percentage || 0
-      );
-
-
-    const status =
-      autoSubmitted
-        ? "auto_submitted"
-        : "submitted";
-
-
-    const {
-      error: updateError
-    } =
-      await supabaseClient
-        .from("exam_attempts")
-        .update({
-
-          submitted_at:
-            new Date().toISOString(),
-
-          status,
-
-          score,
-
-          correct_answers:
-            correct,
-
-          wrong_answers:
-            answered.length -
-            correct,
-
-          unanswered,
-
-          percentage,
-
-          passed
-
-        })
-        .eq(
-          "id",
-          currentAttemptId
-        );
-
-
-    if (updateError) {
-      throw updateError;
-    }
-
-
-    if (examTimerInterval) {
-
-      clearInterval(
-        examTimerInterval
-      );
-
-      examTimerInterval =
-        null;
-
-    }
-
-
-    alert(
-      `Exam submitted successfully.\n\nScore: ${score.toFixed(2)} / ${totalMarks}\nPercentage: ${percentage.toFixed(2)}%\nResult: ${
-        passed
-          ? "PASSED"
-          : "NOT PASSED"
-      }`
-    );
-
-
-    currentAttemptId = null;
-    currentExam = null;
-    currentQuestions = [];
-    currentQuestionIndex = 0;
-
-
-    showPage(
-      "studentDashboard"
-    );
+    return "Selected Subject or Chapter is invalid.";
 
   }
 
-  catch (error) {
 
-    console.error(
-      "Submit exam error:",
-      error
-    );
+  if (
+    lower.includes(
+      "duplicate"
+    )
+  ) {
 
-    alert(
-      error.message ||
-      "Unable to submit exam."
-    );
+    return "This exam already exists.";
 
   }
+
+
+  return message ||
+    "Unable to create exam.";
 
 }
 
@@ -3978,18 +2157,7 @@ document
   )
   .addEventListener(
     "click",
-    async () => {
-
-      if (examTimerInterval) {
-
-        clearInterval(
-          examTimerInterval
-        );
-
-        examTimerInterval =
-          null;
-
-      }
+    async function () {
 
       await supabaseClient.auth.signOut();
 
@@ -4020,10 +2188,10 @@ document
 ========================================================= */
 
 supabaseClient.auth.onAuthStateChange(
-  async (
+  async function (
     event,
     session
-  ) => {
+  ) {
 
     console.log(
       "Auth event:",
@@ -4112,8 +2280,9 @@ function getFriendlyAuthError(
 ) {
 
   const text =
-    String(message || "")
-      .toLowerCase();
+    String(
+      message || ""
+    ).toLowerCase();
 
 
   if (
@@ -4201,15 +2370,6 @@ function escapeHTML(
 }
 
 
-function escapeAttribute(
-  value
-) {
-
-  return escapeHTML(value);
-
-}
-
-
 /* =========================================================
    DATE
 ========================================================= */
@@ -4227,41 +2387,5 @@ function formatDate(
   ).toLocaleString(
     "en-IN"
   );
-
-}
-
-
-/* =========================================================
-   SHUFFLE
-========================================================= */
-
-function shuffleArray(
-  array
-) {
-
-  for (
-    let i = array.length - 1;
-    i > 0;
-    i--
-  ) {
-
-    const j =
-      Math.floor(
-        Math.random() *
-        (i + 1)
-      );
-
-    [
-      array[i],
-      array[j]
-    ] =
-    [
-      array[j],
-      array[i]
-    ];
-
-  }
-
-  return array;
 
 }
