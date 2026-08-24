@@ -1,3 +1,7 @@
+/* =========================================================
+   EXAMHALL - COMPLETE RESPONSIVE UI
+========================================================= */
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -7,13 +11,38 @@
 :root {
   --primary: #111827;
   --primary-light: #1f2937;
+  --primary-soft: #f3f4f6;
+
   --background: #f5f7fb;
   --card: #ffffff;
   --border: #e5e7eb;
+
   --text: #111827;
   --muted: #6b7280;
+
   --danger: #dc2626;
+  --danger-light: #fef2f2;
+
   --success: #16a34a;
+  --success-light: #f0fdf4;
+
+  --warning: #d97706;
+  --warning-light: #fffbeb;
+
+  --info: #2563eb;
+  --info-light: #eff6ff;
+
+  --radius: 14px;
+
+  --shadow:
+    0 8px 30px rgba(0, 0, 0, 0.06);
+
+  --shadow-large:
+    0 20px 60px rgba(0, 0, 0, 0.08);
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
@@ -27,10 +56,14 @@ body {
   color: var(--text);
 
   min-height: 100vh;
+
+  line-height: 1.5;
 }
 
 button,
-input {
+input,
+select,
+textarea {
   font: inherit;
 }
 
@@ -38,12 +71,19 @@ button {
   cursor: pointer;
 }
 
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .hidden {
   display: none !important;
 }
 
 
-/* ================= AUTH ================= */
+/* =========================================================
+   AUTH PAGE
+========================================================= */
 
 .auth-page {
   min-height: 100vh;
@@ -62,7 +102,7 @@ button {
 
   max-width: 430px;
 
-  background: white;
+  background: var(--card);
 
   border: 1px solid var(--border);
 
@@ -70,8 +110,7 @@ button {
 
   padding: 35px;
 
-  box-shadow:
-    0 20px 60px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-large);
 }
 
 .brand {
@@ -84,12 +123,16 @@ button {
   margin-top: 10px;
 
   font-size: 32px;
+
+  letter-spacing: -0.5px;
 }
 
 .brand p {
   color: var(--muted);
 
   margin-top: 6px;
+
+  font-size: 14px;
 }
 
 .brand-icon {
@@ -129,7 +172,9 @@ button {
 }
 
 
-/* AUTH TABS */
+/* =========================================================
+   AUTH TABS
+========================================================= */
 
 .auth-tabs {
   display: grid;
@@ -151,6 +196,12 @@ button {
   border-radius: 9px;
 
   font-weight: bold;
+
+  transition: 0.2s ease;
+}
+
+.auth-tab:hover {
+  background: #f3f4f6;
 }
 
 .auth-tab.active {
@@ -162,7 +213,9 @@ button {
 }
 
 
-/* FORM */
+/* =========================================================
+   FORM
+========================================================= */
 
 label {
   display: block;
@@ -174,7 +227,9 @@ label {
   font-size: 14px;
 }
 
-input {
+input,
+select,
+textarea {
   width: 100%;
 
   padding: 13px;
@@ -186,17 +241,31 @@ input {
   outline: none;
 
   background: white;
+
+  color: var(--text);
+
+  transition: 0.2s ease;
 }
 
-input:focus {
-  border-color: #111827;
+textarea {
+  min-height: 110px;
+
+  resize: vertical;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--primary);
 
   box-shadow:
     0 0 0 3px rgba(17, 24, 39, 0.08);
 }
 
 
-/* BUTTONS */
+/* =========================================================
+   BUTTONS
+========================================================= */
 
 .primary-btn,
 .secondary-btn,
@@ -208,6 +277,11 @@ input:focus {
   padding: 12px 18px;
 
   font-weight: bold;
+
+  transition:
+    background 0.2s ease,
+    transform 0.15s ease,
+    opacity 0.2s ease;
 }
 
 .primary-btn {
@@ -218,6 +292,8 @@ input:focus {
 
 .primary-btn:hover {
   background: var(--primary-light);
+
+  transform: translateY(-1px);
 }
 
 .secondary-btn {
@@ -226,10 +302,18 @@ input:focus {
   color: #111827;
 }
 
+.secondary-btn:hover {
+  background: #d1d5db;
+}
+
 .danger-btn {
   background: var(--danger);
 
   color: white;
+}
+
+.danger-btn:hover {
+  background: #b91c1c;
 }
 
 #loginBtn,
@@ -240,7 +324,9 @@ input:focus {
 }
 
 
-/* MESSAGES */
+/* =========================================================
+   MESSAGES
+========================================================= */
 
 .error-message {
   color: var(--danger);
@@ -258,10 +344,14 @@ input:focus {
   font-size: 14px;
 
   margin-top: 12px;
+
+  min-height: 18px;
 }
 
 
-/* DEMO NOTE */
+/* =========================================================
+   DEMO NOTE
+========================================================= */
 
 .demo-note {
   margin-top: 25px;
@@ -288,7 +378,9 @@ input:focus {
 }
 
 
-/* ================= APP ================= */
+/* =========================================================
+   APP
+========================================================= */
 
 .app {
   min-height: 100vh;
@@ -297,7 +389,9 @@ input:focus {
 }
 
 
-/* ================= SIDEBAR ================= */
+/* =========================================================
+   SIDEBAR
+========================================================= */
 
 .sidebar {
   width: 260px;
@@ -321,6 +415,8 @@ input:focus {
   display: flex;
 
   flex-direction: column;
+
+  z-index: 100;
 }
 
 .sidebar-brand {
@@ -350,7 +446,9 @@ input:focus {
 }
 
 
-/* USER */
+/* =========================================================
+   USER
+========================================================= */
 
 .user-card {
   display: flex;
@@ -373,6 +471,8 @@ input:focus {
 
   height: 42px;
 
+  min-width: 42px;
+
   border-radius: 50%;
 
   background: white;
@@ -388,10 +488,20 @@ input:focus {
   font-weight: bold;
 }
 
+.user-details {
+  min-width: 0;
+}
+
 .user-details strong {
   display: block;
 
   font-size: 14px;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
 }
 
 .user-details span {
@@ -407,7 +517,9 @@ input:focus {
 }
 
 
-/* MENU */
+/* =========================================================
+   MENU
+========================================================= */
 
 .sidebar-menu {
   display: flex;
@@ -437,6 +549,8 @@ input:focus {
   align-items: center;
 
   gap: 10px;
+
+  transition: 0.2s ease;
 }
 
 .menu-btn:hover {
@@ -452,7 +566,9 @@ input:focus {
 }
 
 
-/* LOGOUT */
+/* =========================================================
+   LOGOUT
+========================================================= */
 
 .logout-btn {
   margin-top: auto;
@@ -468,6 +584,8 @@ input:focus {
   color: white;
 
   font-weight: bold;
+
+  transition: 0.2s ease;
 }
 
 .logout-btn:hover {
@@ -475,7 +593,9 @@ input:focus {
 }
 
 
-/* ================= MAIN ================= */
+/* =========================================================
+   MAIN
+========================================================= */
 
 .main-content {
   width: calc(100% - 260px);
@@ -492,7 +612,9 @@ input:focus {
 }
 
 
-/* HEADER */
+/* =========================================================
+   PAGE HEADER
+========================================================= */
 
 .page-header {
   margin-bottom: 25px;
@@ -502,6 +624,8 @@ input:focus {
   font-size: 28px;
 
   margin: 5px 0;
+
+  letter-spacing: -0.4px;
 }
 
 .page-header p {
@@ -519,7 +643,9 @@ input:focus {
 }
 
 
-/* ================= STATS ================= */
+/* =========================================================
+   STATS
+========================================================= */
 
 .stats-grid {
   display: grid;
@@ -540,6 +666,16 @@ input:focus {
   border-radius: 14px;
 
   padding: 20px;
+
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.03);
+
+  transition: 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+
+  box-shadow: var(--shadow);
 }
 
 .stat-card span {
@@ -557,7 +693,9 @@ input:focus {
 }
 
 
-/* ================= CARD ================= */
+/* =========================================================
+   CARD
+========================================================= */
 
 .content-card {
   background: white;
@@ -569,6 +707,9 @@ input:focus {
   padding: 25px;
 
   margin-bottom: 20px;
+
+  box-shadow:
+    0 3px 15px rgba(0, 0, 0, 0.025);
 }
 
 .card-header {
@@ -586,7 +727,9 @@ input:focus {
 }
 
 
-/* ================= EXAM ================= */
+/* =========================================================
+   EXAM LIST
+========================================================= */
 
 .exam-item {
   display: flex;
@@ -608,6 +751,8 @@ input:focus {
 
 .exam-item h4 {
   margin-bottom: 5px;
+
+  font-size: 16px;
 }
 
 .exam-item p {
@@ -616,8 +761,22 @@ input:focus {
   font-size: 14px;
 }
 
+.exam-item .primary-btn {
+  flex-shrink: 0;
+}
 
-/* ================= RESULTS ================= */
+
+/* =========================================================
+   RESULTS
+========================================================= */
+
+.results-list {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 12px;
+}
 
 .result-item {
   background: white;
@@ -628,13 +787,19 @@ input:focus {
 
   padding: 18px;
 
-  margin-bottom: 12px;
-
   display: flex;
 
   justify-content: space-between;
 
   align-items: center;
+
+  gap: 20px;
+
+  transition: 0.2s ease;
+}
+
+.result-item:hover {
+  box-shadow: var(--shadow);
 }
 
 .result-item p {
@@ -649,10 +814,18 @@ input:focus {
   font-size: 19px;
 
   font-weight: bold;
+
+  text-align: right;
 }
 
 
-/* ================= EXAM PAGE ================= */
+/* =========================================================
+   EXAM PAGE
+========================================================= */
+
+#examPage .page-header {
+  position: relative;
+}
 
 #questionText {
   font-size: 20px;
@@ -662,6 +835,14 @@ input:focus {
   margin-bottom: 20px;
 }
 
+#options {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 10px;
+}
+
 .option {
   border: 1px solid var(--border);
 
@@ -669,13 +850,20 @@ input:focus {
 
   border-radius: 10px;
 
-  margin: 10px 0;
+  margin: 0;
 
   cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.15s ease;
 }
 
 .option:hover {
   background: #f9fafb;
+
+  transform: translateX(2px);
 }
 
 .option.selected {
@@ -716,16 +904,28 @@ input:focus {
   background: white;
 
   border-radius: 8px;
+
+  font-weight: bold;
+
+  transition: 0.2s ease;
+}
+
+.question-navigation button:hover {
+  background: #f3f4f6;
 }
 
 .question-navigation button.active {
   background: #111827;
 
   color: white;
+
+  border-color: #111827;
 }
 
 
-/* ================= TABLE ================= */
+/* =========================================================
+   TABLE
+========================================================= */
 
 .table-wrapper {
   overflow-x: auto;
@@ -735,6 +935,8 @@ table {
   width: 100%;
 
   border-collapse: collapse;
+
+  min-width: 650px;
 }
 
 th,
@@ -750,10 +952,22 @@ td {
 
 th {
   background: #f8fafc;
+
+  font-size: 13px;
+}
+
+td {
+  font-size: 14px;
+}
+
+tbody tr:hover {
+  background: #fafafa;
 }
 
 
-/* ================= EMPTY ================= */
+/* =========================================================
+   EMPTY
+========================================================= */
 
 .empty-state {
   padding: 50px 20px;
@@ -765,6 +979,10 @@ th {
   font-size: 40px;
 
   margin-bottom: 15px;
+}
+
+.empty-state h3 {
+  margin-bottom: 5px;
 }
 
 .empty-state p {
@@ -786,9 +1004,296 @@ th {
 }
 
 
-/* ================= MOBILE ================= */
+/* =========================================================
+   STATUS BADGES
+========================================================= */
 
-@media (max-width: 900px) {
+.status-badge {
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding: 5px 10px;
+
+  border-radius: 999px;
+
+  font-size: 12px;
+
+  font-weight: bold;
+}
+
+.status-badge.success {
+  background: var(--success-light);
+
+  color: var(--success);
+}
+
+.status-badge.warning {
+  background: var(--warning-light);
+
+  color: var(--warning);
+}
+
+.status-badge.danger {
+  background: var(--danger-light);
+
+  color: var(--danger);
+}
+
+.status-badge.info {
+  background: var(--info-light);
+
+  color: var(--info);
+}
+
+
+/* =========================================================
+   EXAM BUILDER SUPPORT
+========================================================= */
+
+.form-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, 1fr);
+
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+
+  flex-direction: column;
+}
+
+.form-group.full {
+  grid-column: 1 / -1;
+}
+
+.form-actions {
+  display: flex;
+
+  justify-content: flex-end;
+
+  gap: 10px;
+
+  margin-top: 20px;
+}
+
+.question-card {
+  border: 1px solid var(--border);
+
+  border-radius: 12px;
+
+  padding: 20px;
+
+  margin-bottom: 15px;
+
+  background: white;
+}
+
+.question-card-header {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 10px;
+
+  margin-bottom: 15px;
+}
+
+.question-number {
+  font-weight: bold;
+}
+
+.question-options {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, 1fr);
+
+  gap: 10px;
+}
+
+
+/* =========================================================
+   TIMER SUPPORT
+========================================================= */
+
+.exam-timer {
+  position: sticky;
+
+  top: 15px;
+
+  z-index: 20;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 8px;
+
+  padding: 12px 18px;
+
+  margin-bottom: 15px;
+
+  background: white;
+
+  border: 1px solid var(--border);
+
+  border-radius: 12px;
+
+  box-shadow: var(--shadow);
+
+  font-weight: bold;
+}
+
+.exam-timer.warning {
+  color: var(--warning);
+
+  background: var(--warning-light);
+
+  border-color: #fde68a;
+}
+
+.exam-timer.danger {
+  color: var(--danger);
+
+  background: var(--danger-light);
+
+  border-color: #fecaca;
+}
+
+
+/* =========================================================
+   PERFORMANCE / CHART SUPPORT
+========================================================= */
+
+.chart-card {
+  background: white;
+
+  border: 1px solid var(--border);
+
+  border-radius: 14px;
+
+  padding: 20px;
+
+  margin-bottom: 20px;
+}
+
+.chart-container {
+  position: relative;
+
+  width: 100%;
+
+  min-height: 280px;
+}
+
+
+/* =========================================================
+   SEARCH / FILTER
+========================================================= */
+
+.filter-bar {
+  display: flex;
+
+  gap: 10px;
+
+  margin-bottom: 20px;
+
+  flex-wrap: wrap;
+}
+
+.filter-bar input,
+.filter-bar select {
+  flex: 1;
+
+  min-width: 180px;
+}
+
+
+/* =========================================================
+   LEADERBOARD
+========================================================= */
+
+.leaderboard-item {
+  display: grid;
+
+  grid-template-columns:
+    60px 1fr auto;
+
+  align-items: center;
+
+  gap: 15px;
+
+  padding: 15px;
+
+  border-bottom: 1px solid var(--border);
+}
+
+.leaderboard-rank {
+  font-weight: bold;
+
+  font-size: 18px;
+
+  text-align: center;
+}
+
+.leaderboard-name {
+  font-weight: bold;
+}
+
+.leaderboard-score {
+  font-weight: bold;
+}
+
+
+/* =========================================================
+   CERTIFICATE SUPPORT
+========================================================= */
+
+.certificate-preview {
+  background: white;
+
+  border: 2px solid var(--border);
+
+  border-radius: 14px;
+
+  padding: 50px 30px;
+
+  text-align: center;
+
+  max-width: 850px;
+
+  margin: auto;
+}
+
+.certificate-preview h2 {
+  font-size: 30px;
+
+  margin-bottom: 15px;
+}
+
+.certificate-student {
+  font-size: 25px;
+
+  font-weight: bold;
+
+  margin: 15px 0;
+}
+
+
+/* =========================================================
+   MOBILE / TABLET
+========================================================= */
+
+@media (max-width: 1000px) {
 
   .sidebar {
     width: 220px;
@@ -810,7 +1315,11 @@ th {
 }
 
 
-@media (max-width: 650px) {
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 700px) {
 
   .app {
     display: block;
@@ -822,6 +1331,35 @@ th {
     width: 100%;
 
     min-height: auto;
+
+    padding: 15px;
+  }
+
+  .sidebar-brand {
+    margin-bottom: 15px;
+  }
+
+  .user-card {
+    margin-bottom: 15px;
+  }
+
+  .sidebar-menu {
+    display: grid;
+
+    grid-template-columns:
+      repeat(2, 1fr);
+
+    gap: 6px;
+  }
+
+  .menu-btn {
+    font-size: 13px;
+
+    padding: 10px;
+  }
+
+  .logout-btn {
+    margin-top: 15px;
   }
 
   .main-content {
@@ -835,6 +1373,20 @@ th {
   .stats-grid {
     grid-template-columns:
       repeat(2, 1fr);
+
+    gap: 10px;
+  }
+
+  .stat-card {
+    padding: 16px;
+  }
+
+  .stat-card strong {
+    font-size: 24px;
+  }
+
+  .content-card {
+    padding: 18px;
   }
 
   .exam-item {
@@ -843,7 +1395,7 @@ th {
     align-items: flex-start;
   }
 
-  .exam-item button {
+  .exam-item .primary-btn {
     width: 100%;
   }
 
@@ -855,29 +1407,144 @@ th {
     gap: 15px;
   }
 
+  .score {
+    text-align: left;
+  }
+
   .exam-actions {
     flex-wrap: wrap;
   }
 
   .exam-actions button {
     flex: 1;
+
+    min-width: 120px;
   }
 
-  .auth-card {
-    padding: 25px 20px;
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-group.full {
+    grid-column: auto;
+  }
+
+  .question-options {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-bar {
+    flex-direction: column;
+  }
+
+  .filter-bar input,
+  .filter-bar select {
+    width: 100%;
+  }
+
+  .leaderboard-item {
+    grid-template-columns:
+      45px 1fr auto;
+
+    gap: 10px;
   }
 
 }
 
 
-@media (max-width: 420px) {
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width: 480px) {
+
+  .auth-page {
+    padding: 12px;
+  }
+
+  .auth-card {
+    padding: 25px 18px;
+
+    border-radius: 16px;
+  }
+
+  .brand h1 {
+    font-size: 27px;
+  }
 
   .stats-grid {
     grid-template-columns: 1fr;
   }
 
   .page-header h2 {
+    font-size: 23px;
+  }
+
+  .page-header p {
+    font-size: 14px;
+  }
+
+  .sidebar-menu {
+    grid-template-columns: 1fr;
+  }
+
+  .content-card {
+    padding: 15px;
+  }
+
+  #questionText {
+    font-size: 18px;
+  }
+
+  .option {
+    padding: 13px;
+  }
+
+  .question-navigation button {
+    width: 36px;
+
+    height: 36px;
+  }
+
+  .certificate-preview {
+    padding: 30px 15px;
+  }
+
+  .certificate-preview h2 {
     font-size: 24px;
+  }
+
+  .certificate-student {
+    font-size: 20px;
+  }
+
+}
+
+
+/* =========================================================
+   VERY SMALL DEVICES
+========================================================= */
+
+@media (max-width: 350px) {
+
+  .main-content {
+    padding: 12px;
+  }
+
+  .auth-card {
+    padding: 20px 15px;
+  }
+
+  .auth-tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .exam-actions {
+    flex-direction: column;
+  }
+
+  .exam-actions button {
+    width: 100%;
   }
 
 }
