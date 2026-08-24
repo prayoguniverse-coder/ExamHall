@@ -1,3416 +1,1267 @@
-/* =========================================================
-   EXAMHALL
-   COMPLETE FRONTEND
-   SUPABASE AUTH + DASHBOARDS + EXAM BUILDER
-========================================================= */
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+  <meta charset="UTF-8">
 
-/* =========================================================
-   SUPABASE CONFIG
-========================================================= */
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
-const SUPABASE_URL =
-  "https://imiuiizgusnydgongbqk.supabase.co";
+  <title>ExamHall</title>
 
-const SUPABASE_PUBLISHABLE_KEY =
-  "sb_publishable_wIN-aHetkbk4c8hpZ9e_pQ_mEJmVx_v";
+  <link rel="stylesheet" href="style.css">
 
-const supabaseClient =
-  window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_PUBLISHABLE_KEY
-  );
+</head>
 
+<body>
 
-/* =========================================================
-   GLOBAL STATE
-========================================================= */
+<!-- =====================================================
+     LOGIN / SIGNUP
+===================================================== -->
 
-let currentUser = null;
-let currentProfile = null;
+<div id="loginPage" class="auth-page">
 
-let currentExam = null;
+  <div class="auth-card">
 
-let questionBuilderItems = [];
+    <div class="brand">
 
+      <div class="brand-icon">
+        E
+      </div>
 
-/* =========================================================
-   ELEMENTS
-========================================================= */
+      <h1>ExamHall</h1>
 
-const loginPage =
-  document.getElementById("loginPage");
+      <p>Online Examination Portal</p>
 
-const app =
-  document.getElementById("app");
+    </div>
 
-const loginForm =
-  document.getElementById("loginForm");
 
-const signupForm =
-  document.getElementById("signupForm");
+    <div class="auth-tabs">
 
-const loginTab =
-  document.getElementById("loginTab");
+      <button
+        id="loginTab"
+        class="auth-tab active"
+        type="button"
+      >
+        Login
+      </button>
 
-const signupTab =
-  document.getElementById("signupTab");
+      <button
+        id="signupTab"
+        class="auth-tab"
+        type="button"
+      >
+        Student Signup
+      </button>
 
-const loginError =
-  document.getElementById("loginError");
+    </div>
 
-const signupError =
-  document.getElementById("signupError");
 
-const signupSuccess =
-  document.getElementById("signupSuccess");
+    <!-- LOGIN -->
 
+    <form id="loginForm">
 
-/* =========================================================
-   AUTH TABS
-========================================================= */
+      <label>Email</label>
 
-loginTab.addEventListener(
-  "click",
-  function () {
+      <input
+        type="email"
+        id="loginEmail"
+        placeholder="student@example.com"
+        autocomplete="email"
+        required
+      >
 
-    loginTab.classList.add("active");
+      <label>Password</label>
 
-    signupTab.classList.remove("active");
+      <input
+        type="password"
+        id="loginPassword"
+        placeholder="Enter password"
+        autocomplete="current-password"
+        required
+      >
 
-    loginForm.classList.remove("hidden");
+      <p
+        id="loginError"
+        class="error-message"
+      ></p>
 
-    signupForm.classList.add("hidden");
+      <button
+        type="submit"
+        id="loginBtn"
+        class="primary-btn full-btn"
+      >
+        Login
+      </button>
 
-    clearMessages();
+    </form>
 
-  }
-);
 
+    <!-- SIGNUP -->
 
-signupTab.addEventListener(
-  "click",
-  function () {
+    <form
+      id="signupForm"
+      class="hidden"
+    >
 
-    signupTab.classList.add("active");
+      <label>Full Name</label>
 
-    loginTab.classList.remove("active");
+      <input
+        type="text"
+        id="signupName"
+        placeholder="Enter your full name"
+        required
+      >
 
-    signupForm.classList.remove("hidden");
+      <label>Email</label>
 
-    loginForm.classList.add("hidden");
+      <input
+        type="email"
+        id="signupEmail"
+        placeholder="student@example.com"
+        required
+      >
 
-    clearMessages();
+      <label>Password</label>
 
-  }
-);
+      <input
+        type="password"
+        id="signupPassword"
+        placeholder="Minimum 6 characters"
+        minlength="6"
+        required
+      >
 
+      <label>Confirm Password</label>
 
-/* =========================================================
-   CLEAR AUTH MESSAGES
-========================================================= */
+      <input
+        type="password"
+        id="signupConfirmPassword"
+        placeholder="Confirm password"
+        minlength="6"
+        required
+      >
 
-function clearMessages() {
+      <p
+        id="signupError"
+        class="error-message"
+      ></p>
 
-  loginError.textContent = "";
+      <p
+        id="signupSuccess"
+        class="success-message"
+      ></p>
 
-  signupError.textContent = "";
+      <button
+        type="submit"
+        id="signupBtn"
+        class="primary-btn full-btn"
+      >
+        Create Student Account
+      </button>
 
-  signupSuccess.textContent = "";
+    </form>
 
-}
 
+    <div class="demo-note">
 
-/* =========================================================
-   LOGIN
-========================================================= */
+      <strong>ExamHall</strong>
 
-loginForm.addEventListener(
-  "submit",
-  async function (event) {
+      <span>
+        Secure online examination system
+      </span>
 
-    event.preventDefault();
+    </div>
 
-    clearMessages();
+  </div>
 
-    const email =
-      document
-        .getElementById("loginEmail")
-        .value
-        .trim()
-        .toLowerCase();
+</div>
 
-    const password =
-      document.getElementById(
-        "loginPassword"
-      ).value;
 
-    if (!email || !password) {
+<!-- =====================================================
+     APPLICATION
+===================================================== -->
 
-      loginError.textContent =
-        "Email and password are required.";
+<div
+  id="app"
+  class="app hidden"
+>
 
-      return;
-    }
 
-    const button =
-      document.getElementById(
-        "loginBtn"
-      );
+  <!-- ===================================================
+       SIDEBAR
+  ==================================================== -->
 
-    button.disabled = true;
+  <aside class="sidebar">
 
-    button.textContent =
-      "Logging in...";
+    <div class="sidebar-brand">
 
-    try {
+      <div class="brand-icon small">
+        E
+      </div>
 
-      const {
-        data,
-        error
-      } =
-        await supabaseClient.auth.signInWithPassword({
-          email,
-          password
-        });
+      <div>
 
-      if (error) {
-        throw error;
-      }
+        <strong>
+          ExamHall
+        </strong>
 
-      currentUser =
-        data.user;
+        <small>
+          Online Examination
+        </small>
 
-      await loadUserProfile();
+      </div>
 
-    }
-    catch (error) {
+    </div>
 
-      console.error(error);
 
-      loginError.textContent =
-        getFriendlyAuthError(
-          error.message
-        );
+    <!-- USER -->
 
-    }
-    finally {
+    <div class="user-card">
 
-      button.disabled = false;
+      <div
+        id="userAvatar"
+        class="avatar"
+      >
+        U
+      </div>
 
-      button.textContent =
-        "Login";
+      <div class="user-details">
 
-    }
+        <strong id="userName">
+          User
+        </strong>
 
-  }
-);
-
-
-/* =========================================================
-   STUDENT SIGNUP
-========================================================= */
-
-signupForm.addEventListener(
-  "submit",
-  async function (event) {
-
-    event.preventDefault();
-
-    clearMessages();
-
-    const name =
-      document
-        .getElementById("signupName")
-        .value
-        .trim();
-
-    const email =
-      document
-        .getElementById("signupEmail")
-        .value
-        .trim()
-        .toLowerCase();
-
-    const password =
-      document.getElementById(
-        "signupPassword"
-      ).value;
-
-    const confirmPassword =
-      document.getElementById(
-        "signupConfirmPassword"
-      ).value;
-
-    if (!name) {
-
-      signupError.textContent =
-        "Please enter your full name.";
-
-      return;
-    }
-
-    if (password.length < 6) {
-
-      signupError.textContent =
-        "Password must contain at least 6 characters.";
-
-      return;
-    }
-
-    if (password !== confirmPassword) {
-
-      signupError.textContent =
-        "Passwords do not match.";
-
-      return;
-    }
-
-    const button =
-      document.getElementById(
-        "signupBtn"
-      );
-
-    button.disabled = true;
-
-    button.textContent =
-      "Creating account...";
-
-    try {
-
-      const {
-        data,
-        error
-      } =
-        await supabaseClient.auth.signUp({
-
-          email,
-
-          password,
-
-          options: {
-
-            data: {
-              full_name: name
-            }
-
-          }
-
-        });
-
-      if (error) {
-        throw error;
-      }
-
-      if (data.session) {
-
-        currentUser =
-          data.user;
-
-        await loadUserProfile();
-
-        return;
-      }
-
-      signupSuccess.textContent =
-        "Account created successfully. You can now login.";
-
-      signupForm.reset();
-
-    }
-    catch (error) {
-
-      console.error(error);
-
-      signupError.textContent =
-        getFriendlyAuthError(
-          error.message
-        );
-
-    }
-    finally {
-
-      button.disabled = false;
-
-      button.textContent =
-        "Create Student Account";
-
-    }
-
-  }
-);
-
-
-/* =========================================================
-   LOAD PROFILE
-========================================================= */
-
-async function loadUserProfile() {
-
-  if (!currentUser) {
-    return;
-  }
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("profiles")
-      .select("*")
-      .eq("id", currentUser.id)
-      .single();
-
-  if (error) {
-
-    console.error(
-      "Profile error:",
-      error
-    );
-
-    setTimeout(
-      loadUserProfile,
-      1000
-    );
-
-    return;
-  }
-
-  currentProfile =
-    data;
-
-  openDashboard();
-
-}
-
-
-/* =========================================================
-   OPEN DASHBOARD
-========================================================= */
-
-function openDashboard() {
-
-  loginPage.classList.add("hidden");
-
-  app.classList.remove("hidden");
-
-  updateUserUI();
-
-  if (
-    currentProfile.role ===
-    "teacher"
-  ) {
-
-    document
-      .getElementById("teacherMenu")
-      .classList.remove("hidden");
-
-    document
-      .getElementById("studentMenu")
-      .classList.add("hidden");
-
-    showPage(
-      "teacherDashboard"
-    );
-
-  }
-  else {
-
-    document
-      .getElementById("studentMenu")
-      .classList.remove("hidden");
-
-    document
-      .getElementById("teacherMenu")
-      .classList.add("hidden");
-
-    showPage(
-      "studentDashboard"
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   USER UI
-========================================================= */
-
-function updateUserUI() {
-
-  const name =
-    currentProfile.full_name ||
-    currentUser.email;
-
-  document.getElementById(
-    "userName"
-  ).textContent =
-    name;
-
-  document.getElementById(
-    "userRole"
-  ).textContent =
-    currentProfile.role;
-
-  document.getElementById(
-    "userAvatar"
-  ).textContent =
-    name
-      .charAt(0)
-      .toUpperCase();
-
-  document.getElementById(
-    "studentWelcome"
-  ).textContent =
-    name;
-
-}
-
-
-/* =========================================================
-   PAGE NAVIGATION
-========================================================= */
-
-document
-  .querySelectorAll(".menu-btn")
-  .forEach(
-    button => {
-
-      button.addEventListener(
-        "click",
-        function () {
-
-          showPage(
-            button.dataset.page
-          );
-
-        }
-      );
-
-    }
-  );
-
-
-function showPage(pageId) {
-
-  document
-    .querySelectorAll(".page")
-    .forEach(
-      page => {
-
-        page.classList.add(
-          "hidden"
-        );
-
-      }
-    );
-
-  const page =
-    document.getElementById(
-      pageId
-    );
-
-  if (!page) {
-    return;
-  }
-
-  page.classList.remove(
-    "hidden"
-  );
-
-  document
-    .querySelectorAll(".menu-btn")
-    .forEach(
-      button => {
-
-        button.classList.remove(
-          "active"
-        );
-
-        if (
-          button.dataset.page ===
-          pageId
-        ) {
-
-          button.classList.add(
-            "active"
-          );
-
-        }
-
-      }
-    );
-
-
-  if (
-    pageId ===
-    "studentDashboard"
-  ) {
-
-    loadStudentDashboard();
-
-  }
-
-
-  if (
-    pageId ===
-    "studentResults"
-  ) {
-
-    loadStudentResults();
-
-  }
-
-
-  if (
-    pageId ===
-    "studentHistory"
-  ) {
-
-    loadStudentHistory();
-
-  }
-
-
-  if (
-    pageId ===
-    "teacherDashboard"
-  ) {
-
-    loadTeacherDashboard();
-
-  }
-
-
-  if (
-    pageId ===
-    "createExam"
-  ) {
-
-    loadCreateExamPage();
-
-  }
-
-
-  if (
-    pageId ===
-    "teacherScores"
-  ) {
-
-    loadTeacherScores();
-
-  }
-
-}
-
-
-/* =========================================================
-   STUDENT DASHBOARD
-========================================================= */
-
-async function loadStudentDashboard() {
-
-  if (!currentUser) {
-    return;
-  }
-
-  document.getElementById(
-    "examList"
-  ).innerHTML =
-    `<div class="loading">
-      Loading exams...
-    </div>`;
-
-  try {
-
-    const {
-      data: exams,
-      error
-    } =
-      await supabaseClient
-        .from("exams")
-        .select(`
-          id,
-          title,
-          description,
-          duration_minutes,
-          total_marks,
-          max_attempts,
-          negative_marking,
-          passing_percentage,
-          subjects(name),
-          chapters(name)
-        `)
-        .eq(
-          "is_published",
-          true
-        )
-        .order(
-          "created_at",
-          {
-            ascending: false
-          }
-        );
-
-    if (error) {
-      throw error;
-    }
-
-    document.getElementById(
-      "availableExams"
-    ).textContent =
-      exams.length;
-
-    showAvailableExams(
-      exams
-    );
-
-    await loadStudentStats();
-
-  }
-  catch (error) {
-
-    console.error(error);
-
-    document.getElementById(
-      "examList"
-    ).innerHTML =
-      `<div class="error-box">
-        Unable to load exams.
-      </div>`;
-
-  }
-
-}
-
-
-/* =========================================================
-   SHOW AVAILABLE EXAMS
-========================================================= */
-
-function showAvailableExams(
-  exams
-) {
-
-  const list =
-    document.getElementById(
-      "examList"
-    );
-
-  list.innerHTML = "";
-
-  if (!exams.length) {
-
-    list.innerHTML =
-      `<div class="empty-state">
-
-        <div class="empty-icon">
-          📚
-        </div>
-
-        <h3>
-          No exams available
-        </h3>
-
-        <p>
-          Your teacher has not published any exams yet.
-        </p>
-
-      </div>`;
-
-    return;
-  }
-
-
-  exams.forEach(
-    exam => {
-
-      const item =
-        document.createElement(
-          "div"
-        );
-
-      item.className =
-        "exam-item";
-
-      const subject =
-        exam.subjects?.name ||
-        "General";
-
-      const chapter =
-        exam.chapters?.name ||
-        "All Chapters";
-
-      item.innerHTML = `
-
-        <div class="exam-item-info">
-
-          <h4>
-            ${escapeHTML(
-              exam.title
-            )}
-          </h4>
-
-          <p>
-            ${escapeHTML(subject)}
-            •
-            ${escapeHTML(chapter)}
-          </p>
-
-          <div class="exam-meta">
-
-            <span>
-              ⏱ ${exam.duration_minutes} min
-            </span>
-
-            <span>
-              🎯 ${exam.total_marks} marks
-            </span>
-
-            <span>
-              🔄 ${exam.max_attempts} attempt(s)
-            </span>
-
-          </div>
-
-        </div>
-
-
-        <button
-          class="primary-btn"
-          type="button"
-        >
-          Start Exam
-        </button>
-
-      `;
-
-
-      item
-        .querySelector("button")
-        .addEventListener(
-          "click",
-          function () {
-
-            startExam(
-              exam.id
-            );
-
-          }
-        );
-
-
-      list.appendChild(
-        item
-      );
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   STUDENT STATS
-========================================================= */
-
-async function loadStudentStats() {
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("exam_attempts")
-      .select(
-        "percentage, status"
-      )
-      .eq(
-        "student_id",
-        currentUser.id
-      )
-      .in(
-        "status",
-        [
-          "submitted",
-          "auto_submitted",
-          "expired"
-        ]
-      );
-
-  if (error) {
-
-    console.error(error);
-
-    return;
-  }
-
-  const attempts =
-    data || [];
-
-  document.getElementById(
-    "attemptCount"
-  ).textContent =
-    attempts.length;
-
-  if (!attempts.length) {
-
-    document.getElementById(
-      "averageScore"
-    ).textContent =
-      "0%";
-
-    document.getElementById(
-      "bestScore"
-    ).textContent =
-      "0%";
-
-    return;
-  }
-
-  const percentages =
-    attempts.map(
-      item =>
-        Number(
-          item.percentage || 0
-        )
-    );
-
-  const average =
-    Math.round(
-      percentages.reduce(
-        (
-          total,
-          value
-        ) =>
-          total + value,
-        0
-      ) /
-      percentages.length
-    );
-
-  const best =
-    Math.max(
-      ...percentages
-    );
-
-  document.getElementById(
-    "averageScore"
-  ).textContent =
-    average + "%";
-
-  document.getElementById(
-    "bestScore"
-  ).textContent =
-    best + "%";
-
-}
-
-
-/* =========================================================
-   STUDENT RESULTS
-========================================================= */
-
-async function loadStudentResults() {
-
-  const container =
-    document.getElementById(
-      "myResults"
-    );
-
-  container.innerHTML =
-    `<div class="loading">
-      Loading results...
-    </div>`;
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("exam_attempts")
-      .select(`
-        id,
-        score,
-        percentage,
-        correct_answers,
-        wrong_answers,
-        unanswered,
-        submitted_at,
-        status,
-        exams(title)
-      `)
-      .eq(
-        "student_id",
-        currentUser.id
-      )
-      .in(
-        "status",
-        [
-          "submitted",
-          "auto_submitted",
-          "expired"
-        ]
-      )
-      .order(
-        "submitted_at",
-        {
-          ascending: false
-        }
-      );
-
-  if (error) {
-
-    console.error(error);
-
-    container.innerHTML =
-      `<div class="error-box">
-        Unable to load results.
-      </div>`;
-
-    return;
-  }
-
-  container.innerHTML = "";
-
-  if (!data.length) {
-
-    container.innerHTML =
-      `<div class="empty-state">
-
-        <div class="empty-icon">
-          📄
-        </div>
-
-        <h3>
-          No results yet
-        </h3>
-
-        <p>
-          Your completed exams will appear here.
-        </p>
-
-      </div>`;
-
-    return;
-  }
-
-
-  data.forEach(
-    result => {
-
-      const item =
-        document.createElement(
-          "div"
-        );
-
-      item.className =
-        "result-item";
-
-      item.innerHTML = `
-
-        <div>
-
-          <strong>
-            ${escapeHTML(
-              result.exams?.title ||
-              "Exam"
-            )}
-          </strong>
-
-          <p>
-            ${formatDate(
-              result.submitted_at
-            )}
-          </p>
-
-        </div>
-
-        <div class="score">
-
-          ${Number(
-            result.score || 0
-          ).toFixed(2)}
-
-          <br>
-
-          ${Number(
-            result.percentage || 0
-          )}%
-
-        </div>
-
-      `;
-
-      container.appendChild(
-        item
-      );
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   HISTORY
-========================================================= */
-
-async function loadStudentHistory() {
-
-  const container =
-    document.getElementById(
-      "historyList"
-    );
-
-  container.innerHTML =
-    `<div class="loading">
-      Loading history...
-    </div>`;
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("exam_attempts")
-      .select(`
-        id,
-        attempt_number,
-        score,
-        percentage,
-        status,
-        submitted_at,
-        exams(title)
-      `)
-      .eq(
-        "student_id",
-        currentUser.id
-      )
-      .order(
-        "created_at",
-        {
-          ascending: false
-        }
-      );
-
-  if (error) {
-
-    console.error(error);
-
-    container.innerHTML =
-      `<div class="error-box">
-        Unable to load history.
-      </div>`;
-
-    return;
-  }
-
-  container.innerHTML = "";
-
-  if (!data.length) {
-
-    container.innerHTML =
-      `<div class="empty-state">
-
-        <div class="empty-icon">
-          🕘
-        </div>
-
-        <h3>
-          No attempts yet
-        </h3>
-
-        <p>
-          Your exam attempts will appear here.
-        </p>
-
-      </div>`;
-
-    return;
-  }
-
-
-  data.forEach(
-    attempt => {
-
-      const item =
-        document.createElement(
-          "div"
-        );
-
-      item.className =
-        "result-item";
-
-      item.innerHTML = `
-
-        <div>
-
-          <strong>
-            ${escapeHTML(
-              attempt.exams?.title ||
-              "Exam"
-            )}
-          </strong>
-
-          <p>
-            Attempt #${attempt.attempt_number}
-            •
-            ${escapeHTML(
-              attempt.status
-            )}
-          </p>
-
-        </div>
-
-        <div class="score">
-
-          ${Number(
-            attempt.percentage || 0
-          )}%
-
-        </div>
-
-      `;
-
-      container.appendChild(
-        item
-      );
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   TEACHER DASHBOARD
-========================================================= */
-
-async function loadTeacherDashboard() {
-
-  if (!currentUser) {
-    return;
-  }
-
-  const {
-    data: exams,
-    error
-  } =
-    await supabaseClient
-      .from("exams")
-      .select(`
-        id,
-        title,
-        is_published,
-        duration_minutes,
-        total_marks,
-        created_at,
-        subjects(name)
-      `)
-      .eq(
-        "created_by",
-        currentUser.id
-      )
-      .order(
-        "created_at",
-        {
-          ascending: false
-        }
-      );
-
-  if (error) {
-
-    console.error(error);
-
-    return;
-  }
-
-
-  document.getElementById(
-    "teacherExamCount"
-  ).textContent =
-    exams.length;
-
-
-  const {
-    data: attempts,
-    error: attemptsError
-  } =
-    await supabaseClient
-      .from("exam_attempts")
-      .select(
-        "student_id, percentage, status"
-      );
-
-
-  if (!attemptsError) {
-
-    const completed =
-      attempts.filter(
-        attempt =>
-          [
-            "submitted",
-            "auto_submitted",
-            "expired"
-          ].includes(
-            attempt.status
-          )
-      );
-
-
-    document.getElementById(
-      "teacherAttemptCount"
-    ).textContent =
-      completed.length;
-
-
-    const students =
-      new Set(
-        completed.map(
-          item =>
-            item.student_id
-        )
-      );
-
-
-    document.getElementById(
-      "teacherStudentCount"
-    ).textContent =
-      students.size;
-
-
-    if (completed.length) {
-
-      const average =
-        Math.round(
-          completed.reduce(
-            (
-              total,
-              item
-            ) =>
-              total +
-              Number(
-                item.percentage || 0
-              ),
-            0
-          ) /
-          completed.length
-        );
-
-
-      document.getElementById(
-        "teacherAverage"
-      ).textContent =
-        average + "%";
-
-    }
-    else {
-
-      document.getElementById(
-        "teacherAverage"
-      ).textContent =
-        "0%";
-
-    }
-
-  }
-
-
-  const list =
-    document.getElementById(
-      "teacherExamList"
-    );
-
-  list.innerHTML = "";
-
-
-  if (!exams.length) {
-
-    list.innerHTML =
-      `<div class="empty-state">
-
-        <div class="empty-icon">
-          📝
-        </div>
-
-        <h3>
-          No exams created
-        </h3>
-
-        <p>
-          Create your first exam from the Create Exam section.
-        </p>
-
-      </div>`;
-
-    return;
-  }
-
-
-  exams.forEach(
-    exam => {
-
-      const item =
-        document.createElement(
-          "div"
-        );
-
-      item.className =
-        "exam-item";
-
-      item.innerHTML = `
-
-        <div class="exam-item-info">
-
-          <h4>
-            ${escapeHTML(
-              exam.title
-            )}
-          </h4>
-
-          <p>
-            ${escapeHTML(
-              exam.subjects?.name ||
-              "General"
-            )}
-            •
-            ${exam.duration_minutes}
-            Minutes
-            •
-            ${exam.total_marks}
-            Marks
-          </p>
-
-        </div>
-
-        <span class="
-          exam-status
-          ${
-            exam.is_published
-              ? "published"
-              : "draft"
-          }
-        ">
-
-          ${
-            exam.is_published
-              ? "Published"
-              : "Draft"
-          }
-
+        <span id="userRole">
+          Student
         </span>
 
-      `;
+      </div>
+
+    </div>
+
+
+    <!-- STUDENT MENU -->
+
+    <nav
+      id="studentMenu"
+      class="sidebar-menu"
+    >
+
+      <button
+        class="menu-btn active"
+        data-page="studentDashboard"
+      >
+        <span>📊</span>
+        Dashboard
+      </button>
+
+      <button
+        class="menu-btn"
+        data-page="studentResults"
+      >
+        <span>📄</span>
+        My Results
+      </button>
+
+      <button
+        class="menu-btn"
+        data-page="studentHistory"
+      >
+        <span>🕘</span>
+        Attempt History
+      </button>
+
+      <button
+        class="menu-btn"
+        data-page="studentLeaderboard"
+      >
+        <span>🏆</span>
+        Leaderboard
+      </button>
+
+      <button
+        class="menu-btn"
+        data-page="studentProfile"
+      >
+        <span>👨‍🎓</span>
+        My Profile
+      </button>
+
+    </nav>
+
+
+    <!-- TEACHER MENU -->
+
+    <nav
+      id="teacherMenu"
+      class="sidebar-menu hidden"
+    >
 
-      list.appendChild(
-        item
-      );
-
-    }
-  );
+      <button
+        class="menu-btn active"
+        data-page="teacherDashboard"
+      >
+        <span>📊</span>
+        Dashboard
+      </button>
 
-}
-
-
-/* =========================================================
-   TEACHER SCORES
-========================================================= */
-
-async function loadTeacherScores() {
-
-  const table =
-    document.getElementById(
-      "scoreTable"
-    );
-
-  table.innerHTML =
-    `<tr>
-      <td colspan="5">
-        Loading...
-      </td>
-    </tr>`;
-
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("exam_attempts")
-      .select(`
-        score,
-        percentage,
-        submitted_at,
-        profiles!exam_attempts_student_id_fkey(full_name),
-        exams(title)
-      `)
-      .in(
-        "status",
-        [
-          "submitted",
-          "auto_submitted",
-          "expired"
-        ]
-      )
-      .order(
-        "submitted_at",
-        {
-          ascending: false
-        }
-      );
+      <button
+        class="menu-btn"
+        data-page="createExam"
+      >
+        <span>➕</span>
+        Create Exam
+      </button>
 
+      <button
+        class="menu-btn"
+        data-page="teacherScores"
+      >
+        <span>📈</span>
+        Student Scores
+      </button>
 
-  if (error) {
+      <button
+        class="menu-btn"
+        data-page="teacherAnalytics"
+      >
+        <span>📊</span>
+        Analytics
+      </button>
 
-    console.error(error);
+    </nav>
 
-    table.innerHTML =
-      `<tr>
-        <td colspan="5">
-          Unable to load scores.
-        </td>
-      </tr>`;
 
-    return;
-  }
+    <button
+      id="logoutBtn"
+      class="logout-btn"
+    >
+      🚪 Logout
+    </button>
 
+  </aside>
 
-  table.innerHTML = "";
 
+  <!-- ===================================================
+       MAIN
+  ==================================================== -->
 
-  if (!data.length) {
+  <main class="main-content">
 
-    table.innerHTML =
-      `<tr>
-        <td colspan="5">
-          No student attempts yet.
-        </td>
-      </tr>`;
 
-    return;
-  }
+    <!-- =================================================
+         STUDENT DASHBOARD
+    ================================================== -->
 
+    <section
+      id="studentDashboard"
+      class="page"
+    >
 
-  data.forEach(
-    result => {
-
-      const row =
-        document.createElement(
-          "tr"
-        );
+      <div class="page-header">
 
-      row.innerHTML = `
+        <p class="eyebrow">
+          STUDENT
+        </p>
 
-        <td>
-          ${escapeHTML(
-            result.profiles?.full_name ||
-            "Student"
-          )}
-        </td>
+        <h2>
+          Welcome,
+          <span id="studentWelcome">
+            Student
+          </span>
+        </h2>
 
-        <td>
-          ${escapeHTML(
-            result.exams?.title ||
-            "Exam"
-          )}
-        </td>
+        <p>
+          Ready to continue your learning journey?
+        </p>
 
-        <td>
-          ${Number(
-            result.score || 0
-          ).toFixed(2)}
-        </td>
+      </div>
 
-        <td>
-          ${Number(
-            result.percentage || 0
-          )}%
-        </td>
 
-        <td>
-          ${formatDate(
-            result.submitted_at
-          )}
-        </td>
+      <div class="stats-grid">
 
-      `;
+        <div class="stat-card">
 
-      table.appendChild(
-        row
-      );
+          <span>
+            Available Exams
+          </span>
 
-    }
-  );
+          <strong id="availableExams">
+            0
+          </strong>
 
-}
+        </div>
 
 
-/* =========================================================
-   CREATE EXAM PAGE
-========================================================= */
+        <div class="stat-card">
 
-async function loadCreateExamPage() {
+          <span>
+            Total Attempts
+          </span>
 
-  await loadSubjects();
+          <strong id="attemptCount">
+            0
+          </strong>
 
-  setupQuestionBuilderIfNeeded();
+        </div>
 
-}
 
+        <div class="stat-card">
 
-/* =========================================================
-   LOAD SUBJECTS
-========================================================= */
+          <span>
+            Average Score
+          </span>
 
-async function loadSubjects() {
+          <strong id="averageScore">
+            0%
+          </strong>
 
-  const select =
-    document.getElementById(
-      "examSubject"
-    );
+        </div>
 
-  if (!select) {
-    return;
-  }
 
-  select.innerHTML =
-    `<option value="">
-      Select Subject
-    </option>`;
+        <div class="stat-card">
 
+          <span>
+            Best Score
+          </span>
 
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("subjects")
-      .select(
-        "id, name"
-      )
-      .order(
-        "name",
-        {
-          ascending: true
-        }
-      );
+          <strong id="bestScore">
+            0%
+          </strong>
 
+        </div>
 
-  if (error) {
+      </div>
 
-    console.error(
-      "Subject error:",
-      error
-    );
 
-    return;
-  }
+      <div class="content-card">
 
-
-  (data || []).forEach(
-    subject => {
-
-      const option =
-        document.createElement(
-          "option"
-        );
-
-      option.value =
-        subject.id;
-
-      option.textContent =
-        subject.name;
-
-      select.appendChild(
-        option
-      );
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   LOAD CHAPTERS
-========================================================= */
-
-document
-  .getElementById("examSubject")
-  .addEventListener(
-    "change",
-    async function () {
-
-      await loadChapters(
-        this.value
-      );
-
-    }
-  );
-
-
-async function loadChapters(
-  subjectId
-) {
-
-  const select =
-    document.getElementById(
-      "examChapter"
-    );
-
-  select.innerHTML =
-    `<option value="">
-      Select Chapter
-    </option>`;
-
-
-  if (!subjectId) {
-    return;
-  }
-
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("chapters")
-      .select(
-        "id, name"
-      )
-      .eq(
-        "subject_id",
-        subjectId
-      )
-      .order(
-        "name",
-        {
-          ascending: true
-        }
-      );
-
-
-  if (error) {
-
-    console.error(
-      "Chapter error:",
-      error
-    );
-
-    return;
-  }
-
-
-  (data || []).forEach(
-    chapter => {
-
-      const option =
-        document.createElement(
-          "option"
-        );
-
-      option.value =
-        chapter.id;
-
-      option.textContent =
-        chapter.name;
-
-      select.appendChild(
-        option
-      );
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   QUESTION BUILDER
-========================================================= */
-
-function setupQuestionBuilderIfNeeded() {
-
-  const button =
-    document.getElementById(
-      "addQuestionBtn"
-    );
-
-  if (
-    button.dataset.ready ===
-    "true"
-  ) {
-    return;
-  }
-
-  button.dataset.ready =
-    "true";
-
-
-  button.addEventListener(
-    "click",
-    function () {
-
-      addQuestionBuilder();
-
-    }
-  );
-
-}
-
-
-function addQuestionBuilder() {
-
-  const id =
-    Date.now() +
-    Math.random()
-      .toString(36)
-      .substring(2, 8);
-
-
-  const question =
-    {
-      id,
-      question_text: "",
-      image_url: "",
-      option_a: "",
-      option_b: "",
-      option_c: "",
-      option_d: "",
-      correct_answer: "A",
-      explanation: "",
-      marks: 1,
-      negative_marks: 0
-    };
-
-
-  questionBuilderItems.push(
-    question
-  );
-
-
-  renderQuestionBuilder();
-
-}
-
-
-function renderQuestionBuilder() {
-
-  const container =
-    document.getElementById(
-      "questionBuilder"
-    );
-
-  const empty =
-    document.getElementById(
-      "noQuestionsMessage"
-    );
-
-
-  container.innerHTML = "";
-
-
-  if (
-    questionBuilderItems.length ===
-    0
-  ) {
-
-    empty.classList.remove(
-      "hidden"
-    );
-
-    return;
-  }
-
-
-  empty.classList.add(
-    "hidden"
-  );
-
-
-  questionBuilderItems.forEach(
-    (
-      question,
-      index
-    ) => {
-
-      const card =
-        document.createElement(
-          "div"
-        );
-
-      card.className =
-        "question-builder-card";
-
-
-      card.dataset.id =
-        question.id;
-
-
-      card.innerHTML = `
-
-        <div class="question-card-header">
+        <div class="card-header">
 
           <div>
 
-            <span class="question-number-badge">
-              Question ${index + 1}
-            </span>
+            <h3>
+              Available Exams
+            </h3>
+
+            <p>
+              Exams published by your teachers
+            </p>
 
           </div>
 
-          <button
-            type="button"
-            class="remove-question-btn"
-            data-remove-question="${question.id}"
+        </div>
+
+        <div id="examList">
+
+          <div class="loading">
+            Loading exams...
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================
+         STUDENT RESULTS
+    ================================================== -->
+
+    <section
+      id="studentResults"
+      class="page hidden"
+    >
+
+      <div class="page-header">
+
+        <p class="eyebrow">
+          STUDENT
+        </p>
+
+        <h2>
+          My Results
+        </h2>
+
+        <p>
+          View your examination performance.
+        </p>
+
+      </div>
+
+      <div
+        id="myResults"
+        class="results-list"
+      ></div>
+
+    </section>
+
+
+    <!-- =================================================
+         STUDENT HISTORY
+    ================================================== -->
+
+    <section
+      id="studentHistory"
+      class="page hidden"
+    >
+
+      <div class="page-header">
+
+        <p class="eyebrow">
+          STUDENT
+        </p>
+
+        <h2>
+          Attempt History
+        </h2>
+
+        <p>
+          Your previous examination attempts.
+        </p>
+
+      </div>
+
+      <div
+        id="historyList"
+        class="results-list"
+      ></div>
+
+    </section>
+
+
+    <!-- =================================================
+         LEADERBOARD
+    ================================================== -->
+
+    <section
+      id="studentLeaderboard"
+      class="page hidden"
+    >
+
+      <div class="page-header">
+
+        <p class="eyebrow">
+          PERFORMANCE
+        </p>
+
+        <h2>
+          🏆 Leaderboard
+        </h2>
+
+        <p>
+          Top student performance.
+        </p>
+
+      </div>
+
+      <div class="content-card">
+
+        <div class="table-wrapper">
+
+          <table>
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  Rank
+                </th>
+
+                <th>
+                  Student
+                </th>
+
+                <th>
+                  Best Score
+                </th>
+
+                <th>
+                  Percentage
+                </th>
+
+              </tr>
+
+            </thead>
+
+            <tbody id="leaderboardTable">
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================
+         STUDENT PROFILE
+    ================================================== -->
+
+    <section
+      id="studentProfile"
+      class="page hidden"
+    >
+
+      <div class="page-header">
+
+        <p class="eyebrow">
+          STUDENT
+        </p>
+
+        <h2>
+          👨‍🎓 My Profile
+        </h2>
+
+      </div>
+
+      <div class="content-card profile-card">
+
+        <div class="profile-avatar">
+          <span id="profileAvatar">
+            U
+          </span>
+        </div>
+
+        <div>
+
+          <h3 id="profileName">
+            Student
+          </h3>
+
+          <p id="profileEmail">
+            -
+          </p>
+
+          <p>
+            Role:
+            <strong id="profileRole">
+              Student
+            </strong>
+          </p>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================
+         TEACHER DASHBOARD
+    ================================================== -->
+
+    <section
+      id="teacherDashboard"
+      class="page hidden"
+    >
+
+      <div class="page-header">
+
+        <p class="eyebrow">
+          TEACHER
+        </p>
+
+        <h2>
+          Teacher Dashboard
+        </h2>
+
+        <p>
+          Manage exams and monitor student performance.
+        </p>
+
+      </div>
+
+
+      <div class="stats-grid">
+
+        <div class="stat-card">
+
+          <span>
+            Total Exams
+          </span>
+
+          <strong id="teacherExamCount">
+            0
+          </strong>
+
+        </div>
+
+
+        <div class="stat-card">
+
+          <span>
+            Total Attempts
+          </span>
+
+          <strong id="teacherAttemptCount">
+            0
+          </strong>
+
+        </div>
+
+
+        <div class="stat-card">
+
+          <span>
+            Students
+          </span>
+
+          <strong id="teacherStudentCount">
+            0
+          </strong>
+
+        </div>
+
+
+        <div class="stat-card">
+
+          <span>
+            Average Score
+          </span>
+
+          <strong id="teacherAverage">
+            0%
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div class="content-card">
+
+        <div class="card-header">
+
+          <h3>
+            Created Exams
+          </h3>
+
+          <p>
+            Your examination list
+          </p>
+
+        </div>
+
+        <div id="teacherExamList"></div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================
+         CREATE EXAM
+    ================================================== -->
+
+    <section
+      id="createExam"
+      class="page hidden"
+    >
+
+      <div class="page-header">
+
+        <p class="eyebrow">
+          TEACHER
+        </p>
+
+        <h2>
+          Create New Exam
+        </h2>
+
+        <p>
+          Exam builder.
+        </p>
+
+      </div>
+
+
+      <div class="content-card">
+
+        <div class="empty-state">
+
+          <div class="empty-icon">
+            📝
+          </div>
+
+          <h3>
+            Exam Builder
+          </h3>
+
+          <p>
+            Exam builder will be connected with
+            Subjects, Chapters, Questions, Timer,
+            Negative Marking and Retake Rules.
+          </p>
+
+          <p class="small-note">
+            Database structure is ready.
+            Builder module will be added separately.
+          </p>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================
+         TEACHER SCORES
+    ================================================== -->
+
+    <section
+      id="teacherScores"
+      class="page hidden"
+    >
+
+      <div class="page-header">
+
+        <p class="eyebrow">
+          TEACHER
+        </p>
+
+        <h2>
+          Student Scores
+        </h2>
+
+        <p>
+          Search, filter and export student results.
+        </p>
+
+      </div>
+
+
+      <div class="content-card">
+
+        <div class="filter-row">
+
+          <input
+            type="text"
+            id="studentSearch"
+            placeholder="🔍 Search student or exam..."
           >
-            🗑 Remove
+
+          <button
+            id="exportResultsBtn"
+            class="secondary-btn"
+            type="button"
+          >
+            📥 Export CSV
           </button>
 
         </div>
 
+      </div>
 
-        <div class="form-group full-width">
 
-          <label>
-            Question *
-          </label>
+      <div class="content-card table-wrapper">
 
-          <textarea
-            class="question-input"
-            data-field="question_text"
-            rows="3"
-            placeholder="Enter question"
-          >${escapeHTML(
-            question.question_text
-          )}</textarea>
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>
+                Student
+              </th>
+
+              <th>
+                Exam
+              </th>
+
+              <th>
+                Score
+              </th>
+
+              <th>
+                Percentage
+              </th>
+
+              <th>
+                Result
+              </th>
+
+              <th>
+                Date
+              </th>
+
+            </tr>
+
+          </thead>
+
+          <tbody id="scoreTable">
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================
+         TEACHER ANALYTICS
+    ================================================== -->
+
+    <section
+      id="teacherAnalytics"
+      class="page hidden"
+    >
+
+      <div class="page-header">
+
+        <p class="eyebrow">
+          TEACHER
+        </p>
+
+        <h2>
+          📈 Teacher Analytics
+        </h2>
+
+        <p>
+          Overall student performance.
+        </p>
+
+      </div>
+
+
+      <div class="stats-grid">
+
+        <div class="stat-card">
+
+          <span>
+            Passed
+          </span>
+
+          <strong id="analyticsPassed">
+            0
+          </strong>
+
+        </div>
+
+        <div class="stat-card">
+
+          <span>
+            Failed
+          </span>
+
+          <strong id="analyticsFailed">
+            0
+          </strong>
+
+        </div>
+
+        <div class="stat-card">
+
+          <span>
+            Highest %
+          </span>
+
+          <strong id="analyticsHighest">
+            0%
+          </strong>
+
+        </div>
+
+        <div class="stat-card">
+
+          <span>
+            Lowest %
+          </span>
+
+          <strong id="analyticsLowest">
+            0%
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div class="content-card">
+
+        <h3>
+          Performance Distribution
+        </h3>
+
+        <div
+          id="analyticsBars"
+          class="analytics-bars"
+        ></div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================
+         EXAM PAGE
+    ================================================== -->
+
+    <section
+      id="examPage"
+      class="page hidden"
+    >
+
+      <div class="exam-topbar">
+
+        <div>
+
+          <p class="eyebrow">
+            EXAM
+          </p>
+
+          <h2 id="examTitle">
+            Exam
+          </h2>
+
+          <p id="questionNumber">
+            Question 1
+          </p>
 
         </div>
 
 
-        <div class="form-group full-width">
+        <div class="timer-box">
 
-          <label>
-            Question Image URL
-          </label>
+          <span>
+            ⏱️ Time Left
+          </span>
 
-          <input
-            type="url"
-            class="question-input"
-            data-field="image_url"
-            placeholder="https://example.com/question.jpg"
-            value="${escapeAttribute(
-              question.image_url
-            )}"
-          >
+          <strong id="examTimer">
+            00:00
+          </strong>
 
-          <small class="field-help">
-            Optional. Image hosting/storage will be connected later.
-          </small>
+        </div>
+
+      </div>
+
+
+      <div class="exam-progress">
+
+        <div
+          id="examProgressBar"
+          class="exam-progress-bar"
+        ></div>
+
+      </div>
+
+
+      <div class="content-card">
+
+        <div class="question-meta">
+
+          <span id="questionMarks">
+            Marks: 0
+          </span>
+
+          <span id="questionNegative">
+            Negative: 0
+          </span>
 
         </div>
 
 
-        <div class="options-grid">
-
-          ${createOptionInput(
-            "A",
-            question.option_a
-          )}
-
-          ${createOptionInput(
-            "B",
-            question.option_b
-          )}
-
-          ${createOptionInput(
-            "C",
-            question.option_c
-          )}
-
-          ${createOptionInput(
-            "D",
-            question.option_d
-          )}
-
-        </div>
+        <h3 id="questionText">
+          Question
+        </h3>
 
 
-        <div class="question-settings">
-
-          <div class="form-group">
-
-            <label>
-              Correct Answer *
-            </label>
-
-            <select
-              class="question-input"
-              data-field="correct_answer"
-            >
-
-              <option
-                value="A"
-                ${
-                  question.correct_answer === "A"
-                    ? "selected"
-                    : ""
-                }
-              >
-                A
-              </option>
-
-              <option
-                value="B"
-                ${
-                  question.correct_answer === "B"
-                    ? "selected"
-                    : ""
-                }
-              >
-                B
-              </option>
-
-              <option
-                value="C"
-                ${
-                  question.correct_answer === "C"
-                    ? "selected"
-                    : ""
-                }
-              >
-                C
-              </option>
-
-              <option
-                value="D"
-                ${
-                  question.correct_answer === "D"
-                    ? "selected"
-                    : ""
-                }
-              >
-                D
-              </option>
-
-            </select>
-
-          </div>
+        <div
+          id="questionImage"
+          class="question-image"
+        ></div>
 
 
-          <div class="form-group">
+        <div id="options"></div>
 
-            <label>
-              Marks
-            </label>
-
-            <input
-              type="number"
-              class="question-input"
-              data-field="marks"
-              min="0"
-              step="0.01"
-              value="${question.marks}"
-            >
-
-          </div>
+      </div>
 
 
-          <div class="form-group">
+      <div class="exam-actions">
 
-            <label>
-              Negative Marks
-            </label>
+        <button
+          id="previousBtn"
+          class="secondary-btn"
+          type="button"
+        >
+          Previous
+        </button>
 
-            <input
-              type="number"
-              class="question-input"
-              data-field="negative_marks"
-              min="0"
-              step="0.01"
-              value="${question.negative_marks}"
-            >
+        <button
+          id="nextBtn"
+          class="primary-btn"
+          type="button"
+        >
+          Next
+        </button>
 
-          </div>
+        <button
+          id="submitBtn"
+          class="danger-btn hidden"
+          type="button"
+        >
+          Submit Exam
+        </button>
+
+      </div>
+
+
+      <div
+        id="questionNavigation"
+        class="question-navigation"
+      ></div>
+
+    </section>
+
+
+    <!-- =================================================
+         RESULT PAGE
+    ================================================== -->
+
+    <section
+      id="examResultPage"
+      class="page hidden"
+    >
+
+      <div class="page-header">
+
+        <p class="eyebrow">
+          RESULT
+        </p>
+
+        <h2>
+          Examination Result
+        </h2>
+
+      </div>
+
+
+      <div class="result-summary-card">
+
+        <div class="result-big-score">
+
+          <span>
+            Percentage
+          </span>
+
+          <strong id="finalPercentage">
+            0%
+          </strong>
 
         </div>
 
 
-        <div class="form-group full-width">
+        <div class="result-stat">
 
-          <label>
-            Explanation
-          </label>
+          <span>
+            Score
+          </span>
 
-          <textarea
-            class="question-input"
-            data-field="explanation"
-            rows="3"
-            placeholder="Optional explanation"
-          >${escapeHTML(
-            question.explanation
-          )}</textarea>
+          <strong id="finalScore">
+            0
+          </strong>
 
         </div>
 
-      `;
 
+        <div class="result-stat">
 
-      container.appendChild(
-        card
-      );
+          <span>
+            Correct
+          </span>
 
-    }
-  );
+          <strong id="finalCorrect">
+            0
+          </strong>
 
+        </div>
 
-  bindQuestionInputs();
 
-}
+        <div class="result-stat">
 
+          <span>
+            Wrong
+          </span>
 
-function createOptionInput(
-  letter,
-  value
-) {
+          <strong id="finalWrong">
+            0
+          </strong>
 
-  return `
+        </div>
 
-    <div class="form-group">
 
-      <label>
-        Option ${letter} *
-      </label>
+        <div class="result-stat">
 
-      <input
-        type="text"
-        class="question-input"
-        data-field="option_${letter.toLowerCase()}"
-        placeholder="Enter option ${letter}"
-        value="${escapeAttribute(
-          value
-        )}"
-      >
+          <span>
+            Unanswered
+          </span>
 
-    </div>
+          <strong id="finalUnanswered">
+            0
+          </strong>
 
-  `;
+        </div>
 
-}
+      </div>
 
 
-/* =========================================================
-   QUESTION INPUT EVENTS
-========================================================= */
+      <div
+        id="finalResultMessage"
+        class="result-message"
+      ></div>
 
-function bindQuestionInputs() {
 
-  document
-    .querySelectorAll(
-      ".question-builder-card"
-    )
-    .forEach(
-      card => {
+      <div class="content-card">
 
-        const id =
-          card.dataset.id;
+        <h3>
+          Subject / Chapter
+        </h3>
 
+        <p id="finalExamInfo">
+          -
+        </p>
 
-        card
-          .querySelectorAll(
-            ".question-input"
-          )
-          .forEach(
-            input => {
+      </div>
 
-              input.addEventListener(
-                "input",
-                function () {
 
-                  updateQuestionData(
-                    id,
-                    this
-                  );
+      <div class="result-actions">
 
-                }
-              );
+        <button
+          id="backDashboardBtn"
+          class="primary-btn"
+          type="button"
+        >
+          Back to Dashboard
+        </button>
 
-              input.addEventListener(
-                "change",
-                function () {
+      </div>
 
-                  updateQuestionData(
-                    id,
-                    this
-                  );
+    </section>
 
-                }
-              );
+  </main>
 
-            }
-          );
+</div>
 
 
-        const removeButton =
-          card.querySelector(
-            "[data-remove-question]"
-          );
+<!-- =====================================================
+     SUPABASE
+===================================================== -->
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-        removeButton.addEventListener(
-          "click",
-          function () {
+<script src="script.js"></script>
 
-            removeQuestion(
-              id
-            );
-
-          }
-        );
-
-      }
-    );
-
-}
-
-
-function updateQuestionData(
-  id,
-  input
-) {
-
-  const question =
-    questionBuilderItems.find(
-      item =>
-        item.id === id
-    );
-
-  if (!question) {
-    return;
-  }
-
-
-  const field =
-    input.dataset.field;
-
-
-  if (
-    input.type ===
-    "number"
-  ) {
-
-    question[field] =
-      Number(
-        input.value || 0
-      );
-
-  }
-  else {
-
-    question[field] =
-      input.value;
-
-  }
-
-}
-
-
-function removeQuestion(
-  id
-) {
-
-  questionBuilderItems =
-    questionBuilderItems.filter(
-      question =>
-        question.id !== id
-    );
-
-
-  renderQuestionBuilder();
-
-}
-
-
-/* =========================================================
-   VALIDATE EXAM
-========================================================= */
-
-function validateExamForm() {
-
-  const title =
-    document
-      .getElementById(
-        "examTitleInput"
-      )
-      .value
-      .trim();
-
-
-  const duration =
-    Number(
-      document.getElementById(
-        "examDuration"
-      ).value
-    );
-
-
-  if (!title) {
-
-    return {
-      valid: false,
-      message:
-        "Please enter exam title."
-    };
-
-  }
-
-
-  if (
-    !duration ||
-    duration < 1
-  ) {
-
-    return {
-      valid: false,
-      message:
-        "Exam duration must be at least 1 minute."
-    };
-
-  }
-
-
-  if (
-    questionBuilderItems.length ===
-    0
-  ) {
-
-    return {
-      valid: false,
-      message:
-        "Please add at least one question."
-    };
-
-  }
-
-
-  for (
-    let i = 0;
-    i < questionBuilderItems.length;
-    i++
-  ) {
-
-    const question =
-      questionBuilderItems[i];
-
-
-    if (
-      !question.question_text.trim()
-    ) {
-
-      return {
-        valid: false,
-        message:
-          `Question ${i + 1}: question text is required.`
-      };
-
-    }
-
-
-    if (
-      !question.option_a.trim() ||
-      !question.option_b.trim()
-    ) {
-
-      return {
-        valid: false,
-        message:
-          `Question ${i + 1}: Option A and B are required.`
-      };
-
-    }
-
-
-    if (
-      question.correct_answer ===
-      "C" &&
-      !question.option_c.trim()
-    ) {
-
-      return {
-        valid: false,
-        message:
-          `Question ${i + 1}: Option C is empty.`
-      };
-
-    }
-
-
-    if (
-      question.correct_answer ===
-      "D" &&
-      !question.option_d.trim()
-    ) {
-
-      return {
-        valid: false,
-        message:
-          `Question ${i + 1}: Option D is empty.`
-      };
-
-    }
-
-
-    if (
-      Number(question.marks) <=
-      0
-    ) {
-
-      return {
-        valid: false,
-        message:
-          `Question ${i + 1}: marks must be greater than 0.`
-      };
-
-    }
-
-  }
-
-
-  return {
-    valid: true,
-    message: ""
-  };
-
-}
-
-
-/* =========================================================
-   GET EXAM FORM DATA
-========================================================= */
-
-function getExamFormData(
-  published
-) {
-
-  return {
-
-    title:
-      document
-        .getElementById(
-          "examTitleInput"
-        )
-        .value
-        .trim(),
-
-    description:
-      document
-        .getElementById(
-          "examDescriptionInput"
-        )
-        .value
-        .trim() ||
-      null,
-
-    subject_id:
-      getNullableNumber(
-        document.getElementById(
-          "examSubject"
-        ).value
-      ),
-
-    chapter_id:
-      getNullableNumber(
-        document.getElementById(
-          "examChapter"
-        ).value
-      ),
-
-    duration_minutes:
-      Number(
-        document.getElementById(
-          "examDuration"
-        ).value
-      ),
-
-    total_marks:
-      Number(
-        document.getElementById(
-          "examTotalMarks"
-        ).value
-      ) ||
-      calculateTotalMarks(),
-
-    passing_percentage:
-      Number(
-        document.getElementById(
-          "examPassingPercentage"
-        ).value
-      ) || 0,
-
-    negative_marking:
-      Number(
-        document.getElementById(
-          "examNegativeMarking"
-        ).value
-      ) || 0,
-
-    max_attempts:
-      Number(
-        document.getElementById(
-          "examMaxAttempts"
-        ).value
-      ) || 1,
-
-    randomize_questions:
-      document.getElementById(
-        "randomizeQuestions"
-      ).checked,
-
-    randomize_options:
-      document.getElementById(
-        "randomizeOptions"
-      ).checked,
-
-    show_result_immediately:
-      document.getElementById(
-        "showResultImmediately"
-      ).checked,
-
-    show_explanations:
-      document.getElementById(
-        "showExplanations"
-      ).checked,
-
-    is_published:
-      published
-
-  };
-
-}
-
-
-/* =========================================================
-   SAVE EXAM
-========================================================= */
-
-async function saveExam(
-  publish
-) {
-
-  clearBuilderMessage();
-
-
-  if (
-    !currentUser ||
-    !currentProfile ||
-    currentProfile.role !==
-    "teacher"
-  ) {
-
-    showBuilderMessage(
-      "Only a teacher can create an exam.",
-      "error"
-    );
-
-    return;
-
-  }
-
-
-  const validation =
-    validateExamForm();
-
-
-  if (!validation.valid) {
-
-    showBuilderMessage(
-      validation.message,
-      "error"
-    );
-
-    return;
-
-  }
-
-
-  const saveButton =
-    publish
-      ? document.getElementById(
-          "publishExamBtn"
-        )
-      : document.getElementById(
-          "saveDraftBtn"
-        );
-
-
-  saveButton.disabled =
-    true;
-
-  saveButton.textContent =
-    publish
-      ? "Publishing..."
-      : "Saving...";
-
-
-  try {
-
-    const examData =
-      getExamFormData(
-        publish
-      );
-
-
-    /*
-      Teacher ID
-    */
-
-    examData.created_by =
-      currentUser.id;
-
-
-    /*
-      Insert exam
-    */
-
-    const {
-      data: exam,
-      error: examError
-    } =
-      await supabaseClient
-        .from("exams")
-        .insert(
-          examData
-        )
-        .select()
-        .single();
-
-
-    if (examError) {
-
-      throw examError;
-
-    }
-
-
-    /*
-      Insert questions
-    */
-
-    const questionRows =
-      questionBuilderItems.map(
-        (
-          question,
-          index
-        ) => {
-
-          return {
-
-            exam_id:
-              exam.id,
-
-            question_text:
-              question.question_text
-                .trim(),
-
-            image_url:
-              question.image_url
-                .trim() ||
-              null,
-
-            option_a:
-              question.option_a
-                .trim(),
-
-            option_b:
-              question.option_b
-                .trim(),
-
-            option_c:
-              question.option_c
-                .trim() ||
-              null,
-
-            option_d:
-              question.option_d
-                .trim() ||
-              null,
-
-            correct_answer:
-              question.correct_answer,
-
-            explanation:
-              question.explanation
-                .trim() ||
-              null,
-
-            marks:
-              Number(
-                question.marks
-              ) || 1,
-
-            negative_marks:
-              Number(
-                question.negative_marks
-              ) || 0,
-
-            question_order:
-              index + 1
-
-          };
-
-        }
-      );
-
-
-    const {
-      error: questionError
-    } =
-      await supabaseClient
-        .from("questions")
-        .insert(
-          questionRows
-        );
-
-
-    if (questionError) {
-
-      /*
-        If questions fail after exam creation,
-        attempt to delete the exam so we don't
-        leave an incomplete exam.
-      */
-
-      await supabaseClient
-        .from("exams")
-        .delete()
-        .eq(
-          "id",
-          exam.id
-        );
-
-      throw questionError;
-
-    }
-
-
-    showBuilderMessage(
-      publish
-        ? "Exam published successfully."
-        : "Exam saved as draft successfully.",
-      "success"
-    );
-
-
-    resetExamBuilder();
-
-
-    await loadTeacherDashboard();
-
-
-    setTimeout(
-      function () {
-
-        showPage(
-          "teacherDashboard"
-        );
-
-      },
-      800
-    );
-
-  }
-  catch (error) {
-
-    console.error(
-      "Save exam error:",
-      error
-    );
-
-
-    showBuilderMessage(
-      getDatabaseErrorMessage(
-        error
-      ),
-      "error"
-    );
-
-  }
-  finally {
-
-    saveButton.disabled =
-      false;
-
-    saveButton.textContent =
-      publish
-        ? "🚀 Publish Exam"
-        : "💾 Save Draft";
-
-  }
-
-}
-
-
-/* =========================================================
-   SAVE / PUBLISH BUTTONS
-========================================================= */
-
-document
-  .getElementById(
-    "saveDraftBtn"
-  )
-  .addEventListener(
-    "click",
-    function () {
-
-      saveExam(
-        false
-      );
-
-    }
-  );
-
-
-document
-  .getElementById(
-    "publishExamBtn"
-  )
-  .addEventListener(
-    "click",
-    function () {
-
-      saveExam(
-        true
-      );
-
-    }
-  );
-
-
-/* =========================================================
-   BUILDER MESSAGE
-========================================================= */
-
-function showBuilderMessage(
-  message,
-  type
-) {
-
-  const element =
-    document.getElementById(
-      "examBuilderMessage"
-    );
-
-  element.textContent =
-    message;
-
-  element.className =
-    "builder-message " +
-    (
-      type === "success"
-        ? "success"
-        : "error"
-    );
-
-}
-
-
-function clearBuilderMessage() {
-
-  const element =
-    document.getElementById(
-      "examBuilderMessage"
-    );
-
-  element.textContent = "";
-
-  element.className =
-    "builder-message";
-
-}
-
-
-/* =========================================================
-   RESET BUILDER
-========================================================= */
-
-function resetExamBuilder() {
-
-  document
-    .getElementById(
-      "examTitleInput"
-    )
-    .value = "";
-
-  document
-    .getElementById(
-      "examDescriptionInput"
-    )
-    .value = "";
-
-  document
-    .getElementById(
-      "examSubject"
-    )
-    .value = "";
-
-  document
-    .getElementById(
-      "examChapter"
-    )
-    .innerHTML =
-      `<option value="">
-        Select Chapter
-      </option>`;
-
-  document
-    .getElementById(
-      "examDuration"
-    )
-    .value = "30";
-
-  document
-    .getElementById(
-      "examTotalMarks"
-    )
-    .value = "10";
-
-  document
-    .getElementById(
-      "examPassingPercentage"
-    )
-    .value = "40";
-
-  document
-    .getElementById(
-      "examNegativeMarking"
-    )
-    .value = "0";
-
-  document
-    .getElementById(
-      "examMaxAttempts"
-    )
-    .value = "1";
-
-  document
-    .getElementById(
-      "randomizeQuestions"
-    )
-    .checked = false;
-
-  document
-    .getElementById(
-      "randomizeOptions"
-    )
-    .checked = false;
-
-  document
-    .getElementById(
-      "showResultImmediately"
-    )
-    .checked = true;
-
-  document
-    .getElementById(
-      "showExplanations"
-    )
-    .checked = false;
-
-
-  questionBuilderItems =
-    [];
-
-
-  renderQuestionBuilder();
-
-}
-
-
-/* =========================================================
-   CALCULATE TOTAL MARKS
-========================================================= */
-
-function calculateTotalMarks() {
-
-  return questionBuilderItems.reduce(
-    (
-      total,
-      question
-    ) =>
-      total +
-      Number(
-        question.marks || 0
-      ),
-    0
-  );
-
-}
-
-
-/* =========================================================
-   START EXAM PLACEHOLDER
-========================================================= */
-
-async function startExam(
-  examId
-) {
-
-  /*
-    Full exam engine is the next module.
-
-    For now we verify that the exam and
-    questions exist before activating it.
-  */
-
-  try {
-
-    const {
-      data: exam,
-      error
-    } =
-      await supabaseClient
-        .from("exams")
-        .select(`
-          id,
-          title,
-          description,
-          duration_minutes,
-          total_marks,
-          max_attempts,
-          negative_marking,
-          passing_percentage,
-          randomize_questions,
-          randomize_options,
-          show_result_immediately,
-          show_explanations,
-          questions(
-            id,
-            question_text,
-            image_url,
-            option_a,
-            option_b,
-            option_c,
-            option_d,
-            correct_answer,
-            explanation,
-            marks,
-            negative_marks,
-            question_order
-          )
-        `)
-        .eq(
-          "id",
-          examId
-        )
-        .single();
-
-
-    if (error) {
-      throw error;
-    }
-
-
-    if (
-      !exam.questions ||
-      !exam.questions.length
-    ) {
-
-      alert(
-        "This exam has no questions."
-      );
-
-      return;
-
-    }
-
-
-    currentExam =
-      exam;
-
-
-    /*
-      At this stage the exam builder is complete.
-      The full timer + attempt + answer + auto-submit
-      engine will use this loaded data.
-    */
-
-    alert(
-      "Exam loaded successfully. Full exam engine will be activated in the next module."
-    );
-
-  }
-  catch (error) {
-
-    console.error(
-      "Start exam error:",
-      error
-    );
-
-    alert(
-      getDatabaseErrorMessage(
-        error
-      )
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   LOGOUT
-========================================================= */
-
-document
-  .getElementById(
-    "logoutBtn"
-  )
-  .addEventListener(
-    "click",
-    async function () {
-
-      await supabaseClient.auth.signOut();
-
-      currentUser = null;
-
-      currentProfile = null;
-
-      currentExam = null;
-
-      app.classList.add(
-        "hidden"
-      );
-
-      loginPage.classList.remove(
-        "hidden"
-      );
-
-      loginForm.reset();
-
-      signupForm.reset();
-
-      clearMessages();
-
-      loginTab.click();
-
-    }
-  );
-
-
-/* =========================================================
-   AUTH STATE
-========================================================= */
-
-supabaseClient.auth.onAuthStateChange(
-  async function (
-    event,
-    session
-  ) {
-
-    console.log(
-      "Auth event:",
-      event
-    );
-
-
-    if (
-      session &&
-      session.user
-    ) {
-
-      currentUser =
-        session.user;
-
-
-      if (!currentProfile) {
-
-        await loadUserProfile();
-
-      }
-
-    }
-    else {
-
-      currentUser = null;
-
-      currentProfile = null;
-
-      app.classList.add(
-        "hidden"
-      );
-
-      loginPage.classList.remove(
-        "hidden"
-      );
-
-    }
-
-  }
-);
-
-
-/* =========================================================
-   INITIAL SESSION
-========================================================= */
-
-async function checkExistingSession() {
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient.auth.getSession();
-
-
-  if (error) {
-
-    console.error(
-      error
-    );
-
-    return;
-
-  }
-
-
-  if (
-    data.session &&
-    data.session.user
-  ) {
-
-    currentUser =
-      data.session.user;
-
-    await loadUserProfile();
-
-  }
-
-}
-
-
-checkExistingSession();
-
-
-/* =========================================================
-   FRIENDLY AUTH ERRORS
-========================================================= */
-
-function getFriendlyAuthError(
-  message
-) {
-
-  const text =
-    String(
-      message || ""
-    )
-      .toLowerCase();
-
-
-  if (
-    text.includes(
-      "invalid login credentials"
-    )
-  ) {
-
-    return "Invalid email or password.";
-
-  }
-
-
-  if (
-    text.includes(
-      "user already registered"
-    )
-  ) {
-
-    return "This email is already registered.";
-
-  }
-
-
-  if (
-    text.includes(
-      "password should be at least"
-    )
-  ) {
-
-    return "Password must be at least 6 characters.";
-
-  }
-
-
-  if (
-    text.includes(
-      "email not confirmed"
-    )
-  ) {
-
-    return "Please confirm your email before logging in.";
-
-  }
-
-
-  return message ||
-    "Something went wrong. Please try again.";
-
-}
-
-
-/* =========================================================
-   DATABASE ERROR
-========================================================= */
-
-function getDatabaseErrorMessage(
-  error
-) {
-
-  if (!error) {
-
-    return "Something went wrong.";
-
-  }
-
-
-  const message =
-    String(
-      error.message ||
-      error.details ||
-      error.hint ||
-      ""
-    );
-
-
-  if (
-    message
-      .toLowerCase()
-      .includes(
-        "row-level security"
-      )
-  ) {
-
-    return (
-      "Supabase RLS policy is blocking this operation. " +
-      "Please check the teacher INSERT/UPDATE policies."
-    );
-
-  }
-
-
-  if (
-    message
-      .toLowerCase()
-      .includes(
-        "violates foreign key"
-      )
-  ) {
-
-    return (
-      "A selected Subject or Chapter is invalid."
-    );
-
-  }
-
-
-  return message ||
-    "Unable to save exam.";
-
-}
-
-
-/* =========================================================
-   HTML SAFETY
-========================================================= */
-
-function escapeHTML(
-  value
-) {
-
-  return String(
-    value ?? ""
-  )
-    .replace(
-      /&/g,
-      "&amp;"
-    )
-    .replace(
-      /</g,
-      "&lt;"
-    )
-    .replace(
-      />/g,
-      "&gt;"
-    )
-    .replace(
-      /"/g,
-      "&quot;"
-    )
-    .replace(
-      /'/g,
-      "&#039;"
-    );
-
-}
-
-
-function escapeAttribute(
-  value
-) {
-
-  return escapeHTML(
-    value
-  );
-
-}
-
-
-/* =========================================================
-   NULLABLE NUMBER
-========================================================= */
-
-function getNullableNumber(
-  value
-) {
-
-  if (
-    value === null ||
-    value === undefined ||
-    value === ""
-  ) {
-
-    return null;
-
-  }
-
-  const number =
-    Number(value);
-
-  return Number.isFinite(
-    number
-  )
-    ? number
-    : null;
-
-}
-
-
-/* =========================================================
-   DATE
-========================================================= */
-
-function formatDate(
-  value
-) {
-
-  if (!value) {
-    return "-";
-  }
-
-  return new Date(
-    value
-  ).toLocaleString(
-    "en-IN"
-  );
-
-}
+</body>
+</html>
