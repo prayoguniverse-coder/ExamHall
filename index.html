@@ -26,7 +26,9 @@
 
       <div class="brand">
 
-        <div class="brand-icon">E</div>
+        <div class="brand-icon">
+          E
+        </div>
 
         <h1>ExamHall</h1>
 
@@ -70,6 +72,7 @@
           required
         >
 
+
         <label>Password</label>
 
         <input
@@ -80,10 +83,12 @@
           required
         >
 
+
         <p
           id="loginError"
           class="error-message"
         ></p>
+
 
         <button
           type="submit"
@@ -112,6 +117,7 @@
           required
         >
 
+
         <label>Email</label>
 
         <input
@@ -120,6 +126,7 @@
           placeholder="student@example.com"
           required
         >
+
 
         <label>Password</label>
 
@@ -131,6 +138,7 @@
           required
         >
 
+
         <label>Confirm Password</label>
 
         <input
@@ -141,15 +149,18 @@
           required
         >
 
+
         <p
           id="signupError"
           class="error-message"
         ></p>
 
+
         <p
           id="signupSuccess"
           class="success-message"
         ></p>
+
 
         <button
           type="submit"
@@ -200,7 +211,9 @@
 
           <strong>ExamHall</strong>
 
-          <small>Online Examination</small>
+          <small>
+            Online Examination
+          </small>
 
         </div>
 
@@ -243,22 +256,27 @@
         <button
           class="menu-btn active"
           data-page="studentDashboard"
+          type="button"
         >
           <span>📊</span>
           Dashboard
         </button>
 
+
         <button
           class="menu-btn"
           data-page="studentResults"
+          type="button"
         >
           <span>📄</span>
           My Results
         </button>
 
+
         <button
           class="menu-btn"
           data-page="studentHistory"
+          type="button"
         >
           <span>🕘</span>
           Attempt History
@@ -277,22 +295,27 @@
         <button
           class="menu-btn active"
           data-page="teacherDashboard"
+          type="button"
         >
           <span>📊</span>
           Dashboard
         </button>
 
+
         <button
           class="menu-btn"
           data-page="createExam"
+          type="button"
         >
           <span>➕</span>
           Create Exam
         </button>
 
+
         <button
           class="menu-btn"
           data-page="teacherScores"
+          type="button"
         >
           <span>📈</span>
           Student Scores
@@ -304,6 +327,7 @@
       <button
         id="logoutBtn"
         class="logout-btn"
+        type="button"
       >
         🚪 Logout
       </button>
@@ -311,9 +335,7 @@
     </aside>
 
 
-    <!-- =================================================
-         MAIN
-    ================================================== -->
+    <!-- MAIN -->
 
     <main class="main-content">
 
@@ -351,7 +373,9 @@
 
           <div class="stat-card">
 
-            <span>Available Exams</span>
+            <span>
+              Available Exams
+            </span>
 
             <strong id="availableExams">
               0
@@ -359,9 +383,12 @@
 
           </div>
 
+
           <div class="stat-card">
 
-            <span>Total Attempts</span>
+            <span>
+              Total Attempts
+            </span>
 
             <strong id="attemptCount">
               0
@@ -369,9 +396,12 @@
 
           </div>
 
+
           <div class="stat-card">
 
-            <span>Average Score</span>
+            <span>
+              Average Score
+            </span>
 
             <strong id="averageScore">
               0%
@@ -379,9 +409,12 @@
 
           </div>
 
+
           <div class="stat-card">
 
-            <span>Best Score</span>
+            <span>
+              Best Score
+            </span>
 
             <strong id="bestScore">
               0%
@@ -396,13 +429,20 @@
 
           <div class="card-header">
 
-            <h3>Available Exams</h3>
+            <div>
 
-            <p>
-              Exams assigned by your teachers
-            </p>
+              <h3>
+                Available Exams
+              </h3>
+
+              <p>
+                Exams assigned by your teachers
+              </p>
+
+            </div>
 
           </div>
+
 
           <div id="examList">
 
@@ -432,13 +472,16 @@
             STUDENT
           </p>
 
-          <h2>My Results</h2>
+          <h2>
+            My Results
+          </h2>
 
           <p>
             View your examination performance.
           </p>
 
         </div>
+
 
         <div
           id="myResults"
@@ -463,13 +506,16 @@
             STUDENT
           </p>
 
-          <h2>Attempt History</h2>
+          <h2>
+            Attempt History
+          </h2>
 
           <p>
             Your previous examination attempts.
           </p>
 
         </div>
+
 
         <div
           id="historyList"
@@ -494,7 +540,9 @@
             TEACHER
           </p>
 
-          <h2>Teacher Dashboard</h2>
+          <h2>
+            Teacher Dashboard
+          </h2>
 
           <p>
             Manage exams and monitor student performance.
@@ -507,7 +555,9 @@
 
           <div class="stat-card">
 
-            <span>Total Exams</span>
+            <span>
+              Total Exams
+            </span>
 
             <strong id="teacherExamCount">
               0
@@ -515,9 +565,12 @@
 
           </div>
 
+
           <div class="stat-card">
 
-            <span>Total Attempts</span>
+            <span>
+              Total Attempts
+            </span>
 
             <strong id="teacherAttemptCount">
               0
@@ -525,9 +578,12 @@
 
           </div>
 
+
           <div class="stat-card">
 
-            <span>Students</span>
+            <span>
+              Students
+            </span>
 
             <strong id="teacherStudentCount">
               0
@@ -535,9 +591,12 @@
 
           </div>
 
+
           <div class="stat-card">
 
-            <span>Average Score</span>
+            <span>
+              Average Score
+            </span>
 
             <strong id="teacherAverage">
               0%
@@ -552,13 +611,20 @@
 
           <div class="card-header">
 
-            <h3>Created Exams</h3>
+            <div>
 
-            <p>
-              Your examination list
-            </p>
+              <h3>
+                Created Exams
+              </h3>
+
+              <p>
+                Your examination list
+              </p>
+
+            </div>
 
           </div>
+
 
           <div id="teacherExamList"></div>
 
@@ -582,22 +648,26 @@
             TEACHER
           </p>
 
-          <h2>Create New Exam</h2>
+          <h2>
+            Create New Exam
+          </h2>
 
           <p>
-            Create exam settings and add questions.
+            Create questions, configure exam settings and publish.
           </p>
 
         </div>
 
 
-        <!-- EXAM FORM -->
+        <!-- EXAM DETAILS -->
 
         <div class="content-card">
 
           <div class="card-header">
 
-            <h3>Exam Details</h3>
+            <h3>
+              Exam Details
+            </h3>
 
             <p>
               Configure your examination.
@@ -612,12 +682,14 @@
 
               <div class="form-group full">
 
-                <label>Exam Title *</label>
+                <label>
+                  Exam Title *
+                </label>
 
                 <input
-                  id="examTitleInput"
                   type="text"
-                  placeholder="Example: Mathematics Unit Test"
+                  id="examTitleInput"
+                  placeholder="Example: Mathematics Unit Test 1"
                   required
                 >
 
@@ -626,11 +698,14 @@
 
               <div class="form-group full">
 
-                <label>Description</label>
+                <label>
+                  Description
+                </label>
 
                 <textarea
                   id="examDescription"
                   placeholder="Enter exam description"
+                  rows="3"
                 ></textarea>
 
               </div>
@@ -638,9 +713,14 @@
 
               <div class="form-group">
 
-                <label>Subject</label>
+                <label>
+                  Subject *
+                </label>
 
-                <select id="examSubject">
+                <select
+                  id="examSubject"
+                  required
+                >
 
                   <option value="">
                     Select Subject
@@ -653,12 +733,14 @@
 
               <div class="form-group">
 
-                <label>Chapter</label>
+                <label>
+                  Chapter
+                </label>
 
                 <select id="examChapter">
 
                   <option value="">
-                    Select Chapter
+                    All Chapters
                   </option>
 
                 </select>
@@ -668,11 +750,13 @@
 
               <div class="form-group">
 
-                <label>Duration (Minutes) *</label>
+                <label>
+                  Duration (Minutes) *
+                </label>
 
                 <input
-                  id="examDuration"
                   type="number"
+                  id="examDuration"
                   min="1"
                   value="30"
                   required
@@ -683,14 +767,17 @@
 
               <div class="form-group">
 
-                <label>Total Marks</label>
+                <label>
+                  Total Marks *
+                </label>
 
                 <input
-                  id="examTotalMarks"
                   type="number"
-                  min="0"
+                  id="examTotalMarks"
+                  min="1"
                   step="0.01"
-                  value="0"
+                  value="10"
+                  required
                 >
 
               </div>
@@ -698,13 +785,16 @@
 
               <div class="form-group">
 
-                <label>Passing Percentage</label>
+                <label>
+                  Passing Percentage
+                </label>
 
                 <input
-                  id="examPassing"
                   type="number"
+                  id="examPassing"
                   min="0"
                   max="100"
+                  step="0.01"
                   value="40"
                 >
 
@@ -713,52 +803,36 @@
 
               <div class="form-group">
 
-                <label>Negative Marking</label>
+                <label>
+                  Negative Marking
+                </label>
 
                 <input
-                  id="examNegative"
                   type="number"
+                  id="examNegative"
                   min="0"
                   step="0.01"
                   value="0"
                 >
 
+                <small>
+                  Marks deducted for a wrong answer.
+                </small>
+
               </div>
 
 
               <div class="form-group">
 
-                <label>Maximum Attempts</label>
+                <label>
+                  Maximum Attempts
+                </label>
 
                 <input
-                  id="examMaxAttempts"
                   type="number"
+                  id="examMaxAttempts"
                   min="1"
                   value="1"
-                >
-
-              </div>
-
-
-              <div class="form-group">
-
-                <label>Start Date / Time</label>
-
-                <input
-                  id="examStart"
-                  type="datetime-local"
-                >
-
-              </div>
-
-
-              <div class="form-group">
-
-                <label>End Date / Time</label>
-
-                <input
-                  id="examEnd"
-                  type="datetime-local"
                 >
 
               </div>
@@ -768,59 +842,86 @@
 
             <div class="settings-grid">
 
-              <label class="check-item">
+              <label class="check-card">
 
                 <input
                   type="checkbox"
-                  id="randomQuestions"
+                  id="randomizeQuestions"
                 >
 
                 <span>
-                  Randomize Questions
+                  <strong>
+                    Randomize Questions
+                  </strong>
+
+                  <small>
+                    Questions appear in random order.
+                  </small>
                 </span>
 
               </label>
 
 
-              <label class="check-item">
+              <label class="check-card">
 
                 <input
                   type="checkbox"
-                  id="randomOptions"
+                  id="randomizeOptions"
                 >
 
                 <span>
-                  Randomize Options
+                  <strong>
+                    Randomize Options
+                  </strong>
+
+                  <small>
+                    Options appear in random order.
+                  </small>
                 </span>
 
               </label>
 
 
-              <label class="check-item">
+              <label class="check-card">
 
                 <input
                   type="checkbox"
-                  id="showResult"
+                  id="showResultImmediately"
                   checked
                 >
 
                 <span>
-                  Show Result Immediately
+                  <strong>
+                    Show Result Immediately
+                  </strong>
+
+                  <small>
+                    Student sees result after submission.
+                  </small>
+
                 </span>
 
               </label>
 
 
-              <label class="check-item">
+              <label class="check-card">
 
                 <input
                   type="checkbox"
-                  id="showExplanation"
+                  id="showExplanations"
                   checked
                 >
 
                 <span>
-                  Show Explanations
+
+                  <strong>
+                    Show Explanations
+                  </strong>
+
+                  <small>
+                    Show question explanations in result.
+                  </small>
+
                 </span>
 
               </label>
@@ -828,31 +929,10 @@
             </div>
 
 
-            <div class="form-actions">
-
-              <button
-                type="submit"
-                class="primary-btn"
-                id="saveExamBtn"
-              >
-                Create Exam
-              </button>
-
-              <button
-                type="button"
-                class="secondary-btn"
-                id="resetExamBtn"
-              >
-                Reset
-              </button>
-
-            </div>
-
-
-            <p
+            <div
               id="examFormMessage"
               class="form-message"
-            ></p>
+            ></div>
 
           </form>
 
@@ -861,215 +941,77 @@
 
         <!-- QUESTIONS -->
 
-        <div
-          id="questionBuilder"
-          class="content-card hidden"
-        >
+        <div class="content-card">
 
-          <div class="card-header">
+          <div class="card-header question-header">
 
-            <h3>Add Questions</h3>
+            <div>
 
-            <p id="currentExamInfo">
-              Exam
-            </p>
+              <h3>
+                Questions
+              </h3>
+
+              <p>
+                Add questions to this exam.
+              </p>
+
+            </div>
+
+
+            <button
+              id="addQuestionBtn"
+              class="primary-btn"
+              type="button"
+            >
+              + Add Question
+            </button>
 
           </div>
 
 
-          <form id="questionForm">
+          <div id="questionBuilder">
 
-            <div class="form-group full">
+            <div class="empty-state small-empty">
 
-              <label>Question *</label>
+              <div class="empty-icon">
+                ❓
+              </div>
 
-              <textarea
-                id="questionTextInput"
-                placeholder="Enter question"
-                required
-              ></textarea>
+              <h3>
+                No questions added
+              </h3>
+
+              <p>
+                Click "Add Question" to create your first question.
+              </p>
 
             </div>
-
-
-            <div class="form-group full">
-
-              <label>Question Image URL</label>
-
-              <input
-                id="questionImage"
-                type="url"
-                placeholder="https://example.com/image.jpg"
-              >
-
-            </div>
-
-
-            <div class="form-grid options-grid">
-
-              <div class="form-group">
-
-                <label>Option A *</label>
-
-                <input
-                  id="optionA"
-                  required
-                >
-
-              </div>
-
-
-              <div class="form-group">
-
-                <label>Option B *</label>
-
-                <input
-                  id="optionB"
-                  required
-                >
-
-              </div>
-
-
-              <div class="form-group">
-
-                <label>Option C</label>
-
-                <input
-                  id="optionC"
-                >
-
-              </div>
-
-
-              <div class="form-group">
-
-                <label>Option D</label>
-
-                <input
-                  id="optionD"
-                >
-
-              </div>
-
-            </div>
-
-
-            <div class="form-grid">
-
-              <div class="form-group">
-
-                <label>Correct Answer *</label>
-
-                <select id="correctAnswer" required>
-
-                  <option value="">
-                    Select Answer
-                  </option>
-
-                  <option value="A">
-                    Option A
-                  </option>
-
-                  <option value="B">
-                    Option B
-                  </option>
-
-                  <option value="C">
-                    Option C
-                  </option>
-
-                  <option value="D">
-                    Option D
-                  </option>
-
-                </select>
-
-              </div>
-
-
-              <div class="form-group">
-
-                <label>Marks</label>
-
-                <input
-                  id="questionMarks"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value="1"
-                >
-
-              </div>
-
-
-              <div class="form-group">
-
-                <label>Negative Marks</label>
-
-                <input
-                  id="questionNegative"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value="0"
-                >
-
-              </div>
-
-            </div>
-
-
-            <div class="form-group full">
-
-              <label>Explanation</label>
-
-              <textarea
-                id="questionExplanation"
-                placeholder="Explain the correct answer"
-              ></textarea>
-
-            </div>
-
-
-            <div class="form-actions">
-
-              <button
-                type="submit"
-                class="primary-btn"
-                id="addQuestionBtn"
-              >
-                Add Question
-              </button>
-
-              <button
-                type="button"
-                class="secondary-btn"
-                id="publishExamBtn"
-              >
-                Publish Exam
-              </button>
-
-            </div>
-
-
-            <p
-              id="questionMessage"
-              class="form-message"
-            ></p>
-
-          </form>
-
-
-          <div class="question-list-section">
-
-            <h3>
-              Added Questions
-            </h3>
-
-            <div id="builderQuestionList"></div>
 
           </div>
+
+        </div>
+
+
+        <!-- SAVE -->
+
+        <div class="builder-actions">
+
+          <button
+            id="saveDraftBtn"
+            class="secondary-btn"
+            type="button"
+          >
+            💾 Save Draft
+          </button>
+
+
+          <button
+            id="publishExamBtn"
+            class="primary-btn"
+            type="button"
+          >
+            🚀 Publish Exam
+          </button>
 
         </div>
 
@@ -1091,7 +1033,9 @@
             TEACHER
           </p>
 
-          <h2>Student Scores</h2>
+          <h2>
+            Student Scores
+          </h2>
 
           <p>
             Monitor student examination results.
@@ -1108,17 +1052,25 @@
 
               <tr>
 
-                <th>Student</th>
+                <th>
+                  Student
+                </th>
 
-                <th>Exam</th>
+                <th>
+                  Exam
+                </th>
 
-                <th>Score</th>
+                <th>
+                  Score
+                </th>
 
-                <th>Percentage</th>
+                <th>
+                  Percentage
+                </th>
 
-                <th>Status</th>
-
-                <th>Date</th>
+                <th>
+                  Date
+                </th>
 
               </tr>
 
@@ -1150,7 +1102,7 @@
               EXAM
             </p>
 
-            <h2 id="examTitleDisplay">
+            <h2 id="runningExamTitle">
               Exam
             </h2>
 
@@ -1164,7 +1116,7 @@
           <div class="timer-box">
 
             <span>
-              ⏱️ Time Left
+              Time Left
             </span>
 
             <strong id="examTimer">
@@ -1178,14 +1130,31 @@
 
         <div class="content-card">
 
-          <div
-            id="questionImageDisplay"
-            class="question-image-wrap"
-          ></div>
+          <div class="question-progress">
 
-          <h3 id="questionText">
+            <div
+              id="progressBar"
+              class="progress-bar"
+            ></div>
+
+          </div>
+
+
+          <div class="question-image-wrap">
+
+            <img
+              id="runningQuestionImage"
+              class="question-image hidden"
+              alt="Question image"
+            >
+
+          </div>
+
+
+          <h3 id="runningQuestionText">
             Question
           </h3>
+
 
           <div id="options"></div>
 
@@ -1197,20 +1166,25 @@
           <button
             id="previousBtn"
             class="secondary-btn"
+            type="button"
           >
             Previous
           </button>
 
+
           <button
             id="nextBtn"
             class="primary-btn"
+            type="button"
           >
             Next
           </button>
 
+
           <button
             id="submitBtn"
             class="danger-btn hidden"
+            type="button"
           >
             Submit Exam
           </button>
@@ -1231,43 +1205,34 @@
       ================================================== -->
 
       <section
-        id="examResultPage"
+        id="resultPage"
         class="page hidden"
       >
 
-        <div class="result-hero">
-
-          <div class="result-icon">
-            🏆
-          </div>
+        <div class="page-header">
 
           <p class="eyebrow">
-            EXAM RESULT
+            RESULT
           </p>
 
-          <h2 id="resultExamTitle">
-            Result
+          <h2>
+            Exam Result
           </h2>
 
-          <div
-            id="resultPercentage"
-            class="result-percentage"
-          >
-            0%
-          </div>
-
-          <p id="resultStatus">
-            Completed
+          <p id="resultExamName">
+            Exam
           </p>
 
         </div>
 
 
-        <div class="stats-grid">
+        <div class="result-summary">
 
-          <div class="stat-card">
+          <div class="result-big-card">
 
-            <span>Score</span>
+            <span>
+              Score
+            </span>
 
             <strong id="resultScore">
               0
@@ -1275,9 +1240,25 @@
 
           </div>
 
-          <div class="stat-card">
 
-            <span>Correct</span>
+          <div class="result-big-card">
+
+            <span>
+              Percentage
+            </span>
+
+            <strong id="resultPercentage">
+              0%
+            </strong>
+
+          </div>
+
+
+          <div class="result-big-card">
+
+            <span>
+              Correct
+            </span>
 
             <strong id="resultCorrect">
               0
@@ -1285,22 +1266,15 @@
 
           </div>
 
-          <div class="stat-card">
 
-            <span>Wrong</span>
+          <div class="result-big-card">
 
-            <strong id="resultWrong">
-              0
-            </strong>
+            <span>
+              Status
+            </span>
 
-          </div>
-
-          <div class="stat-card">
-
-            <span>Unanswered</span>
-
-            <strong id="resultUnanswered">
-              0
+            <strong id="resultPassed">
+              -
             </strong>
 
           </div>
@@ -1312,14 +1286,16 @@
 
           <div id="resultDetails"></div>
 
-          <button
-            class="primary-btn"
-            id="resultBackBtn"
-          >
-            Back to Dashboard
-          </button>
-
         </div>
+
+
+        <button
+          id="backToDashboardBtn"
+          class="primary-btn"
+          type="button"
+        >
+          Back to Dashboard
+        </button>
 
       </section>
 
@@ -1328,9 +1304,7 @@
   </div>
 
 
-  <!-- =====================================================
-       SUPABASE
-  ====================================================== -->
+  <!-- SUPABASE -->
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
