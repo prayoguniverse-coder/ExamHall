@@ -2,7 +2,6 @@
 <html lang="en">
 
 <head>
-
   <meta charset="UTF-8">
 
   <meta
@@ -13,653 +12,688 @@
   <title>ExamHall</title>
 
   <link rel="stylesheet" href="style.css">
-
 </head>
 
 <body>
 
-<!-- =====================================================
-     LOGIN PAGE
-===================================================== -->
+  <!-- =====================================================
+       LOGIN PAGE
+  ====================================================== -->
 
-<div id="loginPage" class="auth-page">
+  <div id="loginPage" class="auth-page">
 
-  <div class="auth-card">
+    <div class="auth-card">
 
-    <div class="brand">
+      <div class="brand">
 
-      <div class="brand-icon">E</div>
+        <div class="brand-icon">E</div>
 
-      <h1>ExamHall</h1>
+        <h1>ExamHall</h1>
 
-      <p>Online Examination Portal</p>
+        <p>Online Examination Portal</p>
 
-    </div>
-
-
-    <div class="auth-tabs">
-
-      <button
-        id="loginTab"
-        class="auth-tab active"
-        type="button"
-      >
-        Login
-      </button>
-
-      <button
-        id="signupTab"
-        class="auth-tab"
-        type="button"
-      >
-        Student Signup
-      </button>
-
-    </div>
-
-
-    <!-- LOGIN -->
-
-    <form id="loginForm">
-
-      <label>Email</label>
-
-      <input
-        type="email"
-        id="loginEmail"
-        placeholder="student@example.com"
-        autocomplete="email"
-        required
-      >
-
-      <label>Password</label>
-
-      <input
-        type="password"
-        id="loginPassword"
-        placeholder="Enter password"
-        autocomplete="current-password"
-        required
-      >
-
-      <p
-        id="loginError"
-        class="error-message"
-      ></p>
-
-      <button
-        type="submit"
-        class="primary-btn full-btn"
-        id="loginBtn"
-      >
-        Login
-      </button>
-
-    </form>
-
-
-    <!-- SIGNUP -->
-
-    <form
-      id="signupForm"
-      class="hidden"
-    >
-
-      <label>Full Name</label>
-
-      <input
-        type="text"
-        id="signupName"
-        placeholder="Enter your full name"
-        required
-      >
-
-      <label>Email</label>
-
-      <input
-        type="email"
-        id="signupEmail"
-        placeholder="student@example.com"
-        required
-      >
-
-      <label>Password</label>
-
-      <input
-        type="password"
-        id="signupPassword"
-        placeholder="Minimum 6 characters"
-        minlength="6"
-        required
-      >
-
-      <label>Confirm Password</label>
-
-      <input
-        type="password"
-        id="signupConfirmPassword"
-        placeholder="Confirm password"
-        minlength="6"
-        required
-      >
-
-      <p
-        id="signupError"
-        class="error-message"
-      ></p>
-
-      <p
-        id="signupSuccess"
-        class="success-message"
-      ></p>
-
-      <button
-        type="submit"
-        class="primary-btn full-btn"
-        id="signupBtn"
-      >
-        Create Student Account
-      </button>
-
-    </form>
-
-
-    <div class="demo-note">
-
-      <strong>ExamHall</strong>
-
-      <span>
-        Secure online examination system
-      </span>
-
-    </div>
-
-  </div>
-
-</div>
-
-
-<!-- =====================================================
-     APPLICATION
-===================================================== -->
-
-<div
-  id="app"
-  class="app hidden"
->
-
-  <!-- SIDEBAR -->
-
-  <aside class="sidebar">
-
-    <div class="sidebar-brand">
-
-      <div class="brand-icon small">
-        E
       </div>
 
-      <div>
+
+      <div class="auth-tabs">
+
+        <button
+          id="loginTab"
+          class="auth-tab active"
+          type="button"
+        >
+          Login
+        </button>
+
+        <button
+          id="signupTab"
+          class="auth-tab"
+          type="button"
+        >
+          Student Signup
+        </button>
+
+      </div>
+
+
+      <!-- LOGIN -->
+
+      <form id="loginForm">
+
+        <label for="loginEmail">
+          Email
+        </label>
+
+        <input
+          type="email"
+          id="loginEmail"
+          placeholder="student@example.com"
+          autocomplete="email"
+          required
+        >
+
+
+        <label for="loginPassword">
+          Password
+        </label>
+
+        <input
+          type="password"
+          id="loginPassword"
+          placeholder="Enter password"
+          autocomplete="current-password"
+          required
+        >
+
+
+        <p
+          id="loginError"
+          class="error-message"
+        ></p>
+
+
+        <button
+          type="submit"
+          class="primary-btn full-btn"
+          id="loginBtn"
+        >
+          Login
+        </button>
+
+      </form>
+
+
+      <!-- SIGNUP -->
+
+      <form
+        id="signupForm"
+        class="hidden"
+      >
+
+        <label for="signupName">
+          Full Name
+        </label>
+
+        <input
+          type="text"
+          id="signupName"
+          placeholder="Enter your full name"
+          required
+        >
+
+
+        <label for="signupEmail">
+          Email
+        </label>
+
+        <input
+          type="email"
+          id="signupEmail"
+          placeholder="student@example.com"
+          required
+        >
+
+
+        <label for="signupPassword">
+          Password
+        </label>
+
+        <input
+          type="password"
+          id="signupPassword"
+          placeholder="Minimum 6 characters"
+          minlength="6"
+          required
+        >
+
+
+        <label for="signupConfirmPassword">
+          Confirm Password
+        </label>
+
+        <input
+          type="password"
+          id="signupConfirmPassword"
+          placeholder="Confirm password"
+          minlength="6"
+          required
+        >
+
+
+        <p
+          id="signupError"
+          class="error-message"
+        ></p>
+
+        <p
+          id="signupSuccess"
+          class="success-message"
+        ></p>
+
+
+        <button
+          type="submit"
+          class="primary-btn full-btn"
+          id="signupBtn"
+        >
+          Create Student Account
+        </button>
+
+      </form>
+
+
+      <div class="demo-note">
 
         <strong>ExamHall</strong>
 
-        <small>
-          Online Examination
-        </small>
-
-      </div>
-
-    </div>
-
-
-    <!-- USER -->
-
-    <div class="user-card">
-
-      <div
-        id="userAvatar"
-        class="avatar"
-      >
-        U
-      </div>
-
-      <div class="user-details">
-
-        <strong id="userName">
-          User
-        </strong>
-
-        <span id="userRole">
-          Student
+        <span>
+          Secure online examination system
         </span>
 
       </div>
 
     </div>
 
-
-    <!-- STUDENT MENU -->
-
-    <nav
-      id="studentMenu"
-      class="sidebar-menu"
-    >
-
-      <button
-        class="menu-btn active"
-        data-page="studentDashboard"
-      >
-        <span>📊</span>
-        Dashboard
-      </button>
-
-      <button
-        class="menu-btn"
-        data-page="studentResults"
-      >
-        <span>📄</span>
-        My Results
-      </button>
-
-      <button
-        class="menu-btn"
-        data-page="studentHistory"
-      >
-        <span>🕘</span>
-        Attempt History
-      </button>
-
-    </nav>
+  </div>
 
 
-    <!-- TEACHER MENU -->
+  <!-- =====================================================
+       APPLICATION
+  ====================================================== -->
 
-    <nav
-      id="teacherMenu"
-      class="sidebar-menu hidden"
-    >
+  <div
+    id="app"
+    class="app hidden"
+  >
 
-      <button
-        class="menu-btn active"
-        data-page="teacherDashboard"
-      >
-        <span>📊</span>
-        Dashboard
-      </button>
+    <!-- SIDEBAR -->
 
-      <button
-        class="menu-btn"
-        data-page="createExam"
-      >
-        <span>➕</span>
-        Create Exam
-      </button>
+    <aside class="sidebar">
 
-      <button
-        class="menu-btn"
-        data-page="teacherScores"
-      >
-        <span>📈</span>
-        Student Scores
-      </button>
+      <div class="sidebar-brand">
 
-    </nav>
+        <div class="brand-icon small">
+          E
+        </div>
 
+        <div>
 
-    <button
-      id="logoutBtn"
-      class="logout-btn"
-    >
-      🚪 Logout
-    </button>
+          <strong>
+            ExamHall
+          </strong>
 
-  </aside>
+          <small>
+            Online Examination
+          </small>
+
+        </div>
+
+      </div>
 
 
-  <!-- MAIN -->
+      <!-- USER -->
 
-  <main class="main-content">
+      <div class="user-card">
 
+        <div
+          id="userAvatar"
+          class="avatar"
+        >
+          U
+        </div>
 
-    <!-- =================================================
-         STUDENT DASHBOARD
-    ================================================== -->
+        <div class="user-details">
 
-    <section
-      id="studentDashboard"
-      class="page"
-    >
+          <strong id="userName">
+            User
+          </strong>
 
-      <div class="page-header">
-
-        <p class="eyebrow">
-          STUDENT
-        </p>
-
-        <h2>
-          Welcome,
-          <span id="studentWelcome">
+          <span id="userRole">
             Student
           </span>
-        </h2>
-
-        <p>
-          Ready to continue your learning journey?
-        </p>
-
-      </div>
-
-
-      <div class="stats-grid">
-
-        <div class="stat-card">
-
-          <span>
-            Available Exams
-          </span>
-
-          <strong id="availableExams">
-            0
-          </strong>
-
-        </div>
-
-
-        <div class="stat-card">
-
-          <span>
-            Total Attempts
-          </span>
-
-          <strong id="attemptCount">
-            0
-          </strong>
-
-        </div>
-
-
-        <div class="stat-card">
-
-          <span>
-            Average Score
-          </span>
-
-          <strong id="averageScore">
-            0%
-          </strong>
-
-        </div>
-
-
-        <div class="stat-card">
-
-          <span>
-            Best Score
-          </span>
-
-          <strong id="bestScore">
-            0%
-          </strong>
 
         </div>
 
       </div>
 
 
-      <div class="content-card">
-
-        <div class="card-header">
-
-          <div>
-
-            <h3>
-              Available Exams
-            </h3>
-
-            <p>
-              Exams assigned by your teachers
-            </p>
-
-          </div>
-
-        </div>
-
-
-        <div id="examList">
-
-          <div class="loading">
-            Loading exams...
-          </div>
-
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- =================================================
-         STUDENT RESULTS
-    ================================================== -->
-
-    <section
-      id="studentResults"
-      class="page hidden"
-    >
-
-      <div class="page-header">
-
-        <p class="eyebrow">
-          STUDENT
-        </p>
-
-        <h2>
-          My Results
-        </h2>
-
-        <p>
-          View your examination performance.
-        </p>
-
-      </div>
-
-
-      <div
-        id="myResults"
-        class="results-list"
-      ></div>
-
-    </section>
-
-
-    <!-- =================================================
-         STUDENT HISTORY
-    ================================================== -->
-
-    <section
-      id="studentHistory"
-      class="page hidden"
-    >
-
-      <div class="page-header">
-
-        <p class="eyebrow">
-          STUDENT
-        </p>
-
-        <h2>
-          Attempt History
-        </h2>
-
-        <p>
-          Your previous examination attempts.
-        </p>
-
-      </div>
-
-
-      <div
-        id="historyList"
-        class="results-list"
-      ></div>
-
-    </section>
-
-
-    <!-- =================================================
-         TEACHER DASHBOARD
-    ================================================== -->
-
-    <section
-      id="teacherDashboard"
-      class="page hidden"
-    >
-
-      <div class="page-header">
-
-        <p class="eyebrow">
-          TEACHER
-        </p>
-
-        <h2>
-          Teacher Dashboard
-        </h2>
-
-        <p>
-          Manage exams and monitor student performance.
-        </p>
-
-      </div>
-
-
-      <div class="stats-grid">
-
-        <div class="stat-card">
-
-          <span>
-            Total Exams
-          </span>
-
-          <strong id="teacherExamCount">
-            0
-          </strong>
-
-        </div>
-
-
-        <div class="stat-card">
-
-          <span>
-            Total Attempts
-          </span>
-
-          <strong id="teacherAttemptCount">
-            0
-          </strong>
-
-        </div>
-
-
-        <div class="stat-card">
-
-          <span>
-            Students
-          </span>
-
-          <strong id="teacherStudentCount">
-            0
-          </strong>
-
-        </div>
-
-
-        <div class="stat-card">
-
-          <span>
-            Average Score
-          </span>
-
-          <strong id="teacherAverage">
-            0%
-          </strong>
-
-        </div>
-
-      </div>
-
-
-      <div class="content-card">
-
-        <div class="card-header">
-
-          <div>
-
-            <h3>
-              Created Exams
-            </h3>
-
-            <p>
-              Your examination list
-            </p>
-
-          </div>
-
-        </div>
-
-
-        <div id="teacherExamList"></div>
-
-      </div>
-
-    </section>
-
-
-    <!-- =================================================
-         CREATE EXAM
-    ================================================== -->
-
-    <section
-      id="createExam"
-      class="page hidden"
-    >
-
-      <div class="page-header">
-
-        <p class="eyebrow">
-          TEACHER
-        </p>
-
-        <h2>
-          Create New Exam
-        </h2>
-
-        <p>
-          Configure your examination before adding questions.
-        </p>
-
-      </div>
-
-
-      <form
-        id="createExamForm"
-        class="content-card"
+      <!-- STUDENT MENU -->
+
+      <nav
+        id="studentMenu"
+        class="sidebar-menu"
       >
 
-        <!-- BASIC INFORMATION -->
+        <button
+          class="menu-btn active"
+          data-page="studentDashboard"
+          type="button"
+        >
+          <span>📊</span>
+          Dashboard
+        </button>
 
-        <div class="form-section">
 
-          <h3>
-            Basic Information
-          </h3>
+        <button
+          class="menu-btn"
+          data-page="studentResults"
+          type="button"
+        >
+          <span>📄</span>
+          My Results
+        </button>
 
-          <p class="section-description">
-            Enter the basic details of your exam.
+
+        <button
+          class="menu-btn"
+          data-page="studentHistory"
+          type="button"
+        >
+          <span>🕘</span>
+          Attempt History
+        </button>
+
+      </nav>
+
+
+      <!-- TEACHER MENU -->
+
+      <nav
+        id="teacherMenu"
+        class="sidebar-menu hidden"
+      >
+
+        <button
+          class="menu-btn active"
+          data-page="teacherDashboard"
+          type="button"
+        >
+          <span>📊</span>
+          Dashboard
+        </button>
+
+
+        <button
+          class="menu-btn"
+          data-page="createExam"
+          type="button"
+        >
+          <span>➕</span>
+          Create Exam
+        </button>
+
+
+        <button
+          class="menu-btn"
+          data-page="teacherScores"
+          type="button"
+        >
+          <span>📈</span>
+          Student Scores
+        </button>
+
+      </nav>
+
+
+      <button
+        id="logoutBtn"
+        class="logout-btn"
+        type="button"
+      >
+        🚪 Logout
+      </button>
+
+    </aside>
+
+
+    <!-- MAIN -->
+
+    <main class="main-content">
+
+
+      <!-- =================================================
+           STUDENT DASHBOARD
+      ================================================== -->
+
+      <section
+        id="studentDashboard"
+        class="page"
+      >
+
+        <div class="page-header">
+
+          <div>
+
+            <p class="eyebrow">
+              STUDENT
+            </p>
+
+            <h2>
+              Welcome,
+              <span id="studentWelcome">
+                Student
+              </span>
+            </h2>
+
+            <p>
+              Ready to continue your learning journey?
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="stats-grid">
+
+          <div class="stat-card">
+
+            <span>
+              Available Exams
+            </span>
+
+            <strong id="availableExams">
+              0
+            </strong>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <span>
+              Total Attempts
+            </span>
+
+            <strong id="attemptCount">
+              0
+            </strong>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <span>
+              Average Score
+            </span>
+
+            <strong id="averageScore">
+              0%
+            </strong>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <span>
+              Best Score
+            </span>
+
+            <strong id="bestScore">
+              0%
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="content-card">
+
+          <div class="card-header">
+
+            <div>
+
+              <h3>
+                Available Exams
+              </h3>
+
+              <p>
+                Exams assigned by your teachers
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div id="examList">
+
+            <div class="loading">
+              Loading exams...
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =================================================
+           STUDENT RESULTS
+      ================================================== -->
+
+      <section
+        id="studentResults"
+        class="page hidden"
+      >
+
+        <div class="page-header">
+
+          <p class="eyebrow">
+            STUDENT
           </p>
+
+          <h2>
+            My Results
+          </h2>
+
+          <p>
+            View your examination performance.
+          </p>
+
+        </div>
+
+
+        <div
+          id="myResults"
+          class="results-list"
+        ></div>
+
+      </section>
+
+
+      <!-- =================================================
+           STUDENT HISTORY
+      ================================================== -->
+
+      <section
+        id="studentHistory"
+        class="page hidden"
+      >
+
+        <div class="page-header">
+
+          <p class="eyebrow">
+            STUDENT
+          </p>
+
+          <h2>
+            Attempt History
+          </h2>
+
+          <p>
+            Your previous examination attempts.
+          </p>
+
+        </div>
+
+
+        <div
+          id="historyList"
+          class="results-list"
+        ></div>
+
+      </section>
+
+
+      <!-- =================================================
+           TEACHER DASHBOARD
+      ================================================== -->
+
+      <section
+        id="teacherDashboard"
+        class="page hidden"
+      >
+
+        <div class="page-header">
+
+          <p class="eyebrow">
+            TEACHER
+          </p>
+
+          <h2>
+            Teacher Dashboard
+          </h2>
+
+          <p>
+            Manage exams and monitor student performance.
+          </p>
+
+        </div>
+
+
+        <div class="stats-grid">
+
+          <div class="stat-card">
+
+            <span>
+              Total Exams
+            </span>
+
+            <strong id="teacherExamCount">
+              0
+            </strong>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <span>
+              Total Attempts
+            </span>
+
+            <strong id="teacherAttemptCount">
+              0
+            </strong>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <span>
+              Students
+            </span>
+
+            <strong id="teacherStudentCount">
+              0
+            </strong>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <span>
+              Average Score
+            </span>
+
+            <strong id="teacherAverage">
+              0%
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="content-card">
+
+          <div class="card-header">
+
+            <div>
+
+              <h3>
+                Created Exams
+              </h3>
+
+              <p>
+                Your examination list
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div id="teacherExamList"></div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =================================================
+           CREATE EXAM
+      ================================================== -->
+
+      <section
+        id="createExam"
+        class="page hidden"
+      >
+
+        <div class="page-header">
+
+          <p class="eyebrow">
+            TEACHER
+          </p>
+
+          <h2>
+            Create New Exam
+          </h2>
+
+          <p>
+            Create and publish your examination.
+          </p>
+
+        </div>
+
+
+        <!-- EXAM DETAILS -->
+
+        <div class="content-card">
+
+          <div class="card-header">
+
+            <h3>
+              Exam Details
+            </h3>
+
+            <p>
+              Enter the basic information of your exam.
+            </p>
+
+          </div>
 
 
           <div class="form-grid">
 
-            <div class="form-group full">
+            <div class="form-group full-width">
 
               <label for="examTitleInput">
                 Exam Title *
@@ -675,7 +709,7 @@
             </div>
 
 
-            <div class="form-group full">
+            <div class="form-group full-width">
 
               <label for="examDescriptionInput">
                 Description
@@ -684,7 +718,7 @@
               <textarea
                 id="examDescriptionInput"
                 rows="4"
-                placeholder="Enter exam instructions or description..."
+                placeholder="Enter exam instructions or description"
               ></textarea>
 
             </div>
@@ -723,38 +757,18 @@
 
             </div>
 
-          </div>
-
-        </div>
-
-
-        <!-- EXAM SETTINGS -->
-
-        <div class="form-section">
-
-          <h3>
-            Exam Settings
-          </h3>
-
-          <p class="section-description">
-            Configure marks, timing and attempts.
-          </p>
-
-
-          <div class="form-grid">
 
             <div class="form-group">
 
-              <label for="durationMinutes">
+              <label for="examDuration">
                 Duration (Minutes) *
               </label>
 
               <input
                 type="number"
-                id="durationMinutes"
+                id="examDuration"
                 min="1"
                 value="30"
-                required
               >
 
             </div>
@@ -762,17 +776,16 @@
 
             <div class="form-group">
 
-              <label for="totalMarks">
-                Total Marks *
+              <label for="examTotalMarks">
+                Total Marks
               </label>
 
               <input
                 type="number"
-                id="totalMarks"
+                id="examTotalMarks"
                 min="1"
                 step="0.01"
-                value="100"
-                required
+                value="10"
               >
 
             </div>
@@ -780,18 +793,16 @@
 
             <div class="form-group">
 
-              <label for="passingPercentage">
-                Passing Percentage *
+              <label for="examPassingPercentage">
+                Passing Percentage
               </label>
 
               <input
                 type="number"
-                id="passingPercentage"
+                id="examPassingPercentage"
                 min="0"
                 max="100"
-                step="0.01"
                 value="40"
-                required
               >
 
             </div>
@@ -799,20 +810,20 @@
 
             <div class="form-group">
 
-              <label for="negativeMarking">
+              <label for="examNegativeMarking">
                 Negative Marking
               </label>
 
               <input
                 type="number"
-                id="negativeMarking"
+                id="examNegativeMarking"
                 min="0"
                 step="0.01"
                 value="0"
               >
 
-              <small>
-                Example: 0.25 means 0.25 marks deducted.
+              <small class="field-help">
+                Example: 0.25 marks for a wrong answer.
               </small>
 
             </div>
@@ -820,101 +831,69 @@
 
             <div class="form-group">
 
-              <label for="maxAttempts">
-                Maximum Attempts *
+              <label for="examMaxAttempts">
+                Maximum Attempts
               </label>
 
               <input
                 type="number"
-                id="maxAttempts"
+                id="examMaxAttempts"
                 min="1"
                 value="1"
-                required
               >
 
             </div>
 
           </div>
 
-        </div>
 
+          <div class="settings-grid">
 
-        <!-- OPTIONS -->
-
-        <div class="form-section">
-
-          <h3>
-            Exam Options
-          </h3>
-
-          <p class="section-description">
-            Choose how the exam behaves for students.
-          </p>
-
-
-          <div class="settings-list">
-
-            <label class="switch-row">
-
-              <div>
-
-                <strong>
-                  Randomize Questions
-                </strong>
-
-                <span>
-                  Show questions in random order.
-                </span>
-
-              </div>
+            <label class="checkbox-card">
 
               <input
                 type="checkbox"
                 id="randomizeQuestions"
               >
 
-              <span class="switch"></span>
+              <span>
+
+                <strong>
+                  Randomize Questions
+                </strong>
+
+                <small>
+                  Show questions in random order.
+                </small>
+
+              </span>
 
             </label>
 
 
-            <label class="switch-row">
-
-              <div>
-
-                <strong>
-                  Randomize Options
-                </strong>
-
-                <span>
-                  Shuffle answer options.
-                </span>
-
-              </div>
+            <label class="checkbox-card">
 
               <input
                 type="checkbox"
                 id="randomizeOptions"
               >
 
-              <span class="switch"></span>
+              <span>
+
+                <strong>
+                  Randomize Options
+                </strong>
+
+                <small>
+                  Randomize answer options.
+                </small>
+
+              </span>
 
             </label>
 
 
-            <label class="switch-row">
-
-              <div>
-
-                <strong>
-                  Show Result Immediately
-                </strong>
-
-                <span>
-                  Show result after submission.
-                </span>
-
-              </div>
+            <label class="checkbox-card">
 
               <input
                 type="checkbox"
@@ -922,31 +901,39 @@
                 checked
               >
 
-              <span class="switch"></span>
+              <span>
+
+                <strong>
+                  Show Result Immediately
+                </strong>
+
+                <small>
+                  Student can see result after submission.
+                </small>
+
+              </span>
 
             </label>
 
 
-            <label class="switch-row">
-
-              <div>
-
-                <strong>
-                  Show Explanations
-                </strong>
-
-                <span>
-                  Show answer explanations after exam.
-                </span>
-
-              </div>
+            <label class="checkbox-card">
 
               <input
                 type="checkbox"
                 id="showExplanations"
               >
 
-              <span class="switch"></span>
+              <span>
+
+                <strong>
+                  Show Explanations
+                </strong>
+
+                <small>
+                  Show question explanations after result.
+                </small>
+
+              </span>
 
             </label>
 
@@ -955,247 +942,281 @@
         </div>
 
 
-        <!-- SCHEDULE -->
+        <!-- QUESTIONS -->
 
-        <div class="form-section">
+        <div class="content-card">
 
-          <h3>
-            Exam Schedule
-          </h3>
+          <div class="card-header question-builder-header">
 
-          <p class="section-description">
-            Optional. Leave blank for an exam without schedule restrictions.
-          </p>
+            <div>
 
+              <h3>
+                Questions
+              </h3>
 
-          <div class="form-grid">
-
-            <div class="form-group">
-
-              <label for="startAt">
-                Start Date & Time
-              </label>
-
-              <input
-                type="datetime-local"
-                id="startAt"
-              >
+              <p>
+                Add multiple-choice questions to this exam.
+              </p>
 
             </div>
 
 
-            <div class="form-group">
+            <button
+              id="addQuestionBtn"
+              class="primary-btn"
+              type="button"
+            >
+              + Add Question
+            </button>
 
-              <label for="endAt">
-                End Date & Time
-              </label>
+          </div>
 
-              <input
-                type="datetime-local"
-                id="endAt"
-              >
 
+          <div id="questionBuilder">
+
+            <!-- QUESTION CARDS GENERATED HERE -->
+
+          </div>
+
+
+          <div
+            id="noQuestionsMessage"
+            class="empty-state small-empty"
+          >
+
+            <div class="empty-icon">
+              📝
             </div>
+
+            <h3>
+              No questions added
+            </h3>
+
+            <p>
+              Click "Add Question" to create your first question.
+            </p>
 
           </div>
 
         </div>
 
 
-        <p
-          id="createExamError"
-          class="error-message"
-        ></p>
+        <!-- CREATE ACTIONS -->
+
+        <div class="builder-actions">
+
+          <p
+            id="examBuilderMessage"
+            class="builder-message"
+          ></p>
 
 
-        <p
-          id="createExamSuccess"
-          class="success-message"
-        ></p>
+          <div class="builder-buttons">
+
+            <button
+              id="saveDraftBtn"
+              class="secondary-btn large-btn"
+              type="button"
+            >
+              💾 Save Draft
+            </button>
 
 
-        <!-- BUTTONS -->
+            <button
+              id="publishExamBtn"
+              class="primary-btn large-btn"
+              type="button"
+            >
+              🚀 Publish Exam
+            </button>
 
-        <div class="form-actions">
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =================================================
+           TEACHER SCORES
+      ================================================== -->
+
+      <section
+        id="teacherScores"
+        class="page hidden"
+      >
+
+        <div class="page-header">
+
+          <p class="eyebrow">
+            TEACHER
+          </p>
+
+          <h2>
+            Student Scores
+          </h2>
+
+          <p>
+            Monitor student examination results.
+          </p>
+
+        </div>
+
+
+        <div class="content-card table-wrapper">
+
+          <table>
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  Student
+                </th>
+
+                <th>
+                  Exam
+                </th>
+
+                <th>
+                  Score
+                </th>
+
+                <th>
+                  Percentage
+                </th>
+
+                <th>
+                  Date
+                </th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody id="scoreTable"></tbody>
+
+          </table>
+
+        </div>
+
+      </section>
+
+
+      <!-- =================================================
+           EXAM PAGE
+      ================================================== -->
+
+      <section
+        id="examPage"
+        class="page hidden"
+      >
+
+        <div class="exam-top-bar">
+
+          <div>
+
+            <p class="eyebrow">
+              EXAM
+            </p>
+
+            <h2 id="examTitle">
+              Exam
+            </h2>
+
+            <p id="questionNumber">
+              Question 1
+            </p>
+
+          </div>
+
+
+          <div
+            id="examTimer"
+            class="exam-timer"
+          >
+            00:00
+          </div>
+
+        </div>
+
+
+        <div class="content-card">
+
+          <div
+            id="questionImageContainer"
+            class="question-image-container hidden"
+          >
+
+            <img
+              id="questionImage"
+              src=""
+              alt="Question image"
+            >
+
+          </div>
+
+
+          <h3 id="questionText">
+            Question
+          </h3>
+
+
+          <div id="options"></div>
+
+        </div>
+
+
+        <div class="exam-actions">
 
           <button
-            type="button"
+            id="previousBtn"
             class="secondary-btn"
-            id="resetExamBtn"
-          >
-            Reset
-          </button>
-
-          <button
-            type="submit"
-            class="primary-btn"
-            id="saveDraftBtn"
-          >
-            💾 Save Draft
-          </button>
-
-          <button
             type="button"
-            class="publish-btn"
-            id="publishExamBtn"
           >
-            🚀 Create & Publish
+            Previous
+          </button>
+
+
+          <button
+            id="nextBtn"
+            class="primary-btn"
+            type="button"
+          >
+            Next
+          </button>
+
+
+          <button
+            id="submitBtn"
+            class="danger-btn hidden"
+            type="button"
+          >
+            Submit Exam
           </button>
 
         </div>
 
-      </form>
 
-    </section>
+        <div
+          id="questionNavigation"
+          class="question-navigation"
+        ></div>
 
+      </section>
 
-    <!-- =================================================
-         TEACHER SCORES
-    ================================================== -->
+    </main>
 
-    <section
-      id="teacherScores"
-      class="page hidden"
-    >
-
-      <div class="page-header">
-
-        <p class="eyebrow">
-          TEACHER
-        </p>
-
-        <h2>
-          Student Scores
-        </h2>
-
-        <p>
-          Monitor student examination results.
-        </p>
-
-      </div>
+  </div>
 
 
-      <div class="content-card table-wrapper">
+  <!-- SUPABASE -->
 
-        <table>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-          <thead>
-
-            <tr>
-
-              <th>
-                Student
-              </th>
-
-              <th>
-                Exam
-              </th>
-
-              <th>
-                Score
-              </th>
-
-              <th>
-                Percentage
-              </th>
-
-              <th>
-                Date
-              </th>
-
-            </tr>
-
-          </thead>
-
-          <tbody id="scoreTable"></tbody>
-
-        </table>
-
-      </div>
-
-    </section>
-
-
-    <!-- =================================================
-         EXAM PAGE
-    ================================================== -->
-
-    <section
-      id="examPage"
-      class="page hidden"
-    >
-
-      <div class="page-header">
-
-        <p class="eyebrow">
-          EXAM
-        </p>
-
-        <h2 id="examTitle">
-          Exam
-        </h2>
-
-        <p id="questionNumber">
-          Question 1
-        </p>
-
-      </div>
-
-
-      <div class="content-card">
-
-        <h3 id="questionText">
-          Question
-        </h3>
-
-        <div id="options"></div>
-
-      </div>
-
-
-      <div class="exam-actions">
-
-        <button
-          id="previousBtn"
-          class="secondary-btn"
-        >
-          Previous
-        </button>
-
-        <button
-          id="nextBtn"
-          class="primary-btn"
-        >
-          Next
-        </button>
-
-        <button
-          id="submitBtn"
-          class="danger-btn hidden"
-        >
-          Submit Exam
-        </button>
-
-      </div>
-
-
-      <div
-        id="questionNavigation"
-        class="question-navigation"
-      ></div>
-
-    </section>
-
-  </main>
-
-</div>
-
-
-<!-- SUPABASE -->
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<script src="script.js"></script>
+  <script src="script.js"></script>
 
 </body>
 
