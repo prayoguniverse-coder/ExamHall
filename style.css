@@ -1,2578 +1,5579 @@
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+/* =========================================================
+   EXAMHALL
+   FINAL VERSION
+   SUPABASE + AUTH + EXAM BUILDER + EXAM ENGINE
+========================================================= */
 
-:root {
 
-  --primary: #111827;
-  --primary-light: #1f2937;
+/* =========================================================
+   SUPABASE
+========================================================= */
 
-  --background: #f5f7fb;
-  --card: #ffffff;
+const SUPABASE_URL =
+  "https://imiuiizgusnydgongbqk.supabase.co";
 
-  --border: #e5e7eb;
+const SUPABASE_PUBLISHABLE_KEY =
+  "sb_publishable_wIN-aHetkbk4c8hpZ9e_pQ_mEJmVx_v";
 
-  --text: #111827;
-  --muted: #6b7280;
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+  );
 
-  --danger: #dc2626;
-  --success: #16a34a;
 
-  --warning: #d97706;
+/* =========================================================
+   GLOBAL STATE
+========================================================= */
 
-}
+let currentUser = null;
+let currentProfile = null;
 
-body {
+let builderQuestions = [];
 
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
+let runningExam = null;
+let runningQuestions = [];
+let runningAnswers = {};
+let currentQuestionIndex = 0;
+let currentAttempt = null;
+let examTimerInterval = null;
+let examTimeRemaining = 0;
 
-  background:
-    var(--background);
 
-  color:
-    var(--text);
+/* =========================================================
+   ELEMENTS
+========================================================= */
 
-  min-height:
-    100vh;
+const loginPage =
+  document.getElementById("loginPage");
 
-}
+const app =
+  document.getElementById("app");
 
-button,
-input,
-textarea,
-select {
+const loginForm =
+  document.getElementById("loginForm");
 
-  font:
-    inherit;
+const signupForm =
+  document.getElementById("signupForm");
 
-}
+const loginTab =
+  document.getElementById("loginTab");
 
-button {
+const signupTab =
+  document.getElementById("signupTab");
 
-  cursor:
-    pointer;
+const loginError =
+  document.getElementById("loginError");
 
-}
+const signupError =
+  document.getElementById("signupError");
 
-button:disabled {
+const signupSuccess =
+  document.getElementById("signupSuccess");
 
-  opacity:
-    0.6;
 
-  cursor:
-    not-allowed;
+/* =========================================================
+   AUTH TABS
+========================================================= */
 
-}
+loginTab.addEventListener(
+  "click",
+  () => {
 
-input,
-textarea,
-select {
+    loginTab.classList.add("active");
+    signupTab.classList.remove("active");
 
-  width:
-    100%;
+    loginForm.classList.remove("hidden");
+    signupForm.classList.add("hidden");
 
-  padding:
-    12px 13px;
+    clearMessages();
 
-  border:
-    1px solid var(--border);
+  }
+);
 
-  border-radius:
-    9px;
 
-  outline:
-    none;
+signupTab.addEventListener(
+  "click",
+  () => {
 
-  background:
-    white;
+    signupTab.classList.add("active");
+    loginTab.classList.remove("active");
 
-  color:
-    var(--text);
+    signupForm.classList.remove("hidden");
+    loginForm.classList.add("hidden");
 
-}
+    clearMessages();
 
-textarea {
+  }
+);
 
-  resize:
-    vertical;
 
-}
+function clearMessages() {
 
-input:focus,
-textarea:focus,
-select:focus {
-
-  border-color:
-    var(--primary);
-
-  box-shadow:
-    0 0 0 3px
-    rgba(17, 24, 39, 0.08);
-
-}
-
-.hidden {
-
-  display:
-    none !important;
+  loginError.textContent = "";
+  signupError.textContent = "";
+  signupSuccess.textContent = "";
 
 }
 
 
 /* =========================================================
-   AUTH
+   LOGIN
 ========================================================= */
 
-.auth-page {
+loginForm.addEventListener(
+  "submit",
+  async event => {
 
-  min-height:
-    100vh;
+    event.preventDefault();
 
-  display:
-    flex;
+    clearMessages();
 
-  align-items:
-    center;
+    const email =
+      document
+        .getElementById("loginEmail")
+        .value
+        .trim()
+        .toLowerCase();
 
-  justify-content:
-    center;
+    const password =
+      document.getElementById(
+        "loginPassword"
+      ).value;
 
-  padding:
-    20px;
+    const button =
+      document.getElementById(
+        "loginBtn"
+      );
 
-}
+    button.disabled = true;
+    button.textContent = "Logging in...";
 
-.auth-card {
+    try {
 
-  width:
-    100%;
+      const {
+        data,
+        error
+      } =
+        await supabaseClient.auth.signInWithPassword({
+          email,
+          password
+        });
 
-  max-width:
-    430px;
+      if (error) {
+        throw error;
+      }
 
-  background:
-    white;
+      currentUser = data.user;
 
-  border:
-    1px solid var(--border);
+      await loadUserProfile();
 
-  border-radius:
-    20px;
+    }
 
-  padding:
-    35px;
+    catch (error) {
 
-  box-shadow:
-    0 20px 60px
-    rgba(0, 0, 0, 0.08);
+      console.error(error);
 
-}
+      loginError.textContent =
+        getFriendlyAuthError(
+          error.message
+        );
 
-.brand {
+    }
 
-  text-align:
-    center;
+    finally {
 
-  margin-bottom:
-    25px;
+      button.disabled = false;
+      button.textContent = "Login";
 
-}
+    }
 
-.brand h1 {
+  }
+);
 
-  margin-top:
-    10px;
 
-  font-size:
-    32px;
+/* =========================================================
+   STUDENT SIGNUP
+========================================================= */
 
-}
+signupForm.addEventListener(
+  "submit",
+  async event => {
 
-.brand p {
+    event.preventDefault();
 
-  color:
-    var(--muted);
+    clearMessages();
 
-  margin-top:
-    6px;
+    const name =
+      document
+        .getElementById("signupName")
+        .value
+        .trim();
 
-}
+    const email =
+      document
+        .getElementById("signupEmail")
+        .value
+        .trim()
+        .toLowerCase();
 
-.brand-icon {
+    const password =
+      document.getElementById(
+        "signupPassword"
+      ).value;
 
-  width:
-    58px;
+    const confirmPassword =
+      document.getElementById(
+        "signupConfirmPassword"
+      ).value;
 
-  height:
-    58px;
+    if (!name) {
 
-  margin:
-    auto;
+      signupError.textContent =
+        "Please enter your full name.";
 
-  display:
-    flex;
+      return;
 
-  align-items:
-    center;
+    }
 
-  justify-content:
-    center;
+    if (password.length < 6) {
 
-  border-radius:
-    16px;
+      signupError.textContent =
+        "Password must contain at least 6 characters.";
 
-  background:
-    var(--primary);
+      return;
 
-  color:
-    white;
+    }
 
-  font-size:
-    26px;
+    if (password !== confirmPassword) {
 
-  font-weight:
-    bold;
+      signupError.textContent =
+        "Passwords do not match.";
 
-}
+      return;
 
-.brand-icon.small {
+    }
 
-  width:
-    42px;
+    const button =
+      document.getElementById(
+        "signupBtn"
+      );
 
-  height:
-    42px;
+    button.disabled = true;
+    button.textContent =
+      "Creating account...";
 
-  margin:
-    0;
+    try {
 
-  border-radius:
-    11px;
+      const {
+        data,
+        error
+      } =
+        await supabaseClient.auth.signUp({
 
-  font-size:
-    20px;
+          email,
+          password,
 
-}
+          options: {
 
+            data: {
+              full_name: name
+            }
 
-/* AUTH TABS */
+          }
 
-.auth-tabs {
+        });
 
-  display:
-    grid;
+      if (error) {
+        throw error;
+      }
 
-  grid-template-columns:
-    1fr 1fr;
+      if (data.session) {
 
-  gap:
-    8px;
+        currentUser = data.user;
 
-  margin-bottom:
-    22px;
+        await loadUserProfile();
 
-}
+        return;
 
-.auth-tab {
+      }
 
-  padding:
-    11px;
+      signupSuccess.textContent =
+        "Account created successfully. Please login.";
 
-  border:
-    1px solid var(--border);
+      signupForm.reset();
 
-  background:
-    #f9fafb;
+    }
 
-  border-radius:
-    9px;
+    catch (error) {
 
-  font-weight:
-    bold;
+      console.error(error);
 
-}
+      signupError.textContent =
+        getFriendlyAuthError(
+          error.message
+        );
 
-.auth-tab.active {
+    }
 
-  background:
-    var(--primary);
+    finally {
 
-  color:
-    white;
+      button.disabled = false;
 
-  border-color:
-    var(--primary);
+      button.textContent =
+        "Create Student Account";
 
-}
+    }
 
+  }
+);
 
-/* FORM */
 
-label {
+/* =========================================================
+   PROFILE
+========================================================= */
 
-  display:
-    block;
+async function loadUserProfile() {
 
-  margin:
-    14px 0 7px;
+  if (!currentUser) {
+    return;
+  }
 
-  font-weight:
-    bold;
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("profiles")
+      .select("*")
+      .eq(
+        "id",
+        currentUser.id
+      )
+      .single();
 
-  font-size:
-    14px;
+  if (error) {
 
-}
+    console.error(
+      "Profile error:",
+      error
+    );
 
-small {
+    setTimeout(
+      loadUserProfile,
+      1000
+    );
 
-  color:
-    var(--muted);
+    return;
 
-}
+  }
 
+  currentProfile = data;
 
-/* BUTTONS */
-
-.primary-btn,
-.secondary-btn,
-.danger-btn {
-
-  border:
-    none;
-
-  border-radius:
-    9px;
-
-  padding:
-    12px 18px;
-
-  font-weight:
-    bold;
-
-}
-
-.primary-btn {
-
-  background:
-    var(--primary);
-
-  color:
-    white;
-
-}
-
-.primary-btn:hover {
-
-  background:
-    var(--primary-light);
-
-}
-
-.secondary-btn {
-
-  background:
-    #e5e7eb;
-
-  color:
-    #111827;
-
-}
-
-.secondary-btn:hover {
-
-  background:
-    #d1d5db;
-
-}
-
-.danger-btn {
-
-  background:
-    var(--danger);
-
-  color:
-    white;
-
-}
-
-.danger-btn:hover {
-
-  background:
-    #b91c1c;
-
-}
-
-.full-btn {
-
-  width:
-    100%;
-
-  margin-top:
-    20px;
-
-}
-
-
-/* MESSAGES */
-
-.error-message {
-
-  color:
-    var(--danger);
-
-  font-size:
-    14px;
-
-  margin-top:
-    12px;
-
-  min-height:
-    18px;
-
-}
-
-.success-message {
-
-  color:
-    var(--success);
-
-  font-size:
-    14px;
-
-  margin-top:
-    12px;
-
-}
-
-.demo-note {
-
-  margin-top:
-    25px;
-
-  padding:
-    14px;
-
-  background:
-    #f8fafc;
-
-  border:
-    1px solid var(--border);
-
-  border-radius:
-    10px;
-
-  text-align:
-    center;
-
-  display:
-    flex;
-
-  flex-direction:
-    column;
-
-  gap:
-    5px;
-
-  font-size:
-    13px;
-
-  color:
-    var(--muted);
+  openDashboard();
 
 }
 
 
 /* =========================================================
-   APP
+   OPEN DASHBOARD
 ========================================================= */
 
-.app {
+function openDashboard() {
 
-  min-height:
-    100vh;
+  loginPage.classList.add("hidden");
+  app.classList.remove("hidden");
 
-  display:
-    flex;
+  updateUserUI();
+
+  if (
+    currentProfile.role ===
+    "teacher"
+  ) {
+
+    document
+      .getElementById("teacherMenu")
+      .classList.remove("hidden");
+
+    document
+      .getElementById("studentMenu")
+      .classList.add("hidden");
+
+    showPage("teacherDashboard");
+
+  }
+
+  else {
+
+    document
+      .getElementById("studentMenu")
+      .classList.remove("hidden");
+
+    document
+      .getElementById("teacherMenu")
+      .classList.add("hidden");
+
+    showPage("studentDashboard");
+
+  }
 
 }
 
 
 /* =========================================================
-   SIDEBAR
+   USER UI
 ========================================================= */
 
-.sidebar {
-
-  width:
-    260px;
-
-  min-height:
-    100vh;
-
-  background:
-    #111827;
-
-  color:
-    white;
-
-  position:
-    fixed;
-
-  left:
-    0;
-
-  top:
-    0;
-
-  bottom:
-    0;
-
-  padding:
-    20px;
-
-  display:
-    flex;
-
-  flex-direction:
-    column;
-
-}
-
-.sidebar-brand {
-
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  gap:
-    12px;
-
-  margin-bottom:
-    25px;
-
-}
-
-.sidebar-brand strong {
-
-  display:
-    block;
-
-  font-size:
-    18px;
-
-}
-
-.sidebar-brand small {
-
-  display:
-    block;
-
-  color:
-    #9ca3af;
-
-  margin-top:
-    3px;
-
-  font-size:
-    11px;
-
-}
-
-
-/* USER */
-
-.user-card {
-
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  gap:
-    12px;
-
-  padding:
-    14px;
-
-  background:
-    #1f2937;
-
-  border-radius:
-    12px;
-
-  margin-bottom:
-    22px;
-
-}
-
-.avatar {
-
-  width:
-    42px;
-
-  height:
-    42px;
-
-  border-radius:
-    50%;
-
-  background:
-    white;
-
-  color:
-    #111827;
-
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  justify-content:
-    center;
-
-  font-weight:
-    bold;
-
-}
-
-.user-details {
-
-  min-width:
-    0;
-
-}
-
-.user-details strong {
-
-  display:
-    block;
-
-  font-size:
-    14px;
-
-  overflow:
-    hidden;
-
-  text-overflow:
-    ellipsis;
-
-  white-space:
-    nowrap;
-
-}
-
-.user-details span {
-
-  display:
-    block;
-
-  color:
-    #9ca3af;
-
-  font-size:
-    12px;
-
-  margin-top:
-    4px;
-
-  text-transform:
-    capitalize;
-
-}
-
-
-/* MENU */
-
-.sidebar-menu {
-
-  display:
-    flex;
-
-  flex-direction:
-    column;
-
-  gap:
-    7px;
-
-}
-
-.menu-btn {
-
-  width:
-    100%;
-
-  border:
-    none;
-
-  background:
-    transparent;
-
-  color:
-    #d1d5db;
-
-  padding:
-    12px;
-
-  text-align:
-    left;
-
-  border-radius:
-    9px;
-
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  gap:
-    10px;
-
-}
-
-.menu-btn:hover {
-
-  background:
-    #1f2937;
-
-  color:
-    white;
-
-}
-
-.menu-btn.active {
-
-  background:
-    white;
-
-  color:
-    #111827;
-
-}
-
-
-/* LOGOUT */
-
-.logout-btn {
-
-  margin-top:
-    auto;
-
-  padding:
-    12px;
-
-  border:
-    none;
-
-  border-radius:
-    9px;
-
-  background:
-    #374151;
-
-  color:
-    white;
-
-  font-weight:
-    bold;
-
-}
-
-.logout-btn:hover {
-
-  background:
-    #4b5563;
+function updateUserUI() {
+
+  const name =
+    currentProfile?.full_name ||
+    currentUser?.email ||
+    "User";
+
+  document.getElementById(
+    "userName"
+  ).textContent =
+    name;
+
+  document.getElementById(
+    "userRole"
+  ).textContent =
+    currentProfile?.role ||
+    "student";
+
+  document.getElementById(
+    "userAvatar"
+  ).textContent =
+    name
+      .charAt(0)
+      .toUpperCase();
+
+  document.getElementById(
+    "studentWelcome"
+  ).textContent =
+    name;
 
 }
 
 
 /* =========================================================
-   MAIN
+   PAGE NAVIGATION
 ========================================================= */
 
-.main-content {
+document
+  .querySelectorAll(".menu-btn")
+  .forEach(button => {
 
-  width:
-    calc(100% - 260px);
+    button.addEventListener(
+      "click",
+      () => {
 
-  margin-left:
-    260px;
+        showPage(
+          button.dataset.page
+        );
 
-  padding:
-    35px;
+      }
+    );
 
-}
-
-.page {
-
-  max-width:
-    1150px;
-
-  margin:
-    auto;
-
-}
+  });
 
 
-/* HEADER */
+function showPage(pageId) {
 
-.page-header {
+  document
+    .querySelectorAll(".page")
+    .forEach(page => {
 
-  margin-bottom:
-    25px;
+      page.classList.add("hidden");
 
-}
+    });
 
-.page-header h2 {
 
-  font-size:
-    28px;
+  const page =
+    document.getElementById(
+      pageId
+    );
 
-  margin:
-    5px 0;
+  if (!page) {
+    return;
+  }
 
-}
+  page.classList.remove("hidden");
 
-.page-header p {
 
-  color:
-    var(--muted);
+  document
+    .querySelectorAll(".menu-btn")
+    .forEach(button => {
 
-}
+      button.classList.remove("active");
 
-.eyebrow {
+      if (
+        button.dataset.page ===
+        pageId
+      ) {
 
-  color:
-    var(--muted);
+        button.classList.add("active");
 
-  font-size:
-    11px;
+      }
 
-  font-weight:
-    bold;
+    });
 
-  letter-spacing:
-    1px;
+
+  if (
+    pageId ===
+    "studentDashboard"
+  ) {
+
+    loadStudentDashboard();
+
+  }
+
+
+  if (
+    pageId ===
+    "studentResults"
+  ) {
+
+    loadStudentResults();
+
+  }
+
+
+  if (
+    pageId ===
+    "studentHistory"
+  ) {
+
+    loadStudentHistory();
+
+  }
+
+
+  if (
+    pageId ===
+    "teacherDashboard"
+  ) {
+
+    loadTeacherDashboard();
+
+  }
+
+
+  if (
+    pageId ===
+    "createExam"
+  ) {
+
+    initializeExamBuilder();
+
+  }
+
+
+  if (
+    pageId ===
+    "teacherScores"
+  ) {
+
+    loadTeacherScores();
+
+  }
+
+
+  if (
+    pageId ===
+    "questionBank"
+  ) {
+
+    initializeQuestionBank();
+
+  }
 
 }
 
 
 /* =========================================================
-   STATS
+   STUDENT DASHBOARD
 ========================================================= */
 
-.stats-grid {
+async function loadStudentDashboard() {
 
-  display:
-    grid;
+  if (!currentUser) {
+    return;
+  }
 
-  grid-template-columns:
-    repeat(4, 1fr);
+  const list =
+    document.getElementById(
+      "examList"
+    );
 
-  gap:
-    15px;
+  list.innerHTML =
+    `<div class="loading">
+      Loading exams...
+    </div>`;
 
-  margin-bottom:
-    25px;
+  try {
 
-}
+    const {
+      data: exams,
+      error
+    } =
+      await supabaseClient
+        .from("exams")
+        .select(`
+          id,
+          title,
+          description,
+          duration_minutes,
+          total_marks,
+          max_attempts,
+          start_at,
+          end_at,
+          subjects(name),
+          chapters(name)
+        `)
+        .eq(
+          "is_published",
+          true
+        )
+        .order(
+          "created_at",
+          {
+            ascending: false
+          }
+        );
 
-.stat-card {
+    if (error) {
+      throw error;
+    }
 
-  background:
-    white;
+    const now =
+      new Date();
 
-  border:
-    1px solid var(--border);
+    const available =
+      (exams || []).filter(exam => {
 
-  border-radius:
-    14px;
+        if (
+          exam.start_at &&
+          new Date(exam.start_at) > now
+        ) {
+          return false;
+        }
 
-  padding:
-    20px;
+        if (
+          exam.end_at &&
+          new Date(exam.end_at) < now
+        ) {
+          return false;
+        }
 
-}
+        return true;
 
-.stat-card span {
+      });
 
-  display:
-    block;
+    document.getElementById(
+      "availableExams"
+    ).textContent =
+      available.length;
 
-  color:
-    var(--muted);
+    showAvailableExams(
+      available
+    );
 
-  font-size:
-    14px;
+    await loadStudentStats();
 
-  margin-bottom:
-    10px;
+  }
 
-}
+  catch (error) {
 
-.stat-card strong {
+    console.error(error);
 
-  font-size:
-    28px;
+    list.innerHTML =
+      `<div class="empty-state">
+        <h3>Unable to load exams</h3>
+        <p>${escapeHTML(error.message)}</p>
+      </div>`;
+
+  }
 
 }
 
 
 /* =========================================================
-   CARD
+   AVAILABLE EXAMS
 ========================================================= */
 
-.content-card {
+function showAvailableExams(exams) {
 
-  background:
-    white;
+  const list =
+    document.getElementById(
+      "examList"
+    );
 
-  border:
-    1px solid var(--border);
+  list.innerHTML = "";
 
-  border-radius:
-    14px;
+  if (!exams.length) {
 
-  padding:
-    25px;
+    list.innerHTML =
+      `<div class="empty-state">
+        <div class="empty-icon">📚</div>
+        <h3>No exams available</h3>
+        <p>
+          Your teacher has not published any exams yet.
+        </p>
+      </div>`;
 
-  margin-bottom:
-    20px;
+    return;
 
-}
+  }
 
-.card-header {
 
-  margin-bottom:
-    15px;
+  exams.forEach(exam => {
 
-}
+    const item =
+      document.createElement(
+        "div"
+      );
 
-.card-header h3 {
+    item.className =
+      "exam-item";
 
-  margin-bottom:
-    5px;
 
-}
+    const subject =
+      exam.subjects?.name ||
+      "General";
 
-.card-header p {
+    const chapter =
+      exam.chapters?.name ||
+      "All Chapters";
 
-  color:
-    var(--muted);
 
-  font-size:
-    14px;
+    item.innerHTML = `
+
+      <div class="exam-info">
+
+        <h4>
+          ${escapeHTML(exam.title)}
+        </h4>
+
+        <p>
+          ${escapeHTML(subject)}
+          •
+          ${escapeHTML(chapter)}
+          •
+          ${exam.duration_minutes} Minutes
+          •
+          ${exam.total_marks} Marks
+        </p>
+
+        ${
+          exam.description
+            ? `<small>
+                ${escapeHTML(exam.description)}
+               </small>`
+            : ""
+        }
+
+      </div>
+
+      <button
+        class="primary-btn"
+        type="button"
+      >
+        Start Exam
+      </button>
+
+    `;
+
+
+    item
+      .querySelector("button")
+      .addEventListener(
+        "click",
+        () => startExam(exam)
+      );
+
+
+    list.appendChild(item);
+
+  });
 
 }
 
 
 /* =========================================================
-   EXAM LIST
+   STUDENT STATS
 ========================================================= */
 
-.exam-item {
+async function loadStudentStats() {
 
-  display:
-    flex;
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("exam_attempts")
+      .select(
+        "percentage,status"
+      )
+      .eq(
+        "student_id",
+        currentUser.id
+      )
+      .in(
+        "status",
+        [
+          "submitted",
+          "auto_submitted",
+          "expired"
+        ]
+      );
 
-  align-items:
-    center;
+  if (error) {
 
-  justify-content:
-    space-between;
+    console.error(error);
 
-  gap:
-    15px;
+    return;
 
-  padding:
-    18px 0;
+  }
 
-  border-bottom:
-    1px solid var(--border);
+  const attempts =
+    data || [];
 
-}
+  document.getElementById(
+    "attemptCount"
+  ).textContent =
+    attempts.length;
 
-.exam-item:last-child {
+  if (!attempts.length) {
 
-  border-bottom:
-    none;
+    document.getElementById(
+      "averageScore"
+    ).textContent =
+      "0%";
 
-}
+    document.getElementById(
+      "bestScore"
+    ).textContent =
+      "0%";
 
-.exam-info {
+    return;
 
-  min-width:
-    0;
+  }
 
-}
 
-.exam-item h4 {
+  const percentages =
+    attempts.map(
+      item =>
+        Number(
+          item.percentage || 0
+        )
+    );
 
-  margin-bottom:
-    5px;
 
-}
+  const average =
+    Math.round(
+      percentages.reduce(
+        (a, b) =>
+          a + b,
+        0
+      ) /
+      percentages.length
+    );
 
-.exam-item p {
 
-  color:
-    var(--muted);
+  const best =
+    Math.max(
+      ...percentages
+    );
 
-  font-size:
-    14px;
 
-}
+  document.getElementById(
+    "averageScore"
+  ).textContent =
+    average + "%";
 
-.exam-item small {
-
-  display:
-    block;
-
-  margin-top:
-    6px;
-
-  line-height:
-    1.5;
+  document.getElementById(
+    "bestScore"
+  ).textContent =
+    best + "%";
 
 }
 
 
 /* =========================================================
-   RESULTS
+   STUDENT RESULTS
 ========================================================= */
 
-.result-item {
+async function loadStudentResults() {
 
-  background:
-    white;
+  const container =
+    document.getElementById(
+      "myResults"
+    );
 
-  border:
-    1px solid var(--border);
+  container.innerHTML =
+    `<div class="loading">
+      Loading results...
+    </div>`;
 
-  border-radius:
-    12px;
 
-  padding:
-    18px;
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("exam_attempts")
+      .select(`
+        id,
+        score,
+        percentage,
+        correct_answers,
+        wrong_answers,
+        unanswered,
+        passed,
+        submitted_at,
+        status,
+        exams(title)
+      `)
+      .eq(
+        "student_id",
+        currentUser.id
+      )
+      .in(
+        "status",
+        [
+          "submitted",
+          "auto_submitted",
+          "expired"
+        ]
+      )
+      .order(
+        "submitted_at",
+        {
+          ascending: false
+        }
+      );
 
-  margin-bottom:
-    12px;
 
-  display:
-    flex;
+  if (error) {
 
-  justify-content:
-    space-between;
+    console.error(error);
 
-  align-items:
-    center;
+    container.innerHTML =
+      `<p>
+        Unable to load results.
+      </p>`;
 
-}
+    return;
 
-.result-item p {
+  }
 
-  color:
-    var(--muted);
 
-  margin-top:
-    5px;
+  container.innerHTML = "";
 
-  font-size:
-    13px;
 
-}
+  if (!data.length) {
 
-.score {
+    container.innerHTML =
+      `<div class="empty-state">
+        <div class="empty-icon">📄</div>
+        <h3>No results yet</h3>
+        <p>
+          Your completed exams will appear here.
+        </p>
+      </div>`;
 
-  font-size:
-    19px;
+    return;
 
-  font-weight:
-    bold;
+  }
 
-}
 
-.result-mini {
+  data.forEach(result => {
 
-  display:
-    flex;
+    const item =
+      document.createElement(
+        "div"
+      );
 
-  align-items:
-    center;
+    item.className =
+      "result-item";
 
-  gap:
-    12px;
+    item.innerHTML = `
 
-}
+      <div>
 
-.result-mini strong {
+        <strong>
+          ${escapeHTML(
+            result.exams?.title ||
+            "Exam"
+          )}
+        </strong>
 
-  font-size:
-    18px;
+        <p>
+          ${formatDate(
+            result.submitted_at
+          )}
+        </p>
 
-}
+      </div>
 
-.result-mini span {
+      <div class="result-mini">
 
-  font-weight:
-    bold;
+        <strong>
+          ${Number(
+            result.score || 0
+          ).toFixed(2)}
+        </strong>
 
-}
+        <span>
+          ${Number(
+            result.percentage || 0
+          )}%
+        </span>
 
-.result-mini em {
+        <em class="${
+          result.passed
+            ? "pass"
+            : "fail"
+        }">
+          ${
+            result.passed
+              ? "Passed"
+              : "Failed"
+          }
+        </em>
 
-  font-style:
-    normal;
+      </div>
 
-  font-size:
-    12px;
+    `;
 
-  font-weight:
-    bold;
+    container.appendChild(item);
 
-}
-
-.pass {
-
-  color:
-    var(--success);
-
-}
-
-.fail {
-
-  color:
-    var(--danger);
+  });
 
 }
 
 
 /* =========================================================
-   STATUS
+   HISTORY
 ========================================================= */
 
-.status-badge {
+async function loadStudentHistory() {
 
-  padding:
-    7px 12px;
+  const container =
+    document.getElementById(
+      "historyList"
+    );
 
-  border-radius:
-    999px;
+  container.innerHTML =
+    `<div class="loading">
+      Loading history...
+    </div>`;
 
-  font-size:
-    12px;
 
-  font-weight:
-    bold;
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("exam_attempts")
+      .select(`
+        id,
+        attempt_number,
+        score,
+        percentage,
+        status,
+        submitted_at,
+        created_at,
+        exams(title)
+      `)
+      .eq(
+        "student_id",
+        currentUser.id
+      )
+      .order(
+        "created_at",
+        {
+          ascending: false
+        }
+      );
 
-}
 
-.status-badge.published {
+  if (error) {
 
-  background:
-    #dcfce7;
+    console.error(error);
 
-  color:
-    #166534;
+    container.innerHTML =
+      `<p>
+        Unable to load history.
+      </p>`;
 
-}
+    return;
 
-.status-badge.draft {
+  }
 
-  background:
-    #f3f4f6;
 
-  color:
-    #374151;
+  container.innerHTML = "";
+
+
+  if (!data.length) {
+
+    container.innerHTML =
+      `<div class="empty-state">
+        <div class="empty-icon">🕘</div>
+        <h3>No attempts yet</h3>
+        <p>
+          Your exam attempts will appear here.
+        </p>
+      </div>`;
+
+    return;
+
+  }
+
+
+  data.forEach(attempt => {
+
+    const item =
+      document.createElement(
+        "div"
+      );
+
+    item.className =
+      "result-item";
+
+    item.innerHTML = `
+
+      <div>
+
+        <strong>
+          ${escapeHTML(
+            attempt.exams?.title ||
+            "Exam"
+          )}
+        </strong>
+
+        <p>
+          Attempt #${attempt.attempt_number}
+          •
+          ${escapeHTML(attempt.status)}
+          •
+          ${formatDate(
+            attempt.submitted_at ||
+            attempt.created_at
+          )}
+        </p>
+
+      </div>
+
+      <div class="score">
+
+        ${Number(
+          attempt.percentage || 0
+        )}%
+
+      </div>
+
+    `;
+
+    container.appendChild(item);
+
+  });
 
 }
 
 
 /* =========================================================
-   QUESTION BANK
+   TEACHER DASHBOARD
 ========================================================= */
 
-.qb-header-actions {
-
-  display: flex;
-  gap: 10px;
-
-}
-
-.filter-bar {
-
-  display: grid;
-  grid-template-columns: repeat(4, 1fr) 1.4fr;
-  gap: 10px;
-  margin-bottom: 18px;
-
-}
-
-.filter-bar select,
-.filter-bar input {
-
-  padding: 10px 12px;
-
-}
-
-.qb-item {
-
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 14px;
-  padding: 16px 0;
-  border-bottom: 1px solid var(--border);
-
-}
-
-.qb-item:last-child {
-  border-bottom: none;
-}
-
-.qb-item-main {
-  flex: 1;
-  min-width: 0;
-}
-
-.qb-item-main h4 {
-  margin-bottom: 6px;
-}
-
-.qb-item-main p {
-  color: var(--muted);
-  font-size: 13px;
-  margin-bottom: 6px;
-}
-
-.qb-badges {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.badge {
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: bold;
-  background: #f3f4f6;
-  color: #374151;
-}
-
-.badge.badge-easy {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.badge.badge-medium {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.badge.badge-hard {
-  background: #fee2e2;
-  color: #991b1b;
-}
+async function loadTeacherDashboard() {
+
+  if (!currentUser) {
+    return;
+  }
+
+
+  const {
+    data: exams,
+    error
+  } =
+    await supabaseClient
+      .from("exams")
+      .select(`
+        id,
+        title,
+        is_published,
+        duration_minutes,
+        total_marks,
+        created_at,
+        subjects(name),
+        chapters(name)
+      `)
+      .eq(
+        "created_by",
+        currentUser.id
+      )
+      .order(
+        "created_at",
+        {
+          ascending: false
+        }
+      );
+
+
+  if (error) {
+
+    console.error(error);
+
+    return;
 
-.qb-item-actions {
-  display: flex;
-  gap: 8px;
-  flex-shrink: 0;
-}
+  }
 
-.qb-item-actions button {
-  width: auto;
-  padding: 8px 14px;
-  font-size: 13px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: white;
-}
 
-.qb-item-actions .edit-question-btn:hover {
-  border-color: var(--primary);
-}
+  document.getElementById(
+    "teacherExamCount"
+  ).textContent =
+    exams.length;
 
-.qb-item-actions .delete-question-btn {
-  color: var(--danger);
-}
 
-.qb-item-actions .delete-question-btn:hover {
-  border-color: var(--danger);
-  background: #fef2f2;
-}
+  const {
+    data: attempts,
+    error: attemptsError
+  } =
+    await supabaseClient
+      .from("exam_attempts")
+      .select(
+        "student_id,percentage,status,exam_id"
+      );
 
-.form-row-inline {
-  display: flex;
-  gap: 6px;
-}
 
-.mini-btn {
-  width: 42px;
-  flex-shrink: 0;
-  border-radius: 9px;
-  border: 1px solid var(--border);
-  background: white;
-  font-weight: bold;
-  font-size: 16px;
-}
+  if (!attemptsError) {
 
-.mini-btn:hover {
-  border-color: var(--primary);
-}
+    const completed =
+      attempts.filter(
+        attempt =>
+          [
+            "submitted",
+            "auto_submitted",
+            "expired"
+          ].includes(
+            attempt.status
+          )
+      );
 
-.field-hint {
-  color: var(--muted);
-  font-size: 12px;
-  margin: 6px 0 14px;
-}
 
-.options-builder label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+    document.getElementById(
+      "teacherAttemptCount"
+    ).textContent =
+      completed.length;
 
-.options-builder label input[type="checkbox"] {
-  width: auto;
-}
 
+    const students =
+      new Set(
+        completed.map(
+          item =>
+            item.student_id
+        )
+      );
 
-/* =========================================================
-   FORM GRID
-========================================================= */
 
-.form-grid {
+    document.getElementById(
+      "teacherStudentCount"
+    ).textContent =
+      students.size;
 
-  display:
-    grid;
 
-  grid-template-columns:
-    repeat(2, 1fr);
+    if (completed.length) {
 
-  gap:
-    10px 18px;
+      const average =
+        Math.round(
+          completed.reduce(
+            (total, item) =>
+              total +
+              Number(
+                item.percentage || 0
+              ),
+            0
+          ) /
+          completed.length
+        );
 
-}
+      document.getElementById(
+        "teacherAverage"
+      ).textContent =
+        average + "%";
 
-.form-group {
+    }
 
-  min-width:
-    0;
+    else {
 
-}
+      document.getElementById(
+        "teacherAverage"
+      ).textContent =
+        "0%";
 
-.form-group.full {
+    }
 
-  grid-column:
-    1 / -1;
+  }
 
-}
 
-.form-group small {
+  const list =
+    document.getElementById(
+      "teacherExamList"
+    );
 
-  display:
-    block;
+  list.innerHTML = "";
 
-  margin-top:
-    6px;
 
-  font-size:
-    12px;
+  if (!exams.length) {
 
-}
+    list.innerHTML =
+      `<div class="empty-state">
 
+        <div class="empty-icon">
+          📝
+        </div>
 
-/* =========================================================
-   SETTINGS
-========================================================= */
+        <h3>
+          No exams created
+        </h3>
 
-.settings-grid {
+        <p>
+          Create your first exam from the Create Exam section.
+        </p>
 
-  display:
-    grid;
+      </div>`;
 
-  grid-template-columns:
-    repeat(2, 1fr);
+    return;
 
-  gap:
-    12px;
+  }
 
-  margin-top:
-    22px;
 
-}
+  exams.forEach(exam => {
 
-.check-card {
+    const item =
+      document.createElement(
+        "div"
+      );
 
-  display:
-    flex;
+    item.className =
+      "exam-item";
 
-  align-items:
-    flex-start;
 
-  gap:
-    10px;
+    item.innerHTML = `
 
-  margin:
-    0;
+      <div class="exam-info">
 
-  padding:
-    14px;
+        <h4>
+          ${escapeHTML(exam.title)}
+        </h4>
 
-  border:
-    1px solid var(--border);
+        <p>
+          ${escapeHTML(
+            exam.subjects?.name ||
+            "General"
+          )}
 
-  border-radius:
-    10px;
+          •
 
-  cursor:
-    pointer;
+          ${escapeHTML(
+            exam.chapters?.name ||
+            "All Chapters"
+          )}
 
-  background:
-    #fafafa;
+          •
 
-}
+          ${exam.duration_minutes}
+          Minutes
 
-.check-card:hover {
+          •
 
-  background:
-    #f8fafc;
+          ${exam.total_marks}
+          Marks
 
-}
+        </p>
 
-.check-card input {
+      </div>
 
-  width:
-    auto;
+      <div class="status-badge ${
+        exam.is_published
+          ? "published"
+          : "draft"
+      }">
 
-  margin-top:
-    3px;
+        ${
+          exam.is_published
+            ? "Published"
+            : "Draft"
+        }
 
-}
+      </div>
 
-.check-card span {
+    `;
 
-  display:
-    flex;
 
-  flex-direction:
-    column;
+    list.appendChild(item);
 
-  gap:
-    4px;
-
-}
-
-.check-card strong {
-
-  font-size:
-    14px;
-
-}
-
-.check-card small {
-
-  font-size:
-    12px;
-
-  font-weight:
-    normal;
+  });
 
 }
 
 
 /* =========================================================
-   FORM MESSAGE
+   TEACHER SCORES
 ========================================================= */
 
-.form-message {
+async function loadTeacherScores() {
 
-  min-height:
-    20px;
+  const table =
+    document.getElementById(
+      "scoreTable"
+    );
 
-  margin-top:
-    18px;
+  table.innerHTML =
+    `<tr>
+      <td colspan="5">
+        Loading...
+      </td>
+    </tr>`;
 
-  font-size:
-    14px;
 
-  font-weight:
-    bold;
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("exam_attempts")
+      .select(`
+        score,
+        percentage,
+        submitted_at,
+        profiles!exam_attempts_student_id_fkey(full_name),
+        exams!inner(title,created_by)
+      `)
+      .eq(
+        "exams.created_by",
+        currentUser.id
+      )
+      .in(
+        "status",
+        [
+          "submitted",
+          "auto_submitted",
+          "expired"
+        ]
+      )
+      .order(
+        "submitted_at",
+        {
+          ascending: false
+        }
+      );
 
-}
 
-.form-message.error {
+  if (error) {
 
-  color:
-    var(--danger);
+    console.error(error);
 
-}
+    table.innerHTML =
+      `<tr>
+        <td colspan="5">
+          Unable to load scores.
+        </td>
+      </tr>`;
 
-.form-message.success {
+    return;
 
-  color:
-    var(--success);
+  }
+
+
+  table.innerHTML = "";
+
+
+  if (!data.length) {
+
+    table.innerHTML =
+      `<tr>
+        <td colspan="5">
+          No student attempts yet.
+        </td>
+      </tr>`;
+
+    return;
+
+  }
+
+
+  data.forEach(result => {
+
+    const row =
+      document.createElement(
+        "tr"
+      );
+
+    row.innerHTML = `
+
+      <td>
+        ${escapeHTML(
+          result.profiles?.full_name ||
+          "Student"
+        )}
+      </td>
+
+      <td>
+        ${escapeHTML(
+          result.exams?.title ||
+          "Exam"
+        )}
+      </td>
+
+      <td>
+        ${Number(
+          result.score || 0
+        ).toFixed(2)}
+      </td>
+
+      <td>
+        ${Number(
+          result.percentage || 0
+        )}%
+      </td>
+
+      <td>
+        ${formatDate(
+          result.submitted_at
+        )}
+      </td>
+
+    `;
+
+    table.appendChild(row);
+
+  });
 
 }
 
 
 /* =========================================================
-   QUESTION BUILDER
+   EXAM BUILDER
 ========================================================= */
 
-.question-header {
+let builderInitialized = false;
 
-  display:
-    flex;
 
-  justify-content:
-    space-between;
+async function initializeExamBuilder() {
 
-  align-items:
-    center;
+  if (
+    builderInitialized
+  ) {
+    return;
+  }
 
-  gap:
-    15px;
+  builderInitialized = true;
 
-}
+  builderQuestions = [];
 
-.question-builder-card {
+  await loadSubjects();
 
-  border:
-    1px solid var(--border);
-
-  border-radius:
-    12px;
-
-  padding:
-    20px;
-
-  margin-bottom:
-    15px;
-
-  background:
-    #fafafa;
-
-}
-
-.question-builder-top {
-
-  display:
-    flex;
-
-  justify-content:
-    space-between;
-
-  align-items:
-    center;
-
-  margin-bottom:
-    15px;
-
-}
-
-.question-builder-top h3 {
-
-  font-size:
-    18px;
-
-}
-
-.remove-question-btn {
-
-  border:
-    none;
-
-  background:
-    #fee2e2;
-
-  color:
-    #991b1b;
-
-  padding:
-    8px 12px;
-
-  border-radius:
-    8px;
-
-  font-weight:
-    bold;
-
-}
-
-.remove-question-btn:hover {
-
-  background:
-    #fecaca;
-
-}
-
-.options-builder {
-
-  display:
-    grid;
-
-  grid-template-columns:
-    repeat(2, 1fr);
-
-  gap:
-    10px 18px;
-
-}
-
-.small-empty {
-
-  padding:
-    35px 20px;
+  renderQuestionBuilder();
 
 }
 
 
 /* =========================================================
-   BUILDER ACTIONS
+   LOAD SUBJECTS
 ========================================================= */
 
-.builder-actions {
+async function loadSubjects() {
 
-  display:
-    flex;
+  const select =
+    document.getElementById(
+      "examSubject"
+    );
 
-  justify-content:
-    flex-end;
+  select.innerHTML =
+    `<option value="">
+      Select Subject
+    </option>`;
 
-  gap:
-    10px;
 
-  margin-top:
-    10px;
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("subjects")
+      .select(
+        "id,name"
+      )
+      .order(
+        "name",
+        {
+          ascending: true
+        }
+      );
 
-  margin-bottom:
-    30px;
+
+  if (error) {
+
+    console.error(error);
+
+    return;
+
+  }
+
+
+  (data || []).forEach(subject => {
+
+    const option =
+      document.createElement(
+        "option"
+      );
+
+    option.value =
+      subject.id;
+
+    option.textContent =
+      subject.name;
+
+    select.appendChild(option);
+
+  });
 
 }
 
 
 /* =========================================================
-   EXAM RUNNING
+   SUBJECT -> CHAPTER
 ========================================================= */
 
-.exam-topbar {
+document
+  .getElementById("examSubject")
+  .addEventListener(
+    "change",
+    async event => {
 
-  display:
-    flex;
+      await loadChapters(
+        event.target.value
+      );
 
-  justify-content:
-    space-between;
+    }
+  );
 
-  align-items:
-    center;
 
-  gap:
-    20px;
+async function loadChapters(subjectId) {
 
-  margin-bottom:
-    25px;
+  const select =
+    document.getElementById(
+      "examChapter"
+    );
 
-}
+  select.innerHTML =
+    `<option value="">
+      All Chapters
+    </option>`;
 
-.exam-topbar h2 {
 
-  margin:
-    5px 0;
+  if (!subjectId) {
+    return;
+  }
 
-}
 
-.timer-box {
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("chapters")
+      .select(
+        "id,name"
+      )
+      .eq(
+        "subject_id",
+        subjectId
+      )
+      .order(
+        "name",
+        {
+          ascending: true
+        }
+      );
 
-  min-width:
-    130px;
 
-  padding:
-    13px 16px;
+  if (error) {
 
-  border:
-    1px solid var(--border);
+    console.error(error);
 
-  border-radius:
-    12px;
+    return;
 
-  background:
-    white;
+  }
 
-  text-align:
-    center;
 
-}
+  (data || []).forEach(chapter => {
 
-.timer-box span {
+    const option =
+      document.createElement(
+        "option"
+      );
 
-  display:
-    block;
+    option.value =
+      chapter.id;
 
-  color:
-    var(--muted);
+    option.textContent =
+      chapter.name;
 
-  font-size:
-    12px;
+    select.appendChild(option);
 
-  margin-bottom:
-    4px;
-
-}
-
-.timer-box strong {
-
-  font-size:
-    22px;
-
-}
-
-.timer-danger {
-
-  color:
-    var(--danger);
-
-}
-
-
-/* PROGRESS */
-
-.question-progress {
-
-  height:
-    7px;
-
-  background:
-    #e5e7eb;
-
-  border-radius:
-    999px;
-
-  overflow:
-    hidden;
-
-  margin-bottom:
-    25px;
-
-}
-
-.progress-bar {
-
-  width:
-    0%;
-
-  height:
-    100%;
-
-  background:
-    #111827;
-
-  transition:
-    width 0.2s ease;
-
-}
-
-
-/* QUESTION */
-
-#runningQuestionText {
-
-  font-size:
-    20px;
-
-  line-height:
-    1.6;
-
-  margin-bottom:
-    20px;
-
-}
-
-.question-image-wrap {
-
-  margin-bottom:
-    18px;
-
-}
-
-.question-image {
-
-  max-width:
-    100%;
-
-  max-height:
-    350px;
-
-  object-fit:
-    contain;
-
-  border:
-    1px solid var(--border);
-
-  border-radius:
-    10px;
-
-}
-
-
-/* OPTIONS */
-
-.option {
-
-  width:
-    100%;
-
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  gap:
-    12px;
-
-  border:
-    1px solid var(--border);
-
-  background:
-    white;
-
-  padding:
-    15px;
-
-  border-radius:
-    10px;
-
-  margin:
-    10px 0;
-
-  cursor:
-    pointer;
-
-  text-align:
-    left;
-
-}
-
-.option:hover {
-
-  background:
-    #f9fafb;
-
-}
-
-.option.selected {
-
-  background:
-    #111827;
-
-  color:
-    white;
-
-  border-color:
-    #111827;
-
-}
-
-.option-letter {
-
-  width:
-    32px;
-
-  height:
-    32px;
-
-  border-radius:
-    50%;
-
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  justify-content:
-    center;
-
-  background:
-    #f3f4f6;
-
-  color:
-    #111827;
-
-  font-weight:
-    bold;
-
-  flex:
-    0 0 auto;
-
-}
-
-.option.selected
-.option-letter {
-
-  background:
-    white;
-
-  color:
-    #111827;
-
-}
-
-
-/* EXAM ACTIONS */
-
-.exam-actions {
-
-  display:
-    flex;
-
-  justify-content:
-    space-between;
-
-  gap:
-    10px;
-
-  margin-top:
-    20px;
-
-}
-
-
-/* QUESTION NAVIGATION */
-
-.question-navigation {
-
-  display:
-    flex;
-
-  flex-wrap:
-    wrap;
-
-  gap:
-    8px;
-
-  margin-top:
-    20px;
-
-}
-
-.question-navigation button {
-
-  width:
-    40px;
-
-  height:
-    40px;
-
-  border:
-    1px solid var(--border);
-
-  background:
-    white;
-
-  border-radius:
-    8px;
-
-}
-
-.question-navigation button.active {
-
-  background:
-    #111827;
-
-  color:
-    white;
-
-}
-
-.question-navigation button.answered {
-
-  border-color:
-    var(--success);
+  });
 
 }
 
 
 /* =========================================================
-   RESULT PAGE
+   ADD QUESTION
 ========================================================= */
 
-.result-summary {
+document
+  .getElementById("addQuestionBtn")
+  .addEventListener(
+    "click",
+    () => {
 
-  display:
-    grid;
+      builderQuestions.push({
 
-  grid-template-columns:
-    repeat(4, 1fr);
+        localId:
+          Date.now() +
+          Math.random(),
 
-  gap:
-    15px;
+        question_text: "",
 
-  margin-bottom:
-    20px;
+        image_url: "",
 
-}
+        option_a: "",
 
-.result-big-card {
+        option_b: "",
 
-  background:
-    white;
+        option_c: "",
 
-  border:
-    1px solid var(--border);
+        option_d: "",
 
-  border-radius:
-    14px;
+        correct_answer: "A",
 
-  padding:
-    20px;
+        explanation: "",
 
-  text-align:
-    center;
+        marks: 1,
 
-}
+        negative_marks: 0,
 
-.result-big-card span {
+        question_order:
+          builderQuestions.length + 1
 
-  display:
-    block;
+      });
 
-  color:
-    var(--muted);
+      renderQuestionBuilder();
 
-  font-size:
-    13px;
+    }
+  );
 
-  margin-bottom:
-    8px;
 
-}
+/* =========================================================
+   RENDER QUESTION BUILDER
+========================================================= */
 
-.result-big-card strong {
+function renderQuestionBuilder() {
 
-  font-size:
-    27px;
+  const container =
+    document.getElementById(
+      "questionBuilder"
+    );
 
-}
+  if (!builderQuestions.length) {
 
-.pass-text {
+    container.innerHTML =
+      `<div class="empty-state small-empty">
 
-  color:
-    var(--success);
+        <div class="empty-icon">
+          ❓
+        </div>
 
-}
+        <h3>
+          No questions added
+        </h3>
 
-.fail-text {
+        <p>
+          Click "Add Question" to create your first question.
+        </p>
 
-  color:
-    var(--danger);
+      </div>`;
 
-}
+    return;
 
-.result-detail-grid {
+  }
 
-  display:
-    grid;
 
-  grid-template-columns:
-    repeat(4, 1fr);
+  container.innerHTML = "";
 
-  gap:
-    12px;
 
-}
+  builderQuestions.forEach(
+    (question, index) => {
 
-.result-detail-grid div {
+      const card =
+        document.createElement(
+          "div"
+        );
 
-  background:
-    #f8fafc;
+      card.className =
+        "question-builder-card";
 
-  border:
-    1px solid var(--border);
 
-  padding:
-    15px;
+      card.innerHTML = `
 
-  border-radius:
-    10px;
+        <div class="question-builder-top">
 
-}
+          <h3>
+            Question ${index + 1}
+          </h3>
 
-.result-detail-grid span {
+          <button
+            type="button"
+            class="remove-question-btn"
+          >
+            🗑 Remove
+          </button>
 
-  display:
-    block;
+        </div>
 
-  color:
-    var(--muted);
 
-  font-size:
-    12px;
+        <div class="form-group">
 
-  margin-bottom:
-    5px;
+          <label>
+            Question Text *
+          </label>
 
-}
+          <textarea
+            rows="3"
+            class="builder-question-text"
+            placeholder="Enter question"
+          >${escapeHTML(
+            question.question_text
+          )}</textarea>
 
-.review-section {
+        </div>
 
-  margin-top:
-    25px;
 
-}
+        <div class="form-group">
 
-.review-section h3 {
+          <label>
+            Question Image URL
+          </label>
 
-  margin-bottom:
-    15px;
+          <input
+            type="url"
+            class="builder-image-url"
+            placeholder="https://..."
+            value="${escapeAttribute(
+              question.image_url
+            )}"
+          >
 
-}
+        </div>
 
-.review-item {
 
-  border:
-    1px solid var(--border);
+        <div class="options-builder">
 
-  border-radius:
-    10px;
+          <div class="form-group">
 
-  padding:
-    15px;
+            <label>
+              Option A *
+            </label>
 
-  margin-bottom:
-    12px;
+            <input
+              type="text"
+              class="builder-option-a"
+              value="${escapeAttribute(
+                question.option_a
+              )}"
+              placeholder="Option A"
+            >
 
-}
+          </div>
 
-.review-item p {
 
-  margin-top:
-    8px;
+          <div class="form-group">
 
-  font-size:
-    14px;
+            <label>
+              Option B *
+            </label>
 
-}
+            <input
+              type="text"
+              class="builder-option-b"
+              value="${escapeAttribute(
+                question.option_b
+              )}"
+              placeholder="Option B"
+            >
 
-.explanation {
+          </div>
 
-  margin-top:
-    12px;
 
-  padding:
-    12px;
+          <div class="form-group">
 
-  background:
-    #f8fafc;
+            <label>
+              Option C
+            </label>
 
-  border-radius:
-    8px;
+            <input
+              type="text"
+              class="builder-option-c"
+              value="${escapeAttribute(
+                question.option_c
+              )}"
+              placeholder="Option C"
+            >
 
-  line-height:
-    1.5;
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Option D
+            </label>
+
+            <input
+              type="text"
+              class="builder-option-d"
+              value="${escapeAttribute(
+                question.option_d
+              )}"
+              placeholder="Option D"
+            >
+
+          </div>
+
+        </div>
+
+
+        <div class="form-grid">
+
+          <div class="form-group">
+
+            <label>
+              Correct Answer *
+            </label>
+
+            <select class="builder-correct-answer">
+
+              <option value="A"
+                ${question.correct_answer === "A" ? "selected" : ""}>
+                A
+              </option>
+
+              <option value="B"
+                ${question.correct_answer === "B" ? "selected" : ""}>
+                B
+              </option>
+
+              <option value="C"
+                ${question.correct_answer === "C" ? "selected" : ""}>
+                C
+              </option>
+
+              <option value="D"
+                ${question.correct_answer === "D" ? "selected" : ""}>
+                D
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Marks
+            </label>
+
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              class="builder-marks"
+              value="${question.marks}"
+            >
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Negative Marks
+            </label>
+
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              class="builder-negative"
+              value="${question.negative_marks}"
+            >
+
+          </div>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Explanation
+          </label>
+
+          <textarea
+            rows="2"
+            class="builder-explanation"
+            placeholder="Explain the correct answer"
+          >${escapeHTML(
+            question.explanation
+          )}</textarea>
+
+        </div>
+
+      `;
+
+
+      const get =
+        selector =>
+          card.querySelector(
+            selector
+          );
+
+
+      get(".builder-question-text")
+        .addEventListener(
+          "input",
+          event => {
+
+            question.question_text =
+              event.target.value;
+
+          }
+        );
+
+
+      get(".builder-image-url")
+        .addEventListener(
+          "input",
+          event => {
+
+            question.image_url =
+              event.target.value;
+
+          }
+        );
+
+
+      get(".builder-option-a")
+        .addEventListener(
+          "input",
+          event => {
+
+            question.option_a =
+              event.target.value;
+
+          }
+        );
+
+
+      get(".builder-option-b")
+        .addEventListener(
+          "input",
+          event => {
+
+            question.option_b =
+              event.target.value;
+
+          }
+        );
+
+
+      get(".builder-option-c")
+        .addEventListener(
+          "input",
+          event => {
+
+            question.option_c =
+              event.target.value;
+
+          }
+        );
+
+
+      get(".builder-option-d")
+        .addEventListener(
+          "input",
+          event => {
+
+            question.option_d =
+              event.target.value;
+
+          }
+        );
+
+
+      get(".builder-correct-answer")
+        .addEventListener(
+          "change",
+          event => {
+
+            question.correct_answer =
+              event.target.value;
+
+          }
+        );
+
+
+      get(".builder-marks")
+        .addEventListener(
+          "input",
+          event => {
+
+            question.marks =
+              Number(
+                event.target.value
+              ) || 0;
+
+          }
+        );
+
+
+      get(".builder-negative")
+        .addEventListener(
+          "input",
+          event => {
+
+            question.negative_marks =
+              Number(
+                event.target.value
+              ) || 0;
+
+          }
+        );
+
+
+      get(".builder-explanation")
+        .addEventListener(
+          "input",
+          event => {
+
+            question.explanation =
+              event.target.value;
+
+          }
+        );
+
+
+      get(".remove-question-btn")
+        .addEventListener(
+          "click",
+          () => {
+
+            builderQuestions =
+              builderQuestions.filter(
+                item =>
+                  item.localId !==
+                  question.localId
+              );
+
+            renumberQuestions();
+
+            renderQuestionBuilder();
+
+          }
+        );
+
+
+      container.appendChild(card);
+
+    }
+  );
 
 }
 
 
 /* =========================================================
-   TABLE
+   RENUMBER
 ========================================================= */
 
-.table-wrapper {
+function renumberQuestions() {
 
-  overflow-x:
-    auto;
+  builderQuestions.forEach(
+    (question, index) => {
 
-}
+      question.question_order =
+        index + 1;
 
-table {
-
-  width:
-    100%;
-
-  border-collapse:
-    collapse;
-
-}
-
-th,
-td {
-
-  padding:
-    13px;
-
-  border-bottom:
-    1px solid var(--border);
-
-  text-align:
-    left;
-
-  white-space:
-    nowrap;
-
-}
-
-th {
-
-  background:
-    #f8fafc;
+    }
+  );
 
 }
 
 
 /* =========================================================
-   EMPTY
+   VALIDATE EXAM
 ========================================================= */
 
-.empty-state {
+function validateExam() {
 
-  padding:
-    50px 20px;
+  const title =
+    document
+      .getElementById(
+        "examTitleInput"
+      )
+      .value
+      .trim();
 
-  text-align:
-    center;
+  const subjectId =
+    document.getElementById(
+      "examSubject"
+    ).value;
 
-}
+  const duration =
+    Number(
+      document.getElementById(
+        "examDuration"
+      ).value
+    );
 
-.empty-icon {
+  const totalMarks =
+    Number(
+      document.getElementById(
+        "examTotalMarks"
+      ).value
+    );
 
-  font-size:
-    40px;
+  const passing =
+    Number(
+      document.getElementById(
+        "examPassing"
+      ).value
+    );
 
-  margin-bottom:
-    15px;
 
-}
+  if (!title) {
 
-.empty-state p {
+    return "Exam title is required.";
 
-  color:
-    var(--muted);
+  }
 
-  max-width:
-    550px;
 
-  margin:
-    10px auto;
+  if (!subjectId) {
 
-  line-height:
-    1.6;
+    return "Please select a subject.";
 
-}
+  }
 
-.loading {
 
-  padding:
-    25px;
+  if (
+    !duration ||
+    duration < 1
+  ) {
 
-  text-align:
-    center;
+    return "Duration must be at least 1 minute.";
 
-  color:
-    var(--muted);
+  }
+
+
+  if (
+    !totalMarks ||
+    totalMarks <= 0
+  ) {
+
+    return "Total marks must be greater than 0.";
+
+  }
+
+
+  if (
+    passing < 0 ||
+    passing > 100
+  ) {
+
+    return "Passing percentage must be between 0 and 100.";
+
+  }
+
+
+  if (!builderQuestions.length) {
+
+    return "Please add at least one question.";
+
+  }
+
+
+  for (
+    let i = 0;
+    i < builderQuestions.length;
+    i++
+  ) {
+
+    const q =
+      builderQuestions[i];
+
+    if (
+      !q.question_text.trim()
+    ) {
+
+      return `Question ${i + 1} text is required.`;
+
+    }
+
+
+    if (
+      !q.option_a.trim() ||
+      !q.option_b.trim()
+    ) {
+
+      return `Question ${i + 1}: Option A and Option B are required.`;
+
+    }
+
+
+    if (
+      q.correct_answer === "C" &&
+      !q.option_c.trim()
+    ) {
+
+      return `Question ${i + 1}: Option C is empty.`;
+
+    }
+
+
+    if (
+      q.correct_answer === "D" &&
+      !q.option_d.trim()
+    ) {
+
+      return `Question ${i + 1}: Option D is empty.`;
+
+    }
+
+
+    if (
+      Number(q.marks) <= 0
+    ) {
+
+      return `Question ${i + 1}: Marks must be greater than 0.`;
+
+    }
+
+  }
+
+
+  return null;
 
 }
 
 
 /* =========================================================
-   MOBILE
+   GET EXAM FORM DATA
 ========================================================= */
 
-@media (
-  max-width: 900px
+function getExamFormData(
+  published
 ) {
 
-  .sidebar {
+  return {
 
-    width:
-      220px;
+    title:
+      document
+        .getElementById(
+          "examTitleInput"
+        )
+        .value
+        .trim(),
+
+    description:
+      document
+        .getElementById(
+          "examDescription"
+        )
+        .value
+        .trim(),
+
+    subject_id:
+      Number(
+        document.getElementById(
+          "examSubject"
+        ).value
+      ),
+
+    chapter_id:
+      document.getElementById(
+        "examChapter"
+      ).value
+        ? Number(
+            document.getElementById(
+              "examChapter"
+            ).value
+          )
+        : null,
+
+    duration_minutes:
+      Number(
+        document.getElementById(
+          "examDuration"
+        ).value
+      ),
+
+    total_marks:
+      Number(
+        document.getElementById(
+          "examTotalMarks"
+        ).value
+      ),
+
+    passing_percentage:
+      Number(
+        document.getElementById(
+          "examPassing"
+        ).value
+      ) || 0,
+
+    negative_marking:
+      Number(
+        document.getElementById(
+          "examNegative"
+        ).value
+      ) || 0,
+
+    max_attempts:
+      Number(
+        document.getElementById(
+          "examMaxAttempts"
+        ).value
+      ) || 1,
+
+    randomize_questions:
+      document.getElementById(
+        "randomizeQuestions"
+      ).checked,
+
+    randomize_options:
+      document.getElementById(
+        "randomizeOptions"
+      ).checked,
+
+    show_result_immediately:
+      document.getElementById(
+        "showResultImmediately"
+      ).checked,
+
+    show_explanations:
+      document.getElementById(
+        "showExplanations"
+      ).checked,
+
+    is_published:
+      published
+
+  };
+
+}
+
+
+/* =========================================================
+   SAVE DRAFT
+========================================================= */
+
+document
+  .getElementById("saveDraftBtn")
+  .addEventListener(
+    "click",
+    () => saveExam(false)
+  );
+
+
+/* =========================================================
+   PUBLISH
+========================================================= */
+
+document
+  .getElementById("publishExamBtn")
+  .addEventListener(
+    "click",
+    () => saveExam(true)
+  );
+
+
+/* =========================================================
+   SAVE EXAM
+========================================================= */
+
+async function saveExam(
+  published
+) {
+
+  const message =
+    document.getElementById(
+      "examFormMessage"
+    );
+
+  const validation =
+    validateExam();
+
+  if (validation) {
+
+    message.className =
+      "form-message error";
+
+    message.textContent =
+      validation;
+
+    return;
 
   }
 
-  .main-content {
 
-    width:
-      calc(100% - 220px);
+  const saveButton =
+    published
+      ? document.getElementById(
+          "publishExamBtn"
+        )
+      : document.getElementById(
+          "saveDraftBtn"
+        );
 
-    margin-left:
-      220px;
 
-    padding:
-      25px;
+  saveButton.disabled = true;
+
+  saveButton.textContent =
+    published
+      ? "Publishing..."
+      : "Saving...";
+
+
+  try {
+
+    const examData =
+      getExamFormData(
+        published
+      );
+
+
+    /*
+      First create exam.
+    */
+
+    const {
+      data: exam,
+      error: examError
+    } =
+      await supabaseClient
+        .from("exams")
+        .insert({
+
+          created_by:
+            currentUser.id,
+
+          title:
+            examData.title,
+
+          description:
+            examData.description,
+
+          subject_id:
+            examData.subject_id,
+
+          chapter_id:
+            examData.chapter_id,
+
+          duration_minutes:
+            examData.duration_minutes,
+
+          total_marks:
+            examData.total_marks,
+
+          passing_percentage:
+            examData.passing_percentage,
+
+          negative_marking:
+            examData.negative_marking,
+
+          max_attempts:
+            examData.max_attempts,
+
+          randomize_questions:
+            examData.randomize_questions,
+
+          randomize_options:
+            examData.randomize_options,
+
+          show_result_immediately:
+            examData.show_result_immediately,
+
+          show_explanations:
+            examData.show_explanations,
+
+          is_published:
+            examData.is_published
+
+        })
+        .select()
+        .single();
+
+
+    if (examError) {
+      throw examError;
+    }
+
+
+    /*
+      Insert questions.
+    */
+
+    const questions =
+      builderQuestions.map(
+        (question, index) => ({
+
+          exam_id:
+            exam.id,
+
+          question_text:
+            question.question_text.trim(),
+
+          image_url:
+            question.image_url.trim() ||
+            null,
+
+          option_a:
+            question.option_a.trim(),
+
+          option_b:
+            question.option_b.trim(),
+
+          option_c:
+            question.option_c.trim() ||
+            null,
+
+          option_d:
+            question.option_d.trim() ||
+            null,
+
+          correct_answer:
+            question.correct_answer,
+
+          explanation:
+            question.explanation.trim() ||
+            null,
+
+          marks:
+            Number(
+              question.marks
+            ),
+
+          negative_marks:
+            Number(
+              question.negative_marks
+            ) || 0,
+
+          question_order:
+            index + 1
+
+        })
+      );
+
+
+    const {
+      error: questionError
+    } =
+      await supabaseClient
+        .from("questions")
+        .insert(
+          questions
+        );
+
+
+    if (questionError) {
+
+      /*
+        If question insert fails,
+        remove the newly created exam.
+      */
+
+      await supabaseClient
+        .from("exams")
+        .delete()
+        .eq(
+          "id",
+          exam.id
+        );
+
+      throw questionError;
+
+    }
+
+
+    message.className =
+      "form-message success";
+
+    message.textContent =
+      published
+        ? "Exam published successfully."
+        : "Exam saved as draft successfully.";
+
+
+    alert(
+      published
+        ? "Exam Published Successfully!"
+        : "Exam Saved as Draft!"
+    );
+
+
+    resetExamBuilder();
+
+    showPage(
+      "teacherDashboard"
+    );
 
   }
 
-  .stats-grid {
+  catch (error) {
 
-    grid-template-columns:
-      repeat(2, 1fr);
+    console.error(
+      "Save exam error:",
+      error
+    );
+
+    message.className =
+      "form-message error";
+
+    message.textContent =
+      error.message ||
+      "Unable to save exam.";
 
   }
 
-  .result-summary {
+  finally {
 
-    grid-template-columns:
-      repeat(2, 1fr);
+    saveButton.disabled = false;
 
-  }
-
-  .result-detail-grid {
-
-    grid-template-columns:
-      repeat(2, 1fr);
+    saveButton.textContent =
+      published
+        ? "🚀 Publish Exam"
+        : "💾 Save Draft";
 
   }
 
 }
 
 
-@media (
-  max-width: 650px
-) {
+/* =========================================================
+   RESET BUILDER
+========================================================= */
 
-  .app {
+function resetExamBuilder() {
 
-    display:
-      block;
+  builderQuestions = [];
 
-  }
+  builderInitialized = false;
 
-  .sidebar {
+  document
+    .getElementById(
+      "examForm"
+    )
+    .reset();
 
-    position:
-      static;
+  document.getElementById(
+    "examPassing"
+  ).value = 40;
 
-    width:
-      100%;
+  document.getElementById(
+    "examNegative"
+  ).value = 0;
 
-    min-height:
-      auto;
+  document.getElementById(
+    "examMaxAttempts"
+  ).value = 1;
 
-  }
+  document.getElementById(
+    "examDuration"
+  ).value = 30;
 
-  .main-content {
+  document.getElementById(
+    "examTotalMarks"
+  ).value = 10;
 
-    width:
-      100%;
+  document.getElementById(
+    "showResultImmediately"
+  ).checked = true;
 
-    margin-left:
-      0;
+  document.getElementById(
+    "showExplanations"
+  ).checked = true;
 
-    padding:
-      18px;
+  renderQuestionBuilder();
 
-  }
+}
 
-  .stats-grid {
 
-    grid-template-columns:
-      repeat(2, 1fr);
+/* =========================================================
+   QUESTION BANK — STATE
+========================================================= */
 
-  }
+let qbInitialized = false;
+let qbQuestions = [];
+let qbEditingId = null;
 
-  .form-grid {
 
-    grid-template-columns:
-      1fr;
+/* =========================================================
+   QUESTION BANK — INIT
+========================================================= */
 
-  }
+async function initializeQuestionBank() {
 
-  .filter-bar {
+  if (!qbInitialized) {
 
-    grid-template-columns:
-      1fr;
+    qbInitialized = true;
 
-  }
+    await populateSubjectSelect(
+      document.getElementById("qbFilterSubject"),
+      "All Subjects"
+    );
 
-  .qb-item {
+    await populateSubjectSelect(
+      document.getElementById("qSubject"),
+      "Select Subject"
+    );
 
-    flex-direction:
-      column;
+    await populateSubjectSelect(
+      document.getElementById("bulkSubject"),
+      "Select Subject"
+    );
 
-  }
-
-  .form-group.full {
-
-    grid-column:
-      auto;
-
-  }
-
-  .settings-grid {
-
-    grid-template-columns:
-      1fr;
-
-  }
-
-  .options-builder {
-
-    grid-template-columns:
-      1fr;
-
-  }
-
-  .exam-item {
-
-    flex-direction:
-      column;
-
-    align-items:
-      flex-start;
+    wireQuestionBankEvents();
 
   }
 
-  .exam-item button {
+  await loadQuestionBank();
 
-    width:
-      100%;
+}
+
+
+/* =========================================================
+   QUESTION BANK — SUBJECT / CHAPTER / TOPIC HELPERS
+========================================================= */
+
+async function populateSubjectSelect(select, placeholder) {
+
+  if (!select) {
+    return;
+  }
+
+  const currentValue = select.value;
+
+  select.innerHTML =
+    `<option value="">${placeholder}</option>`;
+
+  const { data, error } =
+    await supabaseClient
+      .from("subjects")
+      .select("id,name")
+      .order("name", { ascending: true });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  (data || []).forEach(subject => {
+
+    const option = document.createElement("option");
+
+    option.value = subject.id;
+    option.textContent = subject.name;
+
+    select.appendChild(option);
+
+  });
+
+  if (currentValue) {
+    select.value = currentValue;
+  }
+
+}
+
+
+async function populateChapterSelect(select, subjectId, placeholder) {
+
+  if (!select) {
+    return;
+  }
+
+  select.innerHTML =
+    `<option value="">${placeholder}</option>`;
+
+  if (!subjectId) {
+    return;
+  }
+
+  const { data, error } =
+    await supabaseClient
+      .from("chapters")
+      .select("id,name")
+      .eq("subject_id", subjectId)
+      .order("name", { ascending: true });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  (data || []).forEach(chapter => {
+
+    const option = document.createElement("option");
+
+    option.value = chapter.id;
+    option.textContent = chapter.name;
+
+    select.appendChild(option);
+
+  });
+
+}
+
+
+async function populateTopicSelect(select, chapterId, placeholder) {
+
+  if (!select) {
+    return;
+  }
+
+  select.innerHTML =
+    `<option value="">${placeholder}</option>`;
+
+  if (!chapterId) {
+    return;
+  }
+
+  const { data, error } =
+    await supabaseClient
+      .from("topics")
+      .select("id,name")
+      .eq("chapter_id", chapterId)
+      .order("name", { ascending: true });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  (data || []).forEach(topic => {
+
+    const option = document.createElement("option");
+
+    option.value = topic.id;
+    option.textContent = topic.name;
+
+    select.appendChild(option);
+
+  });
+
+}
+
+
+async function quickAddSubject(select) {
+
+  const name = prompt("New subject name:");
+
+  if (!name || !name.trim()) {
+    return;
+  }
+
+  const { data, error } =
+    await supabaseClient
+      .from("subjects")
+      .insert({ name: name.trim() })
+      .select()
+      .single();
+
+  if (error) {
+    alert(error.message || "Unable to add subject.");
+    return;
+  }
+
+  await populateSubjectSelect(select, select.options[0].textContent);
+
+  select.value = data.id;
+
+  select.dispatchEvent(new Event("change"));
+
+}
+
+
+async function quickAddChapter(select, subjectId) {
+
+  if (!subjectId) {
+    alert("Please select a subject first.");
+    return;
+  }
+
+  const name = prompt("New chapter name:");
+
+  if (!name || !name.trim()) {
+    return;
+  }
+
+  const { data, error } =
+    await supabaseClient
+      .from("chapters")
+      .insert({ name: name.trim(), subject_id: subjectId })
+      .select()
+      .single();
+
+  if (error) {
+    alert(error.message || "Unable to add chapter.");
+    return;
+  }
+
+  await populateChapterSelect(select, subjectId, select.options[0].textContent);
+
+  select.value = data.id;
+
+  select.dispatchEvent(new Event("change"));
+
+}
+
+
+async function quickAddTopic(select, chapterId) {
+
+  if (!chapterId) {
+    alert("Please select a chapter first.");
+    return;
+  }
+
+  const name = prompt("New topic name:");
+
+  if (!name || !name.trim()) {
+    return;
+  }
+
+  const { data, error } =
+    await supabaseClient
+      .from("topics")
+      .insert({ name: name.trim(), chapter_id: chapterId })
+      .select()
+      .single();
+
+  if (error) {
+    alert(error.message || "Unable to add topic.");
+    return;
+  }
+
+  await populateTopicSelect(select, chapterId, select.options[0].textContent);
+
+  select.value = data.id;
+
+}
+
+
+/* =========================================================
+   QUESTION BANK — EVENTS (wired once)
+========================================================= */
+
+function wireQuestionBankEvents() {
+
+  document.getElementById("qbFilterSubject")
+    .addEventListener("change", async event => {
+
+      await populateChapterSelect(
+        document.getElementById("qbFilterChapter"),
+        event.target.value,
+        "All Chapters"
+      );
+
+      loadQuestionBank();
+
+    });
+
+  ["qbFilterChapter", "qbFilterDifficulty", "qbFilterType"]
+    .forEach(id => {
+
+      document.getElementById(id)
+        .addEventListener("change", loadQuestionBank);
+
+    });
+
+  let searchTimeout = null;
+
+  document.getElementById("qbSearchInput")
+    .addEventListener("input", () => {
+
+      clearTimeout(searchTimeout);
+
+      searchTimeout = setTimeout(loadQuestionBank, 350);
+
+    });
+
+
+  document.getElementById("addQuestionBankBtn")
+    .addEventListener("click", () => openQuestionForm(null));
+
+  document.getElementById("cancelQuestionBtn")
+    .addEventListener("click", closeQuestionForm);
+
+  document.getElementById("questionForm")
+    .addEventListener("submit", saveQuestionToBank);
+
+  document.getElementById("qType")
+    .addEventListener("change", updateQuestionFormForType);
+
+
+  document.getElementById("qSubject")
+    .addEventListener("change", async event => {
+
+      await populateChapterSelect(
+        document.getElementById("qChapter"),
+        event.target.value,
+        "Select Chapter"
+      );
+
+      await populateTopicSelect(
+        document.getElementById("qTopic"),
+        null,
+        "Select Topic"
+      );
+
+    });
+
+  document.getElementById("qChapter")
+    .addEventListener("change", async event => {
+
+      await populateTopicSelect(
+        document.getElementById("qTopic"),
+        event.target.value,
+        "Select Topic"
+      );
+
+    });
+
+  document.getElementById("qAddSubjectBtn")
+    .addEventListener("click", () =>
+      quickAddSubject(document.getElementById("qSubject"))
+    );
+
+  document.getElementById("qAddChapterBtn")
+    .addEventListener("click", () =>
+      quickAddChapter(
+        document.getElementById("qChapter"),
+        document.getElementById("qSubject").value
+      )
+    );
+
+  document.getElementById("qAddTopicBtn")
+    .addEventListener("click", () =>
+      quickAddTopic(
+        document.getElementById("qTopic"),
+        document.getElementById("qChapter").value
+      )
+    );
+
+
+  // correct-answer checkboxes: enforce single-select unless multiple_answer
+  document.querySelectorAll(".q-correct-check")
+    .forEach(box => {
+
+      box.addEventListener("change", () => {
+
+        const type = document.getElementById("qType").value;
+
+        if (type !== "multiple_answer" && box.checked) {
+
+          document.querySelectorAll(".q-correct-check")
+            .forEach(other => {
+
+              if (other !== box) {
+                other.checked = false;
+              }
+
+            });
+
+        }
+
+      });
+
+    });
+
+
+  document.getElementById("bulkImportOpenBtn")
+    .addEventListener("click", () => {
+
+      document.getElementById("bulkImportPanel").classList.remove("hidden");
+      document.getElementById("questionFormPanel").classList.add("hidden");
+
+    });
+
+  document.getElementById("bulkImportCancelBtn")
+    .addEventListener("click", () => {
+
+      document.getElementById("bulkImportPanel").classList.add("hidden");
+
+    });
+
+  document.getElementById("bulkSubject")
+    .addEventListener("change", event => {
+
+      populateChapterSelect(
+        document.getElementById("bulkChapter"),
+        event.target.value,
+        "Select Chapter"
+      );
+
+    });
+
+  document.getElementById("bulkImportSubmitBtn")
+    .addEventListener("click", submitBulkImport);
+
+}
+
+
+/* =========================================================
+   QUESTION BANK — LOAD & RENDER LIST
+========================================================= */
+
+async function loadQuestionBank() {
+
+  const list = document.getElementById("questionBankList");
+
+  list.innerHTML =
+    `<div class="loading">Loading questions...</div>`;
+
+  let query =
+    supabaseClient
+      .from("questions")
+      .select(`
+        id, question_text, question_type, difficulty, marks, negative_marks,
+        class, subject_id, chapter_id, topic_id,
+        subjects(name), chapters(name), topics(name)
+      `)
+      .eq("created_by", currentUser.id)
+      .order("created_at", { ascending: false });
+
+  const subjectFilter = document.getElementById("qbFilterSubject").value;
+  const chapterFilter = document.getElementById("qbFilterChapter").value;
+  const difficultyFilter = document.getElementById("qbFilterDifficulty").value;
+  const typeFilter = document.getElementById("qbFilterType").value;
+  const search = document.getElementById("qbSearchInput").value.trim();
+
+  if (subjectFilter) {
+    query = query.eq("subject_id", subjectFilter);
+  }
+
+  if (chapterFilter) {
+    query = query.eq("chapter_id", chapterFilter);
+  }
+
+  if (difficultyFilter) {
+    query = query.eq("difficulty", difficultyFilter);
+  }
+
+  if (typeFilter) {
+    query = query.eq("question_type", typeFilter);
+  }
+
+  if (search) {
+    query = query.ilike("question_text", `%${search}%`);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+
+    console.error(error);
+
+    list.innerHTML =
+      `<div class="empty-state">
+        <h3>Unable to load questions</h3>
+        <p>${escapeHTML(error.message)}</p>
+      </div>`;
+
+    return;
 
   }
 
-  .result-item {
+  qbQuestions = data || [];
 
-    flex-direction:
-      column;
+  document.getElementById("qbCount").textContent = qbQuestions.length;
 
-    align-items:
-      flex-start;
+  renderQuestionBankList();
 
-    gap:
-      15px;
+}
 
-  }
 
-  .result-mini {
+function renderQuestionBankList() {
 
-    width:
-      100%;
+  const list = document.getElementById("questionBankList");
 
-    justify-content:
-      space-between;
+  list.innerHTML = "";
 
-  }
+  if (!qbQuestions.length) {
 
-  .question-header {
+    list.innerHTML =
+      `<div class="empty-state small-empty">
+        <div class="empty-icon">❓</div>
+        <h3>No questions found</h3>
+        <p>Add your first question or adjust your filters.</p>
+      </div>`;
 
-    align-items:
-      flex-start;
-
-    flex-direction:
-      column;
+    return;
 
   }
 
-  .question-header button {
+  const typeLabels = {
+    mcq: "MCQ",
+    multiple_answer: "Multiple Answer",
+    true_false: "True / False"
+  };
 
-    width:
-      100%;
+  qbQuestions.forEach(question => {
+
+    const item = document.createElement("div");
+
+    item.className = "qb-item";
+
+    item.innerHTML = `
+
+      <div class="qb-item-main">
+
+        <h4>${escapeHTML(question.question_text)}</h4>
+
+        <p>
+          ${escapeHTML(question.subjects?.name || "General")}
+          ${question.chapters?.name ? " • " + escapeHTML(question.chapters.name) : ""}
+          ${question.topics?.name ? " • " + escapeHTML(question.topics.name) : ""}
+          ${question.class ? " • Class " + escapeHTML(question.class) : ""}
+          • ${question.marks} Marks
+        </p>
+
+        <div class="qb-badges">
+
+          <span class="badge badge-${escapeHTML(question.difficulty)}">
+            ${escapeHTML(question.difficulty)}
+          </span>
+
+          <span class="badge">
+            ${typeLabels[question.question_type] || question.question_type}
+          </span>
+
+        </div>
+
+      </div>
+
+      <div class="qb-item-actions">
+
+        <button type="button" class="edit-question-btn">✏️ Edit</button>
+        <button type="button" class="delete-question-btn">🗑 Delete</button>
+
+      </div>
+
+    `;
+
+    item.querySelector(".edit-question-btn")
+      .addEventListener("click", () => editQuestion(question.id));
+
+    item.querySelector(".delete-question-btn")
+      .addEventListener("click", () => deleteQuestion(question.id));
+
+    list.appendChild(item);
+
+  });
+
+}
+
+
+/* =========================================================
+   QUESTION BANK — ADD / EDIT FORM
+========================================================= */
+
+async function openQuestionForm(questionId) {
+
+  qbEditingId = questionId;
+
+  document.getElementById("bulkImportPanel").classList.add("hidden");
+
+  const panel = document.getElementById("questionFormPanel");
+
+  panel.classList.remove("hidden");
+
+  document.getElementById("questionFormMessage").textContent = "";
+  document.getElementById("questionFormMessage").className = "form-message";
+
+  document.getElementById("questionFormTitle").textContent =
+    questionId ? "Edit Question" : "Add Question";
+
+  document.getElementById("questionForm").reset();
+
+  document.querySelectorAll(".q-correct-check")
+    .forEach(box => box.checked = false);
+
+  if (!questionId) {
+
+    await populateChapterSelect(document.getElementById("qChapter"), null, "Select Chapter");
+    await populateTopicSelect(document.getElementById("qTopic"), null, "Select Topic");
+
+    updateQuestionFormForType();
+
+    panel.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    return;
 
   }
 
-  .builder-actions {
+  const { data, error } =
+    await supabaseClient
+      .from("questions")
+      .select("*")
+      .eq("id", questionId)
+      .single();
 
-    flex-direction:
-      column;
+  if (error) {
 
-  }
+    alert(error.message || "Unable to load question.");
 
-  .builder-actions button {
+    closeQuestionForm();
 
-    width:
-      100%;
-
-  }
-
-  .exam-topbar {
-
-    align-items:
-      flex-start;
-
-    flex-direction:
-      column;
+    return;
 
   }
 
-  .timer-box {
+  document.getElementById("qClass").value = data.class || "";
+  document.getElementById("qType").value = data.question_type;
+  document.getElementById("qDifficulty").value = data.difficulty;
+  document.getElementById("qQuestionText").value = data.question_text;
+  document.getElementById("qImageUrl").value = data.image_url || "";
+  document.getElementById("qOptionA").value = data.option_a || "";
+  document.getElementById("qOptionB").value = data.option_b || "";
+  document.getElementById("qOptionC").value = data.option_c || "";
+  document.getElementById("qOptionD").value = data.option_d || "";
+  document.getElementById("qMarks").value = data.marks;
+  document.getElementById("qNegative").value = data.negative_marks;
+  document.getElementById("qExplanation").value = data.explanation || "";
 
-    width:
-      100%;
+  const correctKeys = String(data.correct_answer || "").split(",").map(k => k.trim());
+
+  document.getElementById("qCorrectA").checked = correctKeys.includes("A");
+  document.getElementById("qCorrectB").checked = correctKeys.includes("B");
+  document.getElementById("qCorrectC").checked = correctKeys.includes("C");
+  document.getElementById("qCorrectD").checked = correctKeys.includes("D");
+
+  document.getElementById("qSubject").value = data.subject_id || "";
+
+  await populateChapterSelect(document.getElementById("qChapter"), data.subject_id, "Select Chapter");
+
+  document.getElementById("qChapter").value = data.chapter_id || "";
+
+  await populateTopicSelect(document.getElementById("qTopic"), data.chapter_id, "Select Topic");
+
+  document.getElementById("qTopic").value = data.topic_id || "";
+
+  updateQuestionFormForType();
+
+  panel.scrollIntoView({ behavior: "smooth", block: "start" });
+
+}
+
+
+function editQuestion(id) {
+
+  openQuestionForm(id);
+
+}
+
+
+function closeQuestionForm() {
+
+  qbEditingId = null;
+
+  document.getElementById("questionFormPanel").classList.add("hidden");
+
+}
+
+
+function updateQuestionFormForType() {
+
+  const type = document.getElementById("qType").value;
+
+  const cWrap = document.getElementById("qOptionCWrap");
+  const dWrap = document.getElementById("qOptionDWrap");
+
+  if (type === "true_false") {
+
+    cWrap.classList.add("hidden");
+    dWrap.classList.add("hidden");
+
+    document.getElementById("qOptionA").value = "True";
+    document.getElementById("qOptionB").value = "False";
+
+  } else {
+
+    cWrap.classList.remove("hidden");
+    dWrap.classList.remove("hidden");
 
   }
 
-  .exam-actions {
+  if (type !== "multiple_answer") {
 
-    flex-wrap:
-      wrap;
+    const checked = document.querySelector(".q-correct-check:checked");
 
-  }
+    document.querySelectorAll(".q-correct-check")
+      .forEach(box => {
 
-  .exam-actions button {
+        if (box !== checked) {
+          box.checked = false;
+        }
 
-    flex:
-      1;
-
-  }
-
-  .auth-card {
-
-    padding:
-      25px 20px;
-
-  }
-
-  .result-summary {
-
-    grid-template-columns:
-      1fr 1fr;
+      });
 
   }
 
 }
 
 
-@media (
-  max-width: 420px
+async function saveQuestionToBank(event) {
+
+  event.preventDefault();
+
+  const message = document.getElementById("questionFormMessage");
+
+  const subjectId = document.getElementById("qSubject").value;
+  const questionText = document.getElementById("qQuestionText").value.trim();
+  const type = document.getElementById("qType").value;
+  const optionA = document.getElementById("qOptionA").value.trim();
+  const optionB = document.getElementById("qOptionB").value.trim();
+  const optionC = document.getElementById("qOptionC").value.trim();
+  const optionD = document.getElementById("qOptionD").value.trim();
+  const marks = Number(document.getElementById("qMarks").value);
+
+  const correctKeys = [];
+
+  if (document.getElementById("qCorrectA").checked) correctKeys.push("A");
+  if (document.getElementById("qCorrectB").checked) correctKeys.push("B");
+  if (document.getElementById("qCorrectC").checked) correctKeys.push("C");
+  if (document.getElementById("qCorrectD").checked) correctKeys.push("D");
+
+  if (!subjectId) {
+    message.className = "form-message error";
+    message.textContent = "Please select a subject.";
+    return;
+  }
+
+  if (!questionText) {
+    message.className = "form-message error";
+    message.textContent = "Question text is required.";
+    return;
+  }
+
+  if (!optionA || !optionB) {
+    message.className = "form-message error";
+    message.textContent = "Option A and Option B are required.";
+    return;
+  }
+
+  if (!correctKeys.length) {
+    message.className = "form-message error";
+    message.textContent = "Please mark at least one correct answer.";
+    return;
+  }
+
+  if (type !== "multiple_answer" && correctKeys.length > 1) {
+    message.className = "form-message error";
+    message.textContent = "Only one correct answer allowed for this question type.";
+    return;
+  }
+
+  if (!marks || marks <= 0) {
+    message.className = "form-message error";
+    message.textContent = "Marks must be greater than 0.";
+    return;
+  }
+
+  const payload = {
+
+    created_by: currentUser.id,
+    subject_id: Number(subjectId),
+    chapter_id: document.getElementById("qChapter").value
+      ? Number(document.getElementById("qChapter").value)
+      : null,
+    topic_id: document.getElementById("qTopic").value
+      ? Number(document.getElementById("qTopic").value)
+      : null,
+    class: document.getElementById("qClass").value.trim() || null,
+
+    question_type: type,
+    question_text: questionText,
+    image_url: document.getElementById("qImageUrl").value.trim() || null,
+
+    option_a: optionA,
+    option_b: optionB,
+    option_c: optionC || null,
+    option_d: optionD || null,
+
+    correct_answer: correctKeys.join(","),
+
+    explanation: document.getElementById("qExplanation").value.trim() || null,
+    marks: marks,
+    negative_marks: Number(document.getElementById("qNegative").value) || 0,
+    difficulty: document.getElementById("qDifficulty").value
+
+  };
+
+  const saveButton = document.getElementById("saveQuestionBtn");
+
+  saveButton.disabled = true;
+  saveButton.textContent = "Saving...";
+
+  try {
+
+    let error;
+
+    if (qbEditingId) {
+
+      ({ error } =
+        await supabaseClient
+          .from("questions")
+          .update(payload)
+          .eq("id", qbEditingId));
+
+    } else {
+
+      ({ error } =
+        await supabaseClient
+          .from("questions")
+          .insert(payload));
+
+    }
+
+    if (error) {
+      throw error;
+    }
+
+    closeQuestionForm();
+
+    await loadQuestionBank();
+
+  }
+
+  catch (error) {
+
+    console.error(error);
+
+    message.className = "form-message error";
+    message.textContent = error.message || "Unable to save question.";
+
+  }
+
+  finally {
+
+    saveButton.disabled = false;
+    saveButton.textContent = "💾 Save Question";
+
+  }
+
+}
+
+
+async function deleteQuestion(id) {
+
+  if (!confirm("Delete this question? This cannot be undone.")) {
+    return;
+  }
+
+  const { error } =
+    await supabaseClient
+      .from("questions")
+      .delete()
+      .eq("id", id);
+
+  if (error) {
+
+    alert(error.message || "Unable to delete question. It may be used in an exam.");
+
+    return;
+
+  }
+
+  await loadQuestionBank();
+
+}
+
+
+/* =========================================================
+   QUESTION BANK — BULK IMPORT
+========================================================= */
+
+async function submitBulkImport() {
+
+  const message = document.getElementById("bulkImportMessage");
+  const subjectId = document.getElementById("bulkSubject").value;
+  const chapterId = document.getElementById("bulkChapter").value;
+  const rawText = document.getElementById("bulkImportText").value.trim();
+
+  message.className = "form-message";
+  message.textContent = "";
+
+  if (!subjectId) {
+    message.className = "form-message error";
+    message.textContent = "Please select a subject.";
+    return;
+  }
+
+  if (!rawText) {
+    message.className = "form-message error";
+    message.textContent = "Please paste questions JSON.";
+    return;
+  }
+
+  let parsed;
+
+  try {
+
+    parsed = JSON.parse(rawText);
+
+  } catch (error) {
+
+    message.className = "form-message error";
+    message.textContent = "Invalid JSON: " + error.message;
+    return;
+
+  }
+
+  if (!Array.isArray(parsed) || !parsed.length) {
+
+    message.className = "form-message error";
+    message.textContent = "JSON must be a non-empty array of questions.";
+    return;
+
+  }
+
+  const rows = [];
+
+  for (let i = 0; i < parsed.length; i++) {
+
+    const q = parsed[i];
+
+    if (!q.question_text || !q.option_a || !q.option_b || !q.correct_answer) {
+
+      message.className = "form-message error";
+      message.textContent =
+        `Question ${i + 1}: question_text, option_a, option_b and correct_answer are required.`;
+      return;
+
+    }
+
+    rows.push({
+
+      created_by: currentUser.id,
+      subject_id: Number(subjectId),
+      chapter_id: chapterId ? Number(chapterId) : null,
+      topic_id: null,
+      class: q.class || null,
+
+      question_type: q.question_type || "mcq",
+      question_text: q.question_text,
+      image_url: q.image_url || null,
+
+      option_a: q.option_a,
+      option_b: q.option_b,
+      option_c: q.option_c || null,
+      option_d: q.option_d || null,
+
+      correct_answer: String(q.correct_answer).toUpperCase(),
+
+      explanation: q.explanation || null,
+      marks: Number(q.marks) || 1,
+      negative_marks: Number(q.negative_marks) || 0,
+      difficulty: q.difficulty || "medium"
+
+    });
+
+  }
+
+  const button = document.getElementById("bulkImportSubmitBtn");
+
+  button.disabled = true;
+  button.textContent = "Importing...";
+
+  try {
+
+    const { error } =
+      await supabaseClient
+        .from("questions")
+        .insert(rows);
+
+    if (error) {
+      throw error;
+    }
+
+    message.className = "form-message success";
+    message.textContent = `${rows.length} question(s) imported successfully.`;
+
+    document.getElementById("bulkImportText").value = "";
+
+    await loadQuestionBank();
+
+  }
+
+  catch (error) {
+
+    console.error(error);
+
+    message.className = "form-message error";
+    message.textContent = error.message || "Unable to import questions.";
+
+  }
+
+  finally {
+
+    button.disabled = false;
+    button.textContent = "📥 Import Questions";
+
+  }
+
+}
+
+
+/* =========================================================
+   START EXAM
+========================================================= */
+
+async function startExam(
+  exam
 ) {
 
-  .stats-grid {
+  try {
 
-    grid-template-columns:
-      1fr;
+    /*
+      Check attempt count.
+    */
+
+    const {
+      data: attempts,
+      error: attemptError
+    } =
+      await supabaseClient
+        .from("exam_attempts")
+        .select(
+          "id,attempt_number,status"
+        )
+        .eq(
+          "exam_id",
+          exam.id
+        )
+        .eq(
+          "student_id",
+          currentUser.id
+        )
+        .order(
+          "attempt_number",
+          {
+            ascending: false
+          }
+        );
+
+
+    if (attemptError) {
+      throw attemptError;
+    }
+
+
+    const completedAttempts =
+      (attempts || []).filter(
+        attempt =>
+          [
+            "submitted",
+            "auto_submitted",
+            "expired"
+          ].includes(
+            attempt.status
+          )
+      );
+
+
+    if (
+      completedAttempts.length >=
+      Number(exam.max_attempts || 1)
+    ) {
+
+      alert(
+        "You have already used all allowed attempts for this exam."
+      );
+
+      return;
+
+    }
+
+
+    /*
+      Get questions.
+    */
+
+    const {
+      data: questions,
+      error: questionError
+    } =
+      await supabaseClient
+        .from("questions")
+        .select(`
+          id,
+          exam_id,
+          question_text,
+          image_url,
+          option_a,
+          option_b,
+          option_c,
+          option_d,
+          correct_answer,
+          explanation,
+          marks,
+          negative_marks,
+          question_order
+        `)
+        .eq(
+          "exam_id",
+          exam.id
+        )
+        .order(
+          "question_order",
+          {
+            ascending: true
+          }
+        );
+
+
+    if (questionError) {
+      throw questionError;
+    }
+
+
+    if (!questions?.length) {
+
+      alert(
+        "This exam has no questions yet."
+      );
+
+      return;
+
+    }
+
+
+    /*
+      Create attempt.
+    */
+
+    const nextAttemptNumber =
+      completedAttempts.length + 1;
+
+
+    const {
+      data: attempt,
+      error: createAttemptError
+    } =
+      await supabaseClient
+        .from("exam_attempts")
+        .insert({
+
+          exam_id:
+            exam.id,
+
+          student_id:
+            currentUser.id,
+
+          attempt_number:
+            nextAttemptNumber,
+
+          started_at:
+            new Date().toISOString(),
+
+          status:
+            "in_progress",
+
+          score:
+            0,
+
+          correct_answers:
+            0,
+
+          wrong_answers:
+            0,
+
+          unanswered:
+            questions.length,
+
+          percentage:
+            0,
+
+          passed:
+            false
+
+        })
+        .select()
+        .single();
+
+
+    if (createAttemptError) {
+      throw createAttemptError;
+    }
+
+
+    runningExam =
+      exam;
+
+    currentAttempt =
+      attempt;
+
+    runningAnswers = {};
+
+    currentQuestionIndex = 0;
+
+
+    runningQuestions =
+      questions.map(
+        question => {
+
+          const options =
+            buildQuestionOptions(
+              question,
+              exam.randomize_options
+            );
+
+          return {
+
+            ...question,
+
+            displayOptions:
+              options
+
+          };
+
+        }
+      );
+
+
+    if (
+      exam.randomize_questions
+    ) {
+
+      runningQuestions =
+        shuffle(
+          runningQuestions
+        );
+
+    }
+
+
+    examTimeRemaining =
+      Number(
+        exam.duration_minutes
+      ) *
+      60;
+
+
+    showPage(
+      "examPage"
+    );
+
+
+    renderRunningQuestion();
+
+    startExamTimer();
 
   }
 
-  .result-summary {
+  catch (error) {
 
-    grid-template-columns:
-      1fr;
+    console.error(
+      "Start exam error:",
+      error
+    );
+
+    alert(
+      error.message ||
+      "Unable to start exam."
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   QUESTION OPTIONS
+========================================================= */
+
+function buildQuestionOptions(
+  question,
+  randomize
+) {
+
+  const options = [];
+
+  if (
+    question.option_a
+  ) {
+
+    options.push({
+      key: "A",
+      text: question.option_a
+    });
 
   }
 
-  .result-detail-grid {
+  if (
+    question.option_b
+  ) {
 
-    grid-template-columns:
-      1fr;
+    options.push({
+      key: "B",
+      text: question.option_b
+    });
+
+  }
+
+  if (
+    question.option_c
+  ) {
+
+    options.push({
+      key: "C",
+      text: question.option_c
+    });
 
   }
 
-  .page-header h2 {
+  if (
+    question.option_d
+  ) {
 
-    font-size:
-      24px;
+    options.push({
+      key: "D",
+      text: question.option_d
+    });
 
   }
+
+
+  return randomize
+    ? shuffle(options)
+    : options;
+
+}
+
+
+/* =========================================================
+   RENDER RUNNING QUESTION
+========================================================= */
+
+function renderRunningQuestion() {
+
+  if (
+    !runningQuestions.length
+  ) {
+    return;
+  }
+
+
+  const question =
+    runningQuestions[
+      currentQuestionIndex
+    ];
+
+
+  document.getElementById(
+    "runningExamTitle"
+  ).textContent =
+    runningExam.title;
+
+
+  document.getElementById(
+    "questionNumber"
+  ).textContent =
+    `Question ${
+      currentQuestionIndex + 1
+    } of ${
+      runningQuestions.length
+    }`;
+
+
+  document.getElementById(
+    "runningQuestionText"
+  ).textContent =
+    question.question_text;
+
+
+  const image =
+    document.getElementById(
+      "runningQuestionImage"
+    );
+
+
+  if (
+    question.image_url
+  ) {
+
+    image.src =
+      question.image_url;
+
+    image.classList.remove(
+      "hidden"
+    );
+
+  }
+
+  else {
+
+    image.src = "";
+
+    image.classList.add(
+      "hidden"
+    );
+
+  }
+
+
+  const optionsContainer =
+    document.getElementById(
+      "options"
+    );
+
+  optionsContainer.innerHTML = "";
+
+
+  const selected =
+    runningAnswers[
+      question.id
+    ];
+
+
+  question.displayOptions
+    .forEach(option => {
+
+      const button =
+        document.createElement(
+          "button"
+        );
+
+      button.type =
+        "button";
+
+      button.className =
+        "option";
+
+      if (
+        selected ===
+        option.key
+      ) {
+
+        button.classList.add(
+          "selected"
+        );
+
+      }
+
+
+      button.innerHTML = `
+
+        <span class="option-letter">
+          ${escapeHTML(
+            option.key
+          )}
+        </span>
+
+        <span>
+          ${escapeHTML(
+            option.text
+          )}
+        </span>
+
+      `;
+
+
+      button.addEventListener(
+        "click",
+        () => {
+
+          runningAnswers[
+            question.id
+          ] =
+            option.key;
+
+          renderRunningQuestion();
+
+        }
+      );
+
+
+      optionsContainer.appendChild(
+        button
+      );
+
+    });
+
+
+  document.getElementById(
+    "previousBtn"
+  ).disabled =
+    currentQuestionIndex === 0;
+
+
+  const isLast =
+    currentQuestionIndex ===
+    runningQuestions.length - 1;
+
+
+  document.getElementById(
+    "nextBtn"
+  ).classList.toggle(
+    "hidden",
+    isLast
+  );
+
+
+  document.getElementById(
+    "submitBtn"
+  ).classList.toggle(
+    "hidden",
+    !isLast
+  );
+
+
+  const progress =
+    (
+      (
+        currentQuestionIndex + 1
+      ) /
+      runningQuestions.length
+    ) *
+    100;
+
+
+  document.getElementById(
+    "progressBar"
+  ).style.width =
+    progress + "%";
+
+
+  renderQuestionNavigation();
+
+}
+
+
+/* =========================================================
+   QUESTION NAVIGATION
+========================================================= */
+
+function renderQuestionNavigation() {
+
+  const container =
+    document.getElementById(
+      "questionNavigation"
+    );
+
+  container.innerHTML = "";
+
+
+  runningQuestions.forEach(
+    (question, index) => {
+
+      const button =
+        document.createElement(
+          "button"
+        );
+
+      button.type =
+        "button";
+
+      button.textContent =
+        index + 1;
+
+
+      if (
+        index ===
+        currentQuestionIndex
+      ) {
+
+        button.classList.add(
+          "active"
+        );
+
+      }
+
+
+      if (
+        runningAnswers[
+          question.id
+        ]
+      ) {
+
+        button.classList.add(
+          "answered"
+        );
+
+      }
+
+
+      button.addEventListener(
+        "click",
+        () => {
+
+          currentQuestionIndex =
+            index;
+
+          renderRunningQuestion();
+
+        }
+      );
+
+
+      container.appendChild(
+        button
+      );
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   PREVIOUS
+========================================================= */
+
+document
+  .getElementById(
+    "previousBtn"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      if (
+        currentQuestionIndex > 0
+      ) {
+
+        currentQuestionIndex--;
+
+        renderRunningQuestion();
+
+      }
+
+    }
+  );
+
+
+/* =========================================================
+   NEXT
+========================================================= */
+
+document
+  .getElementById(
+    "nextBtn"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      if (
+        currentQuestionIndex <
+        runningQuestions.length - 1
+      ) {
+
+        currentQuestionIndex++;
+
+        renderRunningQuestion();
+
+      }
+
+    }
+  );
+
+
+/* =========================================================
+   SUBMIT BUTTON
+========================================================= */
+
+document
+  .getElementById(
+    "submitBtn"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      submitRunningExam(
+        "submitted"
+      );
+
+    }
+  );
+
+
+/* =========================================================
+   TIMER
+========================================================= */
+
+function startExamTimer() {
+
+  stopExamTimer();
+
+  updateTimerUI();
+
+
+  examTimerInterval =
+    setInterval(
+      () => {
+
+        examTimeRemaining--;
+
+        updateTimerUI();
+
+
+        if (
+          examTimeRemaining <= 0
+        ) {
+
+          stopExamTimer();
+
+          submitRunningExam(
+            "auto_submitted"
+          );
+
+        }
+
+      },
+      1000
+    );
+
+}
+
+
+function stopExamTimer() {
+
+  if (
+    examTimerInterval
+  ) {
+
+    clearInterval(
+      examTimerInterval
+    );
+
+    examTimerInterval =
+      null;
+
+  }
+
+}
+
+
+function updateTimerUI() {
+
+  const minutes =
+    Math.floor(
+      examTimeRemaining / 60
+    );
+
+  const seconds =
+    examTimeRemaining % 60;
+
+
+  document.getElementById(
+    "examTimer"
+  ).textContent =
+    `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+
+
+  if (
+    examTimeRemaining <= 60
+  ) {
+
+    document
+      .getElementById(
+        "examTimer"
+      )
+      .classList.add(
+        "timer-danger"
+      );
+
+  }
+
+  else {
+
+    document
+      .getElementById(
+        "examTimer"
+      )
+      .classList.remove(
+        "timer-danger"
+      );
+
+  }
+
+}
+
+
+/* =========================================================
+   SUBMIT EXAM
+========================================================= */
+
+async function submitRunningExam(
+  status = "submitted"
+) {
+
+  if (
+    !currentAttempt ||
+    !runningExam
+  ) {
+
+    return;
+
+  }
+
+
+  const button =
+    document.getElementById(
+      "submitBtn"
+    );
+
+  button.disabled = true;
+
+  stopExamTimer();
+
+
+  try {
+
+    /*
+      Calculate result.
+    */
+
+    let score = 0;
+    let correct = 0;
+    let wrong = 0;
+    let unanswered = 0;
+
+
+    const answersToInsert = [];
+
+
+    runningQuestions.forEach(
+      question => {
+
+        const selected =
+          runningAnswers[
+            question.id
+          ] ||
+          null;
+
+
+        let isCorrect =
+          false;
+
+        let marksObtained =
+          0;
+
+
+        if (!selected) {
+
+          unanswered++;
+
+        }
+
+        else if (
+          selected ===
+          question.correct_answer
+        ) {
+
+          isCorrect = true;
+
+          correct++;
+
+          marksObtained =
+            Number(
+              question.marks || 0
+            );
+
+          score +=
+            marksObtained;
+
+        }
+
+        else {
+
+          wrong++;
+
+          marksObtained =
+            -Number(
+              question.negative_marks ||
+              runningExam.negative_marking ||
+              0
+            );
+
+          score +=
+            marksObtained;
+
+        }
+
+
+        answersToInsert.push({
+
+          attempt_id:
+            currentAttempt.id,
+
+          question_id:
+            question.id,
+
+          selected_answer:
+            selected,
+
+          is_correct:
+            isCorrect,
+
+          marks_obtained:
+            marksObtained,
+
+          answered_at:
+            new Date().toISOString()
+
+        });
+
+      }
+    );
+
+
+    const totalMarks =
+      Number(
+        runningExam.total_marks || 0
+      );
+
+
+    let percentage =
+      totalMarks > 0
+        ? (
+            score /
+            totalMarks
+          ) *
+          100
+        : 0;
+
+
+    /*
+      Keep percentage in 0-100 range.
+    */
+
+    percentage =
+      Math.max(
+        0,
+        Math.min(
+          100,
+          percentage
+        )
+      );
+
+
+    const passed =
+      percentage >=
+      Number(
+        runningExam.passing_percentage || 0
+      );
+
+
+    /*
+      Insert student answers.
+    */
+
+    const {
+      error: answerError
+    } =
+      await supabaseClient
+        .from("student_answers")
+        .insert(
+          answersToInsert
+        );
+
+
+    if (answerError) {
+
+      throw answerError;
+
+    }
+
+
+    /*
+      Update attempt.
+    */
+
+    const {
+      data: updatedAttempt,
+      error: updateError
+    } =
+      await supabaseClient
+        .from("exam_attempts")
+        .update({
+
+          submitted_at:
+            new Date().toISOString(),
+
+          status:
+            status,
+
+          score:
+            score,
+
+          correct_answers:
+            correct,
+
+          wrong_answers:
+            wrong,
+
+          unanswered:
+            unanswered,
+
+          percentage:
+            percentage,
+
+          passed:
+            passed
+
+        })
+        .eq(
+          "id",
+          currentAttempt.id
+        )
+        .select()
+        .single();
+
+
+    if (updateError) {
+
+      throw updateError;
+
+    }
+
+
+    currentAttempt =
+      updatedAttempt;
+
+
+    showResult(
+      score,
+      percentage,
+      correct,
+      wrong,
+      unanswered,
+      passed
+    );
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "Submit error:",
+      error
+    );
+
+    alert(
+      error.message ||
+      "Unable to submit exam."
+    );
+
+    button.disabled = false;
+
+  }
+
+}
+
+
+/* =========================================================
+   SHOW RESULT
+========================================================= */
+
+async function showResult(
+  score,
+  percentage,
+  correct,
+  wrong,
+  unanswered,
+  passed
+) {
+
+  stopExamTimer();
+
+  showPage(
+    "resultPage"
+  );
+
+
+  document.getElementById(
+    "resultExamName"
+  ).textContent =
+    runningExam.title;
+
+
+  document.getElementById(
+    "resultScore"
+  ).textContent =
+    Number(
+      score
+    ).toFixed(2);
+
+
+  document.getElementById(
+    "resultPercentage"
+  ).textContent =
+    Number(
+      percentage
+    ).toFixed(2) + "%";
+
+
+  document.getElementById(
+    "resultCorrect"
+  ).textContent =
+    correct;
+
+
+  const passedElement =
+    document.getElementById(
+      "resultPassed"
+    );
+
+  passedElement.textContent =
+    passed
+      ? "PASSED"
+      : "FAILED";
+
+
+  passedElement.className =
+    passed
+      ? "pass-text"
+      : "fail-text";
+
+
+  const details =
+    document.getElementById(
+      "resultDetails"
+    );
+
+
+  details.innerHTML = `
+
+    <div class="result-detail-grid">
+
+      <div>
+        <span>Correct Answers</span>
+        <strong>${correct}</strong>
+      </div>
+
+      <div>
+        <span>Wrong Answers</span>
+        <strong>${wrong}</strong>
+      </div>
+
+      <div>
+        <span>Unanswered</span>
+        <strong>${unanswered}</strong>
+      </div>
+
+      <div>
+        <span>Passing Percentage</span>
+        <strong>
+          ${Number(
+            runningExam.passing_percentage || 0
+          )}%
+        </strong>
+      </div>
+
+    </div>
+
+  `;
+
+
+  /*
+    Load answer review if explanations enabled.
+  */
+
+  if (
+    runningExam.show_explanations
+  ) {
+
+    await loadResultReview(
+      details
+    );
+
+  }
+
+
+  /*
+    Reset exam state after result.
+  */
+
+  runningExam = null;
+  runningQuestions = [];
+  runningAnswers = {};
+  currentAttempt = null;
+  currentQuestionIndex = 0;
+
+}
+
+
+/* =========================================================
+   RESULT REVIEW
+========================================================= */
+
+async function loadResultReview(
+  container
+) {
+
+  if (!currentAttempt) {
+    return;
+  }
+
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("student_answers")
+      .select(`
+        id,
+        selected_answer,
+        is_correct,
+        marks_obtained,
+        question_id,
+        questions(
+          question_text,
+          option_a,
+          option_b,
+          option_c,
+          option_d,
+          correct_answer,
+          explanation
+        )
+      `)
+      .eq(
+        "attempt_id",
+        currentAttempt.id
+      )
+      .order(
+        "id",
+        {
+          ascending: true
+        }
+      );
+
+
+  if (error) {
+
+    console.error(error);
+
+    return;
+
+  }
+
+
+  if (!data?.length) {
+    return;
+  }
+
+
+  const review =
+    document.createElement(
+      "div"
+    );
+
+  review.className =
+    "review-section";
+
+
+  review.innerHTML =
+    `<h3>
+      Answer Review
+    </h3>`;
+
+
+  data.forEach(
+    (answer, index) => {
+
+      const q =
+        answer.questions;
+
+      if (!q) {
+        return;
+      }
+
+
+      const item =
+        document.createElement(
+          "div"
+        );
+
+      item.className =
+        "review-item";
+
+
+      item.innerHTML = `
+
+        <div class="review-question">
+
+          <strong>
+            Q${index + 1}.
+            ${escapeHTML(
+              q.question_text
+            )}
+          </strong>
+
+        </div>
+
+
+        <p>
+          Your Answer:
+          <strong>
+            ${
+              answer.selected_answer
+                ? escapeHTML(
+                    getOptionText(
+                      q,
+                      answer.selected_answer
+                    )
+                  )
+                : "Not Answered"
+            }
+          </strong>
+        </p>
+
+
+        <p>
+          Correct Answer:
+          <strong>
+            ${escapeHTML(
+              getOptionText(
+                q,
+                q.correct_answer
+              )
+            )}
+          </strong>
+        </p>
+
+
+        ${
+          q.explanation
+            ? `<div class="explanation">
+                <strong>Explanation:</strong>
+                ${escapeHTML(
+                  q.explanation
+                )}
+               </div>`
+            : ""
+        }
+
+      `;
+
+
+      review.appendChild(
+        item
+      );
+
+    }
+  );
+
+
+  container.appendChild(
+    review
+  );
+
+}
+
+
+/* =========================================================
+   GET OPTION TEXT
+========================================================= */
+
+function getOptionText(
+  question,
+  key
+) {
+
+  if (
+    key === "A"
+  ) {
+    return question.option_a || "";
+  }
+
+  if (
+    key === "B"
+  ) {
+    return question.option_b || "";
+  }
+
+  if (
+    key === "C"
+  ) {
+    return question.option_c || "";
+  }
+
+  if (
+    key === "D"
+  ) {
+    return question.option_d || "";
+  }
+
+  return "";
+
+}
+
+
+/* =========================================================
+   BACK TO DASHBOARD
+========================================================= */
+
+document
+  .getElementById(
+    "backToDashboardBtn"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      if (
+        currentProfile?.role ===
+        "teacher"
+      ) {
+
+        showPage(
+          "teacherDashboard"
+        );
+
+      }
+
+      else {
+
+        showPage(
+          "studentDashboard"
+        );
+
+      }
+
+    }
+  );
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+document
+  .getElementById(
+    "logoutBtn"
+  )
+  .addEventListener(
+    "click",
+    async () => {
+
+      stopExamTimer();
+
+      await supabaseClient.auth.signOut();
+
+      currentUser = null;
+      currentProfile = null;
+
+      runningExam = null;
+      runningQuestions = [];
+      runningAnswers = {};
+      currentAttempt = null;
+
+      app.classList.add(
+        "hidden"
+      );
+
+      loginPage.classList.remove(
+        "hidden"
+      );
+
+      loginForm.reset();
+      signupForm.reset();
+
+      clearMessages();
+
+      loginTab.click();
+
+    }
+  );
+
+
+/* =========================================================
+   AUTH STATE
+========================================================= */
+
+supabaseClient.auth.onAuthStateChange(
+  async (
+    event,
+    session
+  ) => {
+
+    console.log(
+      "Auth event:",
+      event
+    );
+
+
+    if (
+      session &&
+      session.user
+    ) {
+
+      currentUser =
+        session.user;
+
+
+      if (!currentProfile) {
+
+        await loadUserProfile();
+
+      }
+
+    }
+
+    else {
+
+      currentUser = null;
+      currentProfile = null;
+
+      app.classList.add(
+        "hidden"
+      );
+
+      loginPage.classList.remove(
+        "hidden"
+      );
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   INITIAL SESSION
+========================================================= */
+
+async function checkExistingSession() {
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient.auth.getSession();
+
+
+  if (error) {
+
+    console.error(error);
+
+    return;
+
+  }
+
+
+  if (
+    data.session &&
+    data.session.user
+  ) {
+
+    currentUser =
+      data.session.user;
+
+    await loadUserProfile();
+
+  }
+
+}
+
+
+checkExistingSession();
+
+
+/* =========================================================
+   FRIENDLY AUTH ERRORS
+========================================================= */
+
+function getFriendlyAuthError(
+  message
+) {
+
+  const text =
+    String(
+      message || ""
+    ).toLowerCase();
+
+
+  if (
+    text.includes(
+      "invalid login credentials"
+    )
+  ) {
+
+    return "Invalid email or password.";
+
+  }
+
+
+  if (
+    text.includes(
+      "user already registered"
+    )
+  ) {
+
+    return "This email is already registered.";
+
+  }
+
+
+  if (
+    text.includes(
+      "password should be at least"
+    )
+  ) {
+
+    return "Password must be at least 6 characters.";
+
+  }
+
+
+  if (
+    text.includes(
+      "email not confirmed"
+    )
+  ) {
+
+    return "Please confirm your email before logging in.";
+
+  }
+
+
+  return (
+    message ||
+    "Something went wrong. Please try again."
+  );
+
+}
+
+
+/* =========================================================
+   HTML SAFETY
+========================================================= */
+
+function escapeHTML(
+  value
+) {
+
+  return String(
+    value ?? ""
+  )
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
+    );
+
+}
+
+
+function escapeAttribute(
+  value
+) {
+
+  return escapeHTML(
+    value
+  );
+
+}
+
+
+/* =========================================================
+   SHUFFLE
+========================================================= */
+
+function shuffle(
+  array
+) {
+
+  const copy =
+    [...array];
+
+  for (
+    let i =
+      copy.length - 1;
+    i > 0;
+    i--
+  ) {
+
+    const j =
+      Math.floor(
+        Math.random() *
+        (i + 1)
+      );
+
+    [
+      copy[i],
+      copy[j]
+    ] =
+    [
+      copy[j],
+      copy[i]
+    ];
+
+  }
+
+  return copy;
+
+}
+
+
+/* =========================================================
+   DATE
+========================================================= */
+
+function formatDate(
+  value
+) {
+
+  if (!value) {
+    return "-";
+  }
+
+  return new Date(
+    value
+  ).toLocaleString(
+    "en-IN"
+  );
 
 }
