@@ -579,6 +579,16 @@ function showPage(pageId) {
 
   }
 
+
+  if (
+    pageId ===
+    "questionBank"
+  ) {
+
+    initializeQuestionBank();
+
+  }
+
 }
 
 
@@ -2808,6 +2818,1031 @@ function resetExamBuilder() {
   ).checked = true;
 
   renderQuestionBuilder();
+
+}
+
+
+/* =========================================================
+   QUESTION BANK — STATE
+========================================================= */
+
+let qbInitialized = false;
+let qbQuestions = [];
+let qbEditingId = null;
+
+
+/* =========================================================
+   QUESTION BANK — INIT
+========================================================= */
+
+async function initializeQuestionBank() {
+
+  if (!qbInitialized) {
+
+    qbInitialized = true;
+
+    await populateSubjectSelect(
+      document.getElementById("qbFilterSubject"),
+      "All Subjects"
+    );
+
+    await populateSubjectSelect(
+      document.getElementById("qSubject"),
+      "Select Subject"
+    );
+
+    await populateSubjectSelect(
+      document.getElementById("bulkSubject"),
+      "Select Subject"
+    );
+
+    wireQuestionBankEvents();
+
+  }
+
+  await loadQuestionBank();
+
+}
+
+
+/* =========================================================
+   QUESTION BANK — SUBJECT / CHAPTER / TOPIC HELPERS
+========================================================= */
+
+async function populateSubjectSelect(select, placeholder) {
+
+  if (!select) {
+    return;
+  }
+
+  const currentValue = select.value;
+
+  select.innerHTML =
+    `<option value="">${placeholder}</option>`;
+
+  const { data, error } =
+    await supabaseClient
+      .from("subjects")
+      .select("id,name")
+      .order("name", { ascending: true });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  (data || []).forEach(subject => {
+
+    const option = document.createElement("option");
+
+    option.value = subject.id;
+    option.textContent = subject.name;
+
+    select.appendChild(option);
+
+  });
+
+  if (currentValue) {
+    select.value = currentValue;
+  }
+
+}
+
+
+async function populateChapterSelect(select, subjectId, placeholder) {
+
+  if (!select) {
+    return;
+  }
+
+  select.innerHTML =
+    `<option value="">${placeholder}</option>`;
+
+  if (!subjectId) {
+    return;
+  }
+
+  const { data, error } =
+    await supabaseClient
+      .from("chapters")
+      .select("id,name")
+      .eq("subject_id", subjectId)
+      .order("name", { ascending: true });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  (data || []).forEach(chapter => {
+
+    const option = document.createElement("option");
+
+    option.value = chapter.id;
+    option.textContent = chapter.name;
+
+    select.appendChild(option);
+
+  });
+
+}
+
+
+async function populateTopicSelect(select, chapterId, placeholder) {
+
+  if (!select) {
+    return;
+  }
+
+  select.innerHTML =
+    `<option value="">${placeholder}</option>`;
+
+  if (!chapterId) {
+    return;
+  }
+
+  const { data, error } =
+    await supabaseClient
+      .from("topics")
+      .select("id,name")
+      .eq("chapter_id", chapterId)
+      .order("name", { ascending: true });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  (data || []).forEach(topic => {
+
+    const option = document.createElement("option");
+
+    option.value = topic.id;
+    option.textContent = topic.name;
+
+    select.appendChild(option);
+
+  });
+
+}
+
+
+async function quickAddSubject(select) {
+
+  const name = prompt("New subject name:");
+
+  if (!name || !name.trim()) {
+    return;
+  }
+
+  const { data, error } =
+    await supabaseClient
+      .from("subjects")
+      .insert({ name: name.trim() })
+      .select()
+      .single();
+
+  if (error) {
+    alert(error.message || "Unable to add subject.");
+    return;
+  }
+
+  await populateSubjectSelect(select, select.options[0].textContent);
+
+  select.value = data.id;
+
+  select.dispatchEvent(new Event("change"));
+
+}
+
+
+async function quickAddChapter(select, subjectId) {
+
+  if (!subjectId) {
+    alert("Please select a subject first.");
+    return;
+  }
+
+  const name = prompt("New chapter name:");
+
+  if (!name || !name.trim()) {
+    return;
+  }
+
+  const { data, error } =
+    await supabaseClient
+      .from("chapters")
+      .insert({ name: name.trim(), subject_id: subjectId })
+      .select()
+      .single();
+
+  if (error) {
+    alert(error.message || "Unable to add chapter.");
+    return;
+  }
+
+  await populateChapterSelect(select, subjectId, select.options[0].textContent);
+
+  select.value = data.id;
+
+  select.dispatchEvent(new Event("change"));
+
+}
+
+
+async function quickAddTopic(select, chapterId) {
+
+  if (!chapterId) {
+    alert("Please select a chapter first.");
+    return;
+  }
+
+  const name = prompt("New topic name:");
+
+  if (!name || !name.trim()) {
+    return;
+  }
+
+  const { data, error } =
+    await supabaseClient
+      .from("topics")
+      .insert({ name: name.trim(), chapter_id: chapterId })
+      .select()
+      .single();
+
+  if (error) {
+    alert(error.message || "Unable to add topic.");
+    return;
+  }
+
+  await populateTopicSelect(select, chapterId, select.options[0].textContent);
+
+  select.value = data.id;
+
+}
+
+
+/* =========================================================
+   QUESTION BANK — EVENTS (wired once)
+========================================================= */
+
+function wireQuestionBankEvents() {
+
+  document.getElementById("qbFilterSubject")
+    .addEventListener("change", async event => {
+
+      await populateChapterSelect(
+        document.getElementById("qbFilterChapter"),
+        event.target.value,
+        "All Chapters"
+      );
+
+      loadQuestionBank();
+
+    });
+
+  ["qbFilterChapter", "qbFilterDifficulty", "qbFilterType"]
+    .forEach(id => {
+
+      document.getElementById(id)
+        .addEventListener("change", loadQuestionBank);
+
+    });
+
+  let searchTimeout = null;
+
+  document.getElementById("qbSearchInput")
+    .addEventListener("input", () => {
+
+      clearTimeout(searchTimeout);
+
+      searchTimeout = setTimeout(loadQuestionBank, 350);
+
+    });
+
+
+  document.getElementById("addQuestionBankBtn")
+    .addEventListener("click", () => openQuestionForm(null));
+
+  document.getElementById("cancelQuestionBtn")
+    .addEventListener("click", closeQuestionForm);
+
+  document.getElementById("questionForm")
+    .addEventListener("submit", saveQuestionToBank);
+
+  document.getElementById("qType")
+    .addEventListener("change", updateQuestionFormForType);
+
+
+  document.getElementById("qSubject")
+    .addEventListener("change", async event => {
+
+      await populateChapterSelect(
+        document.getElementById("qChapter"),
+        event.target.value,
+        "Select Chapter"
+      );
+
+      await populateTopicSelect(
+        document.getElementById("qTopic"),
+        null,
+        "Select Topic"
+      );
+
+    });
+
+  document.getElementById("qChapter")
+    .addEventListener("change", async event => {
+
+      await populateTopicSelect(
+        document.getElementById("qTopic"),
+        event.target.value,
+        "Select Topic"
+      );
+
+    });
+
+  document.getElementById("qAddSubjectBtn")
+    .addEventListener("click", () =>
+      quickAddSubject(document.getElementById("qSubject"))
+    );
+
+  document.getElementById("qAddChapterBtn")
+    .addEventListener("click", () =>
+      quickAddChapter(
+        document.getElementById("qChapter"),
+        document.getElementById("qSubject").value
+      )
+    );
+
+  document.getElementById("qAddTopicBtn")
+    .addEventListener("click", () =>
+      quickAddTopic(
+        document.getElementById("qTopic"),
+        document.getElementById("qChapter").value
+      )
+    );
+
+
+  // correct-answer checkboxes: enforce single-select unless multiple_answer
+  document.querySelectorAll(".q-correct-check")
+    .forEach(box => {
+
+      box.addEventListener("change", () => {
+
+        const type = document.getElementById("qType").value;
+
+        if (type !== "multiple_answer" && box.checked) {
+
+          document.querySelectorAll(".q-correct-check")
+            .forEach(other => {
+
+              if (other !== box) {
+                other.checked = false;
+              }
+
+            });
+
+        }
+
+      });
+
+    });
+
+
+  document.getElementById("bulkImportOpenBtn")
+    .addEventListener("click", () => {
+
+      document.getElementById("bulkImportPanel").classList.remove("hidden");
+      document.getElementById("questionFormPanel").classList.add("hidden");
+
+    });
+
+  document.getElementById("bulkImportCancelBtn")
+    .addEventListener("click", () => {
+
+      document.getElementById("bulkImportPanel").classList.add("hidden");
+
+    });
+
+  document.getElementById("bulkSubject")
+    .addEventListener("change", event => {
+
+      populateChapterSelect(
+        document.getElementById("bulkChapter"),
+        event.target.value,
+        "Select Chapter"
+      );
+
+    });
+
+  document.getElementById("bulkImportSubmitBtn")
+    .addEventListener("click", submitBulkImport);
+
+}
+
+
+/* =========================================================
+   QUESTION BANK — LOAD & RENDER LIST
+========================================================= */
+
+async function loadQuestionBank() {
+
+  const list = document.getElementById("questionBankList");
+
+  list.innerHTML =
+    `<div class="loading">Loading questions...</div>`;
+
+  let query =
+    supabaseClient
+      .from("questions")
+      .select(`
+        id, question_text, question_type, difficulty, marks, negative_marks,
+        class, subject_id, chapter_id, topic_id,
+        subjects(name), chapters(name), topics(name)
+      `)
+      .eq("created_by", currentUser.id)
+      .order("created_at", { ascending: false });
+
+  const subjectFilter = document.getElementById("qbFilterSubject").value;
+  const chapterFilter = document.getElementById("qbFilterChapter").value;
+  const difficultyFilter = document.getElementById("qbFilterDifficulty").value;
+  const typeFilter = document.getElementById("qbFilterType").value;
+  const search = document.getElementById("qbSearchInput").value.trim();
+
+  if (subjectFilter) {
+    query = query.eq("subject_id", subjectFilter);
+  }
+
+  if (chapterFilter) {
+    query = query.eq("chapter_id", chapterFilter);
+  }
+
+  if (difficultyFilter) {
+    query = query.eq("difficulty", difficultyFilter);
+  }
+
+  if (typeFilter) {
+    query = query.eq("question_type", typeFilter);
+  }
+
+  if (search) {
+    query = query.ilike("question_text", `%${search}%`);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+
+    console.error(error);
+
+    list.innerHTML =
+      `<div class="empty-state">
+        <h3>Unable to load questions</h3>
+        <p>${escapeHTML(error.message)}</p>
+      </div>`;
+
+    return;
+
+  }
+
+  qbQuestions = data || [];
+
+  document.getElementById("qbCount").textContent = qbQuestions.length;
+
+  renderQuestionBankList();
+
+}
+
+
+function renderQuestionBankList() {
+
+  const list = document.getElementById("questionBankList");
+
+  list.innerHTML = "";
+
+  if (!qbQuestions.length) {
+
+    list.innerHTML =
+      `<div class="empty-state small-empty">
+        <div class="empty-icon">❓</div>
+        <h3>No questions found</h3>
+        <p>Add your first question or adjust your filters.</p>
+      </div>`;
+
+    return;
+
+  }
+
+  const typeLabels = {
+    mcq: "MCQ",
+    multiple_answer: "Multiple Answer",
+    true_false: "True / False"
+  };
+
+  qbQuestions.forEach(question => {
+
+    const item = document.createElement("div");
+
+    item.className = "qb-item";
+
+    item.innerHTML = `
+
+      <div class="qb-item-main">
+
+        <h4>${escapeHTML(question.question_text)}</h4>
+
+        <p>
+          ${escapeHTML(question.subjects?.name || "General")}
+          ${question.chapters?.name ? " • " + escapeHTML(question.chapters.name) : ""}
+          ${question.topics?.name ? " • " + escapeHTML(question.topics.name) : ""}
+          ${question.class ? " • Class " + escapeHTML(question.class) : ""}
+          • ${question.marks} Marks
+        </p>
+
+        <div class="qb-badges">
+
+          <span class="badge badge-${escapeHTML(question.difficulty)}">
+            ${escapeHTML(question.difficulty)}
+          </span>
+
+          <span class="badge">
+            ${typeLabels[question.question_type] || question.question_type}
+          </span>
+
+        </div>
+
+      </div>
+
+      <div class="qb-item-actions">
+
+        <button type="button" class="edit-question-btn">✏️ Edit</button>
+        <button type="button" class="delete-question-btn">🗑 Delete</button>
+
+      </div>
+
+    `;
+
+    item.querySelector(".edit-question-btn")
+      .addEventListener("click", () => editQuestion(question.id));
+
+    item.querySelector(".delete-question-btn")
+      .addEventListener("click", () => deleteQuestion(question.id));
+
+    list.appendChild(item);
+
+  });
+
+}
+
+
+/* =========================================================
+   QUESTION BANK — ADD / EDIT FORM
+========================================================= */
+
+async function openQuestionForm(questionId) {
+
+  qbEditingId = questionId;
+
+  document.getElementById("bulkImportPanel").classList.add("hidden");
+
+  const panel = document.getElementById("questionFormPanel");
+
+  panel.classList.remove("hidden");
+
+  document.getElementById("questionFormMessage").textContent = "";
+  document.getElementById("questionFormMessage").className = "form-message";
+
+  document.getElementById("questionFormTitle").textContent =
+    questionId ? "Edit Question" : "Add Question";
+
+  document.getElementById("questionForm").reset();
+
+  document.querySelectorAll(".q-correct-check")
+    .forEach(box => box.checked = false);
+
+  if (!questionId) {
+
+    await populateChapterSelect(document.getElementById("qChapter"), null, "Select Chapter");
+    await populateTopicSelect(document.getElementById("qTopic"), null, "Select Topic");
+
+    updateQuestionFormForType();
+
+    panel.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    return;
+
+  }
+
+  const { data, error } =
+    await supabaseClient
+      .from("questions")
+      .select("*")
+      .eq("id", questionId)
+      .single();
+
+  if (error) {
+
+    alert(error.message || "Unable to load question.");
+
+    closeQuestionForm();
+
+    return;
+
+  }
+
+  document.getElementById("qClass").value = data.class || "";
+  document.getElementById("qType").value = data.question_type;
+  document.getElementById("qDifficulty").value = data.difficulty;
+  document.getElementById("qQuestionText").value = data.question_text;
+  document.getElementById("qImageUrl").value = data.image_url || "";
+  document.getElementById("qOptionA").value = data.option_a || "";
+  document.getElementById("qOptionB").value = data.option_b || "";
+  document.getElementById("qOptionC").value = data.option_c || "";
+  document.getElementById("qOptionD").value = data.option_d || "";
+  document.getElementById("qMarks").value = data.marks;
+  document.getElementById("qNegative").value = data.negative_marks;
+  document.getElementById("qExplanation").value = data.explanation || "";
+
+  const correctKeys = String(data.correct_answer || "").split(",").map(k => k.trim());
+
+  document.getElementById("qCorrectA").checked = correctKeys.includes("A");
+  document.getElementById("qCorrectB").checked = correctKeys.includes("B");
+  document.getElementById("qCorrectC").checked = correctKeys.includes("C");
+  document.getElementById("qCorrectD").checked = correctKeys.includes("D");
+
+  document.getElementById("qSubject").value = data.subject_id || "";
+
+  await populateChapterSelect(document.getElementById("qChapter"), data.subject_id, "Select Chapter");
+
+  document.getElementById("qChapter").value = data.chapter_id || "";
+
+  await populateTopicSelect(document.getElementById("qTopic"), data.chapter_id, "Select Topic");
+
+  document.getElementById("qTopic").value = data.topic_id || "";
+
+  updateQuestionFormForType();
+
+  panel.scrollIntoView({ behavior: "smooth", block: "start" });
+
+}
+
+
+function editQuestion(id) {
+
+  openQuestionForm(id);
+
+}
+
+
+function closeQuestionForm() {
+
+  qbEditingId = null;
+
+  document.getElementById("questionFormPanel").classList.add("hidden");
+
+}
+
+
+function updateQuestionFormForType() {
+
+  const type = document.getElementById("qType").value;
+
+  const cWrap = document.getElementById("qOptionCWrap");
+  const dWrap = document.getElementById("qOptionDWrap");
+
+  if (type === "true_false") {
+
+    cWrap.classList.add("hidden");
+    dWrap.classList.add("hidden");
+
+    document.getElementById("qOptionA").value = "True";
+    document.getElementById("qOptionB").value = "False";
+
+  } else {
+
+    cWrap.classList.remove("hidden");
+    dWrap.classList.remove("hidden");
+
+  }
+
+  if (type !== "multiple_answer") {
+
+    const checked = document.querySelector(".q-correct-check:checked");
+
+    document.querySelectorAll(".q-correct-check")
+      .forEach(box => {
+
+        if (box !== checked) {
+          box.checked = false;
+        }
+
+      });
+
+  }
+
+}
+
+
+async function saveQuestionToBank(event) {
+
+  event.preventDefault();
+
+  const message = document.getElementById("questionFormMessage");
+
+  const subjectId = document.getElementById("qSubject").value;
+  const questionText = document.getElementById("qQuestionText").value.trim();
+  const type = document.getElementById("qType").value;
+  const optionA = document.getElementById("qOptionA").value.trim();
+  const optionB = document.getElementById("qOptionB").value.trim();
+  const optionC = document.getElementById("qOptionC").value.trim();
+  const optionD = document.getElementById("qOptionD").value.trim();
+  const marks = Number(document.getElementById("qMarks").value);
+
+  const correctKeys = [];
+
+  if (document.getElementById("qCorrectA").checked) correctKeys.push("A");
+  if (document.getElementById("qCorrectB").checked) correctKeys.push("B");
+  if (document.getElementById("qCorrectC").checked) correctKeys.push("C");
+  if (document.getElementById("qCorrectD").checked) correctKeys.push("D");
+
+  if (!subjectId) {
+    message.className = "form-message error";
+    message.textContent = "Please select a subject.";
+    return;
+  }
+
+  if (!questionText) {
+    message.className = "form-message error";
+    message.textContent = "Question text is required.";
+    return;
+  }
+
+  if (!optionA || !optionB) {
+    message.className = "form-message error";
+    message.textContent = "Option A and Option B are required.";
+    return;
+  }
+
+  if (!correctKeys.length) {
+    message.className = "form-message error";
+    message.textContent = "Please mark at least one correct answer.";
+    return;
+  }
+
+  if (type !== "multiple_answer" && correctKeys.length > 1) {
+    message.className = "form-message error";
+    message.textContent = "Only one correct answer allowed for this question type.";
+    return;
+  }
+
+  if (!marks || marks <= 0) {
+    message.className = "form-message error";
+    message.textContent = "Marks must be greater than 0.";
+    return;
+  }
+
+  const payload = {
+
+    created_by: currentUser.id,
+    subject_id: Number(subjectId),
+    chapter_id: document.getElementById("qChapter").value
+      ? Number(document.getElementById("qChapter").value)
+      : null,
+    topic_id: document.getElementById("qTopic").value
+      ? Number(document.getElementById("qTopic").value)
+      : null,
+    class: document.getElementById("qClass").value.trim() || null,
+
+    question_type: type,
+    question_text: questionText,
+    image_url: document.getElementById("qImageUrl").value.trim() || null,
+
+    option_a: optionA,
+    option_b: optionB,
+    option_c: optionC || null,
+    option_d: optionD || null,
+
+    correct_answer: correctKeys.join(","),
+
+    explanation: document.getElementById("qExplanation").value.trim() || null,
+    marks: marks,
+    negative_marks: Number(document.getElementById("qNegative").value) || 0,
+    difficulty: document.getElementById("qDifficulty").value
+
+  };
+
+  const saveButton = document.getElementById("saveQuestionBtn");
+
+  saveButton.disabled = true;
+  saveButton.textContent = "Saving...";
+
+  try {
+
+    let error;
+
+    if (qbEditingId) {
+
+      ({ error } =
+        await supabaseClient
+          .from("questions")
+          .update(payload)
+          .eq("id", qbEditingId));
+
+    } else {
+
+      ({ error } =
+        await supabaseClient
+          .from("questions")
+          .insert(payload));
+
+    }
+
+    if (error) {
+      throw error;
+    }
+
+    closeQuestionForm();
+
+    await loadQuestionBank();
+
+  }
+
+  catch (error) {
+
+    console.error(error);
+
+    message.className = "form-message error";
+    message.textContent = error.message || "Unable to save question.";
+
+  }
+
+  finally {
+
+    saveButton.disabled = false;
+    saveButton.textContent = "💾 Save Question";
+
+  }
+
+}
+
+
+async function deleteQuestion(id) {
+
+  if (!confirm("Delete this question? This cannot be undone.")) {
+    return;
+  }
+
+  const { error } =
+    await supabaseClient
+      .from("questions")
+      .delete()
+      .eq("id", id);
+
+  if (error) {
+
+    alert(error.message || "Unable to delete question. It may be used in an exam.");
+
+    return;
+
+  }
+
+  await loadQuestionBank();
+
+}
+
+
+/* =========================================================
+   QUESTION BANK — BULK IMPORT
+========================================================= */
+
+async function submitBulkImport() {
+
+  const message = document.getElementById("bulkImportMessage");
+  const subjectId = document.getElementById("bulkSubject").value;
+  const chapterId = document.getElementById("bulkChapter").value;
+  const rawText = document.getElementById("bulkImportText").value.trim();
+
+  message.className = "form-message";
+  message.textContent = "";
+
+  if (!subjectId) {
+    message.className = "form-message error";
+    message.textContent = "Please select a subject.";
+    return;
+  }
+
+  if (!rawText) {
+    message.className = "form-message error";
+    message.textContent = "Please paste questions JSON.";
+    return;
+  }
+
+  let parsed;
+
+  try {
+
+    parsed = JSON.parse(rawText);
+
+  } catch (error) {
+
+    message.className = "form-message error";
+    message.textContent = "Invalid JSON: " + error.message;
+    return;
+
+  }
+
+  if (!Array.isArray(parsed) || !parsed.length) {
+
+    message.className = "form-message error";
+    message.textContent = "JSON must be a non-empty array of questions.";
+    return;
+
+  }
+
+  const rows = [];
+
+  for (let i = 0; i < parsed.length; i++) {
+
+    const q = parsed[i];
+
+    if (!q.question_text || !q.option_a || !q.option_b || !q.correct_answer) {
+
+      message.className = "form-message error";
+      message.textContent =
+        `Question ${i + 1}: question_text, option_a, option_b and correct_answer are required.`;
+      return;
+
+    }
+
+    rows.push({
+
+      created_by: currentUser.id,
+      subject_id: Number(subjectId),
+      chapter_id: chapterId ? Number(chapterId) : null,
+      topic_id: null,
+      class: q.class || null,
+
+      question_type: q.question_type || "mcq",
+      question_text: q.question_text,
+      image_url: q.image_url || null,
+
+      option_a: q.option_a,
+      option_b: q.option_b,
+      option_c: q.option_c || null,
+      option_d: q.option_d || null,
+
+      correct_answer: String(q.correct_answer).toUpperCase(),
+
+      explanation: q.explanation || null,
+      marks: Number(q.marks) || 1,
+      negative_marks: Number(q.negative_marks) || 0,
+      difficulty: q.difficulty || "medium"
+
+    });
+
+  }
+
+  const button = document.getElementById("bulkImportSubmitBtn");
+
+  button.disabled = true;
+  button.textContent = "Importing...";
+
+  try {
+
+    const { error } =
+      await supabaseClient
+        .from("questions")
+        .insert(rows);
+
+    if (error) {
+      throw error;
+    }
+
+    message.className = "form-message success";
+    message.textContent = `${rows.length} question(s) imported successfully.`;
+
+    document.getElementById("bulkImportText").value = "";
+
+    await loadQuestionBank();
+
+  }
+
+  catch (error) {
+
+    console.error(error);
+
+    message.className = "form-message error";
+    message.textContent = error.message || "Unable to import questions.";
+
+  }
+
+  finally {
+
+    button.disabled = false;
+    button.textContent = "📥 Import Questions";
+
+  }
 
 }
 
