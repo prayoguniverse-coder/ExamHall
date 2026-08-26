@@ -33,6 +33,11 @@ button {
   cursor: pointer;
 }
 
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .hidden {
   display: none !important;
 }
@@ -156,6 +161,10 @@ select:focus {
 .secondary-btn {
   background: #eef2f7;
   color: var(--text);
+}
+
+.secondary-btn:hover {
+  background: #e2e8f0;
 }
 
 .danger-btn {
@@ -415,6 +424,93 @@ select:focus {
 }
 
 
+/* SUBJECT MANAGEMENT */
+
+.subject-add-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 15px;
+}
+
+.subject-input-area {
+  flex: 1;
+}
+
+.subject-input-area label {
+  margin-top: 0;
+}
+
+.subject-add-form .primary-btn {
+  min-height: 44px;
+  white-space: nowrap;
+}
+
+.subject-count {
+  background: #eef2ff;
+  color: #3730a3;
+  padding: 7px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.subject-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.subject-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 15px;
+  background: white;
+}
+
+.subject-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.subject-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: #eff6ff;
+  color: var(--primary);
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.subject-info strong {
+  display: block;
+}
+
+.subject-info small {
+  color: var(--muted);
+}
+
+.subject-delete-btn {
+  border: 0;
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+.subject-delete-btn:hover {
+  background: #fecaca;
+}
+
+
 /* FORMS */
 
 .form-grid {
@@ -470,6 +566,7 @@ select:focus {
 
 .form-message {
   color: var(--primary);
+  min-height: 20px;
 }
 
 
@@ -716,6 +813,10 @@ select:focus {
     grid-template-columns: 1fr;
   }
 
+  .subject-list {
+    grid-template-columns: 1fr;
+  }
+
 }
 
 @media (max-width: 750px) {
@@ -753,6 +854,15 @@ select:focus {
     grid-template-columns: 1fr;
   }
 
+  .subject-add-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .subject-add-form .primary-btn {
+    width: 100%;
+  }
+
   .exam-item {
     flex-direction: column;
     align-items: flex-start;
@@ -760,6 +870,16 @@ select:focus {
 
   .result-actions {
     flex-direction: column;
+  }
+
+  .score-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .demo-note {
+    flex-direction: column;
+    gap: 5px;
   }
 
 }
