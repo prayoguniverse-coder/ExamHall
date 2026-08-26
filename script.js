@@ -1,6 +1,6 @@
 /* =========================================================
    EXAMHALL
-   SUPABASE + STUDENT + TEACHER + EXAM + HISTORY + REVIEW
+   SUPABASE + STUDENT + TEACHER + SUBJECTS + EXAM
 ========================================================= */
 
 const SUPABASE_URL =
@@ -370,10 +370,6 @@ async function loadUserProfile() {
 
   }
 
-  /*
-    If profile was not created because email confirmation
-    or an old account is being used, create it.
-  */
 
   if (!data) {
 
@@ -566,6 +562,12 @@ function showPage(pageId) {
     pageId === "teacherDashboard"
   )
     loadTeacherDashboard();
+
+
+  if (
+    pageId === "manageSubjects"
+  )
+    loadManageSubjects();
 
 
   if (
@@ -792,12 +794,17 @@ async function renderAvailableExams(
 
     `;
 
-    item
-      .querySelector("button")
-      .addEventListener(
+    const button =
+      item.querySelector("button");
+
+    if (button) {
+
+      button.addEventListener(
         "click",
         () => startExam(exam)
       );
+
+    }
 
     list.appendChild(item);
 
@@ -956,10 +963,6 @@ async function startExam(exam) {
     completedAttempts.length + 1;
 
 
-  /*
-    Load exam questions
-  */
-
   const {
     data: examQuestions,
     error: questionError
@@ -1025,10 +1028,6 @@ async function startExam(exam) {
 
   }
 
-
-  /*
-    Create attempt
-  */
 
   const {
     data: attempt,
@@ -1162,8 +1161,7 @@ function updateTimer() {
 
   $("examTimer").textContent =
     String(minutes).padStart(2,"0")
-    + ":"
-    +
+    + ":" +
     String(seconds).padStart(2,"0");
 
 }
@@ -1196,9 +1194,10 @@ function renderCurrentQuestion() {
     ["C", question.option_c],
     ["D", question.option_d]
   ].filter(
-    x => x[1] !== null &&
-         x[1] !== undefined &&
-         String(x[1]).trim() !== ""
+    x =>
+      x[1] !== null &&
+      x[1] !== undefined &&
+      String(x[1]).trim() !== ""
   );
 
 
@@ -1222,9 +1221,11 @@ function renderCurrentQuestion() {
             type="radio"
             name="currentOption"
             value="${key}"
-            ${selected === key
-              ? "checked"
-              : ""}
+            ${
+              selected === key
+                ? "checked"
+                : ""
+            }
           >
 
           <strong>${key}.</strong>
@@ -1429,10 +1430,6 @@ async function submitExam(
   let unanswered = 0;
 
 
-  /*
-    Save answers
-  */
-
   for (
     const question of
     runningQuestions
@@ -1485,44 +1482,56 @@ async function submitExam(
     }
 
 
-    await supabaseClient
-      .from("student_answers")
-      .upsert({
+    const {
+      error: answerError
+    } =
+      await supabaseClient
+        .from("student_answers")
+        .upsert({
 
-        attempt_id:
-          currentAttempt.id,
+          attempt_id:
+            currentAttempt.id,
 
-        question_id:
-          question.id,
+          question_id:
+            question.id,
 
-        selected_answer:
-          selected,
+          selected_answer:
+            selected,
 
-        is_correct:
-          Boolean(isCorrect),
+          is_correct:
+            Boolean(isCorrect),
 
-        marks_obtained:
-          isCorrect
-            ? Number(question.marks || 0)
-            : (
-              selected
-                ? -Number(
-                    question.negative_marks || 0
-                  )
-                : 0
-            ),
+          marks_obtained:
+            isCorrect
+              ? Number(question.marks || 0)
+              : (
+                selected
+                  ? -Number(
+                      question.negative_marks || 0
+                    )
+                  : 0
+              ),
 
-        answered_at:
-          selected
-            ? new Date().toISOString()
-            : null
+          answered_at:
+            selected
+              ? new Date().toISOString()
+              : null
 
-      }, {
+        }, {
 
-        onConflict:
-          "attempt_id,question_id"
+          onConflict:
+            "attempt_id,question_id"
 
-      });
+        });
+
+    if (answerError) {
+
+      console.error(
+        "Answer save error:",
+        answerError
+      );
+
+    }
 
   }
 
@@ -2494,6 +2503,364 @@ async function loadTeacherDashboard() {
 
 
 /* =========================================================
+   SUBJECT MANAGEMENT
+========================================================= */
+
+async function loadManageSubjects() {
+
+  await renderSubjectList();
+
+}
+
+
+async function getAllSubjects() {
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("subjects")
+      .select("id,name")
+      .order(
+        "name",
+        { ascending: true }
+      );
+
+  if (error) {
+
+    console.error(error);
+
+    return {
+      data: [],
+      error
+    };
+
+  }
+
+  return {
+    data: data || [],
+    error: null
+  };
+
+}
+
+
+async function renderSubjectList() {
+
+  const {
+    data,
+    error
+  } =
+    await getAllSubjects();
+
+
+  if (error) {
+
+    $("subjectList").innerHTML =
+      `<p class="error-message">
+        ${escapeHTML(error.message)}
+      </p>`;
+
+    return;
+
+  }
+
+
+  $("subjectCount").textContent =
+    `${data.length} Subject${data.length === 1 ? "" : "s"}`;
+
+
+  if (!data.length) {
+
+    $("subjectList").innerHTML =
+      `<div class="subject-item">
+        <div>
+          <strong>No subjects found.</strong>
+          <small>Add your first subject above.</small>
+        </div>
+      </div>`;
+
+    return;
+
+  }
+
+
+  $("subjectList").innerHTML =
+    data.map(
+      subject => `
+
+        <div
+          class="subject-item"
+          data-id="${subject.id}"
+        >
+
+          <div class="subject-info">
+
+            <div class="subject-icon">
+              📚
+            </div>
+
+            <div>
+
+              <strong>
+                ${escapeHTML(subject.name)}
+              </strong>
+
+              <small>
+                Available for exams
+              </small>
+
+            </div>
+
+          </div>
+
+
+          <button
+            class="subject-delete-btn"
+            data-id="${subject.id}"
+            data-name="${escapeHTML(subject.name)}"
+          >
+            Delete
+          </button>
+
+        </div>
+
+      `
+    ).join("");
+
+
+  document
+    .querySelectorAll(
+      ".subject-delete-btn"
+    )
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        () =>
+          deleteSubject(
+            button.dataset.id,
+            button.dataset.name
+          )
+      );
+
+    });
+
+}
+
+
+/* =========================================================
+   ADD SUBJECT
+========================================================= */
+
+$("subjectForm")
+  .addEventListener(
+    "submit",
+    async event => {
+
+      event.preventDefault();
+
+      const input =
+        $("subjectNameInput");
+
+      const message =
+        $("subjectMessage");
+
+      const button =
+        $("addSubjectBtn");
+
+      const name =
+        input.value.trim();
+
+
+      message.textContent = "";
+
+
+      if (!name) {
+
+        message.textContent =
+          "Please enter a subject name.";
+
+        return;
+
+      }
+
+
+      button.disabled = true;
+      button.textContent =
+        "Adding...";
+
+
+      try {
+
+        /*
+          First check duplicate subject
+        */
+
+        const {
+          data: existing,
+          error: searchError
+        } =
+          await supabaseClient
+            .from("subjects")
+            .select("id,name")
+            .ilike(
+              "name",
+              name
+            )
+            .limit(1);
+
+
+        if (searchError)
+          throw searchError;
+
+
+        if (existing?.length) {
+
+          message.textContent =
+            "This subject already exists.";
+
+          return;
+
+        }
+
+
+        /*
+          Insert subject
+        */
+
+        const {
+          error
+        } =
+          await supabaseClient
+            .from("subjects")
+            .insert({
+
+              name: name
+
+            });
+
+
+        if (error)
+          throw error;
+
+
+        message.textContent =
+          `"${name}" added successfully.`;
+
+        message.style.color =
+          "var(--success)";
+
+        input.value = "";
+
+
+        await renderSubjectList();
+
+        await refreshSubjectDropdowns();
+
+      }
+      catch (error) {
+
+        console.error(error);
+
+        message.textContent =
+          error.message ||
+          "Unable to add subject.";
+
+        message.style.color =
+          "var(--danger)";
+
+      }
+      finally {
+
+        button.disabled = false;
+        button.textContent =
+          "+ Add Subject";
+
+      }
+
+    }
+  );
+
+
+/* =========================================================
+   DELETE SUBJECT
+========================================================= */
+
+async function deleteSubject(
+  subjectId,
+  subjectName
+) {
+
+  const confirmed =
+    confirm(
+      `Delete "${subjectName}"?\n\nIf this subject is already used by exams, questions or chapters, deletion may fail.`
+    );
+
+
+  if (!confirmed) return;
+
+
+  try {
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from("subjects")
+        .delete()
+        .eq(
+          "id",
+          subjectId
+        );
+
+
+    if (error)
+      throw error;
+
+
+    await renderSubjectList();
+
+    await refreshSubjectDropdowns();
+
+    alert(
+      `"${subjectName}" deleted successfully.`
+    );
+
+  }
+  catch (error) {
+
+    console.error(error);
+
+    alert(
+      "Subject could not be deleted.\n\n" +
+      error.message
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   REFRESH SUBJECT DROPDOWNS
+========================================================= */
+
+async function refreshSubjectDropdowns() {
+
+  await loadSubjects(
+    $("examSubject")
+  );
+
+  await loadSubjects(
+    $("qSubject")
+  );
+
+}
+
+
+/* =========================================================
    TEACHER QUESTION BANK
 ========================================================= */
 
@@ -2582,7 +2949,8 @@ async function loadQuestionBank() {
           </p>
 
           <span class="badge">
-            Correct: ${escapeHTML(
+            Correct:
+            ${escapeHTML(
               q.correct_answer
             )}
           </span>
@@ -2605,6 +2973,7 @@ async function loadSubjects(
 
   if (!select) return;
 
+
   const {
     data,
     error
@@ -2621,6 +2990,7 @@ async function loadSubjects(
   if (error) {
 
     console.error(error);
+
     return;
 
   }
@@ -2632,7 +3002,7 @@ async function loadSubjects(
     </option>`;
 
 
-  data.forEach(
+  (data || []).forEach(
     subject => {
 
       const option =
@@ -2664,6 +3034,9 @@ async function loadChapters(
   subjectId,
   select
 ) {
+
+  if (!select) return;
+
 
   select.innerHTML =
     `<option value="">
@@ -2700,7 +3073,7 @@ async function loadChapters(
   }
 
 
-  data.forEach(
+  (data || []).forEach(
     chapter => {
 
       const option =
@@ -2852,16 +3225,9 @@ $("questionForm")
 
 async function initializeExamBuilder() {
 
-  if (
-    $("examSubject").options.length <= 1
-  ) {
-
-    await loadSubjects(
-      $("examSubject")
-    );
-
-  }
-
+  await loadSubjects(
+    $("examSubject")
+  );
 
   renderBuilderQuestions();
 
@@ -2939,6 +3305,7 @@ function renderBuilderQuestions() {
             </span>
 
             <button
+              type="button"
               class="remove-question"
               data-index="${index}"
             >
@@ -2963,48 +3330,63 @@ function renderBuilderQuestions() {
 
             <div>
               <label>Option A</label>
+
               <input
                 class="builder-a"
                 value="${escapeHTML(
                   q.option_a
                 )}"
               >
+
             </div>
+
 
             <div>
               <label>Option B</label>
+
               <input
                 class="builder-b"
                 value="${escapeHTML(
                   q.option_b
                 )}"
               >
+
             </div>
+
 
             <div>
               <label>Option C</label>
+
               <input
                 class="builder-c"
                 value="${escapeHTML(
                   q.option_c
                 )}"
               >
+
             </div>
+
 
             <div>
               <label>Option D</label>
+
               <input
                 class="builder-d"
                 value="${escapeHTML(
                   q.option_d
                 )}"
               >
+
             </div>
 
+
             <div>
+
               <label>Correct Answer</label>
 
-              <select class="builder-correct">
+              <select
+                class="builder-correct"
+              >
 
                 <option
                   value="A"
@@ -3046,7 +3428,9 @@ function renderBuilderQuestions() {
 
             </div>
 
+
             <div>
+
               <label>Marks</label>
 
               <input
@@ -3055,6 +3439,7 @@ function renderBuilderQuestions() {
                 min="0"
                 value="${q.marks}"
               >
+
             </div>
 
           </div>
@@ -3220,8 +3605,10 @@ $("saveExamBtn")
 
 async function saveExam() {
 
-  if (!currentProfile ||
-      currentProfile.role !== "teacher") {
+  if (
+    !currentProfile ||
+    currentProfile.role !== "teacher"
+  ) {
 
     alert(
       "Only teacher can create exams."
@@ -3239,6 +3626,44 @@ async function saveExam() {
     );
 
     return;
+
+  }
+
+
+  const subjectId =
+    $("examSubject").value;
+
+
+  if (!subjectId) {
+
+    alert(
+      "Please select a subject."
+    );
+
+    return;
+
+  }
+
+
+  for (
+    let i = 0;
+    i < builderQuestions.length;
+    i++
+  ) {
+
+    if (
+      !builderQuestions[i]
+        .question_text
+        .trim()
+    ) {
+
+      alert(
+        `Please enter question ${i + 1}.`
+      );
+
+      return;
+
+    }
 
   }
 
@@ -3279,7 +3704,7 @@ async function saveExam() {
               .trim(),
 
           subject_id:
-            $("examSubject").value,
+            subjectId,
 
           chapter_id:
             $("examChapter").value ||
@@ -3359,7 +3784,7 @@ async function saveExam() {
               currentUser.id,
 
             subject_id:
-              $("examSubject").value,
+              subjectId,
 
             chapter_id:
               $("examChapter").value ||
@@ -3372,25 +3797,25 @@ async function saveExam() {
               "medium",
 
             question_text:
-              q.question_text,
+              q.question_text.trim(),
 
             option_a:
-              q.option_a,
+              q.option_a.trim(),
 
             option_b:
-              q.option_b,
+              q.option_b.trim(),
 
             option_c:
-              q.option_c,
+              q.option_c.trim(),
 
             option_d:
-              q.option_d,
+              q.option_d.trim(),
 
             correct_answer:
               q.correct_answer,
 
             explanation:
-              q.explanation,
+              q.explanation.trim(),
 
             marks:
               Number(
@@ -3444,6 +3869,10 @@ async function saveExam() {
       .textContent =
       "Exam created and published successfully.";
 
+    $("examFormMessage").style.color =
+      "var(--success)";
+
+
     $("examForm").reset();
 
     builderQuestions = [];
@@ -3461,6 +3890,9 @@ async function saveExam() {
       .textContent =
       error.message ||
       "Unable to create exam.";
+
+    $("examFormMessage").style.color =
+      "var(--danger)";
 
   }
   finally {
@@ -3485,7 +3917,9 @@ async function loadTeacherScores() {
   } =
     await supabaseClient
       .from("exams")
-      .select("id,title")
+      .select(
+        "id,title"
+      )
       .eq(
         "created_by",
         currentUser.id
@@ -3596,6 +4030,7 @@ async function loadTeacherScores() {
                   ? "Official"
                   : "Re-Exam"
               }
+
             </small>
 
           </div>
@@ -3664,12 +4099,6 @@ async function openTeacherReview(
   attemptId,
   examTitle
 ) {
-
-  /*
-    Teacher is allowed to read answers
-    through RLS if the exam belongs
-    to that teacher.
-  */
 
   const {
     data,
@@ -3753,6 +4182,7 @@ async function openTeacherReview(
                 q.question_text
               )}
             </h3>
+
 
             <div class="review-options">
 
