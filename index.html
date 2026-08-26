@@ -169,6 +169,10 @@
         📊 Dashboard
       </button>
 
+      <button class="menu-btn" data-page="manageSubjects">
+        📚 Subjects
+      </button>
+
       <button class="menu-btn" data-page="createExam">
         ➕ Create Exam
       </button>
@@ -385,6 +389,82 @@
     </section>
 
 
+    <!-- ================= MANAGE SUBJECTS ================= -->
+
+    <section id="manageSubjects" class="page hidden">
+
+      <div class="page-header">
+        <p class="eyebrow">TEACHER</p>
+        <h2>Manage Subjects</h2>
+        <p>Add and manage subjects for examinations.</p>
+      </div>
+
+
+      <div class="content-card">
+
+        <div class="card-header">
+          <div>
+            <h3>➕ Add New Subject</h3>
+            <p>Enter a subject name and add it to the portal.</p>
+          </div>
+        </div>
+
+
+        <form id="subjectForm" class="subject-add-form">
+
+          <div class="subject-input-area">
+
+            <label for="subjectNameInput">
+              Subject Name
+            </label>
+
+            <input
+              type="text"
+              id="subjectNameInput"
+              placeholder="Example: English"
+              maxlength="100"
+              required
+            >
+
+          </div>
+
+          <button
+            type="submit"
+            id="addSubjectBtn"
+            class="primary-btn"
+          >
+            + Add Subject
+          </button>
+
+        </form>
+
+        <p id="subjectMessage" class="form-message"></p>
+
+      </div>
+
+
+      <div class="content-card">
+
+        <div class="card-header">
+
+          <div>
+            <h3>Available Subjects</h3>
+            <p>Subjects currently available in the portal.</p>
+          </div>
+
+          <span id="subjectCount" class="subject-count">
+            0 Subjects
+          </span>
+
+        </div>
+
+        <div id="subjectList" class="subject-list"></div>
+
+      </div>
+
+    </section>
+
+
     <!-- ================= CREATE EXAM ================= -->
 
     <section id="createExam" class="page hidden">
@@ -408,39 +488,49 @@
 
             <div class="form-group full">
               <label>Exam Title *</label>
+
               <input
                 id="examTitleInput"
                 placeholder="Example: Mathematics Test 1"
                 required
               >
+
             </div>
 
             <div class="form-group full">
+
               <label>Description</label>
+
               <textarea
                 id="examDescription"
                 rows="3"
                 placeholder="Exam description"
               ></textarea>
+
             </div>
 
             <div class="form-group">
+
               <label>Subject *</label>
 
               <select id="examSubject" required>
                 <option value="">Select Subject</option>
               </select>
+
             </div>
 
             <div class="form-group">
+
               <label>Chapter</label>
 
               <select id="examChapter">
                 <option value="">All Chapters</option>
               </select>
+
             </div>
 
             <div class="form-group">
+
               <label>Duration (Minutes)</label>
 
               <input
@@ -450,9 +540,11 @@
                 value="30"
                 required
               >
+
             </div>
 
             <div class="form-group">
+
               <label>Total Marks</label>
 
               <input
@@ -462,9 +554,11 @@
                 value="10"
                 required
               >
+
             </div>
 
             <div class="form-group">
+
               <label>Passing Percentage</label>
 
               <input
@@ -474,9 +568,11 @@
                 max="100"
                 value="40"
               >
+
             </div>
 
             <div class="form-group">
+
               <label>Maximum Attempts</label>
 
               <input
@@ -485,6 +581,7 @@
                 min="1"
                 value="3"
               >
+
             </div>
 
           </div>
@@ -493,35 +590,64 @@
           <div class="settings-grid">
 
             <label class="check-card">
-              <input id="randomizeQuestions" type="checkbox">
+
+              <input
+                id="randomizeQuestions"
+                type="checkbox"
+              >
+
               <span>
                 <strong>Randomize Questions</strong>
                 <small>Show questions randomly.</small>
               </span>
+
             </label>
 
+
             <label class="check-card">
-              <input id="randomizeOptions" type="checkbox">
+
+              <input
+                id="randomizeOptions"
+                type="checkbox"
+              >
+
               <span>
                 <strong>Randomize Options</strong>
                 <small>Show options randomly.</small>
               </span>
+
             </label>
 
+
             <label class="check-card">
-              <input id="showResultImmediately" type="checkbox" checked>
+
+              <input
+                id="showResultImmediately"
+                type="checkbox"
+                checked
+              >
+
               <span>
                 <strong>Show Result</strong>
                 <small>Show result after submission.</small>
               </span>
+
             </label>
 
+
             <label class="check-card">
-              <input id="showExplanations" type="checkbox" checked>
+
+              <input
+                id="showExplanations"
+                type="checkbox"
+                checked
+              >
+
               <span>
                 <strong>Show Explanation</strong>
                 <small>Show explanations in review.</small>
               </span>
+
             </label>
 
           </div>
@@ -542,7 +668,10 @@
             <p>Add questions to this exam.</p>
           </div>
 
-          <button id="addQuestionBtn" class="primary-btn">
+          <button
+            id="addQuestionBtn"
+            class="primary-btn"
+          >
             + Add Question
           </button>
 
@@ -555,11 +684,17 @@
 
       <div class="action-bar">
 
-        <button id="saveExamBtn" class="primary-btn">
+        <button
+          id="saveExamBtn"
+          class="primary-btn"
+        >
           💾 Save & Publish Exam
         </button>
 
-        <p id="examFormMessage" class="form-message"></p>
+        <p
+          id="examFormMessage"
+          class="form-message"
+        ></p>
 
       </div>
 
@@ -571,9 +706,15 @@
     <section id="questionBank" class="page hidden">
 
       <div class="page-header">
+
         <p class="eyebrow">TEACHER</p>
+
         <h2>Question Bank</h2>
-        <p>Create and manage reusable questions.</p>
+
+        <p>
+          Create and manage reusable questions.
+        </p>
+
       </div>
 
 
@@ -593,42 +734,86 @@
           <div class="form-grid">
 
             <div class="form-group">
+
               <label>Subject *</label>
 
               <select id="qSubject" required>
-                <option value="">Select Subject</option>
+
+                <option value="">
+                  Select Subject
+                </option>
+
               </select>
+
             </div>
 
+
             <div class="form-group">
+
               <label>Chapter</label>
 
               <select id="qChapter">
-                <option value="">Select Chapter</option>
+
+                <option value="">
+                  Select Chapter
+                </option>
+
               </select>
+
             </div>
 
+
             <div class="form-group">
+
               <label>Difficulty</label>
 
               <select id="qDifficulty">
-                <option value="easy">Easy</option>
-                <option value="medium" selected>Medium</option>
-                <option value="hard">Hard</option>
+
+                <option value="easy">
+                  Easy
+                </option>
+
+                <option
+                  value="medium"
+                  selected
+                >
+                  Medium
+                </option>
+
+                <option value="hard">
+                  Hard
+                </option>
+
               </select>
+
             </div>
 
+
             <div class="form-group">
+
               <label>Question Type</label>
 
               <select id="qType">
-                <option value="mcq">MCQ</option>
-                <option value="true_false">True / False</option>
-                <option value="multiple_answer">Multiple Answer</option>
+
+                <option value="mcq">
+                  MCQ
+                </option>
+
+                <option value="true_false">
+                  True / False
+                </option>
+
+                <option value="multiple_answer">
+                  Multiple Answer
+                </option>
+
               </select>
+
             </div>
 
+
             <div class="form-group full">
+
               <label>Question *</label>
 
               <textarea
@@ -637,40 +822,60 @@
                 required
                 placeholder="Enter question"
               ></textarea>
+
             </div>
 
+
             <div class="form-group">
+
               <label>Option A</label>
               <input id="qA">
+
             </div>
 
+
             <div class="form-group">
+
               <label>Option B</label>
               <input id="qB">
+
             </div>
 
+
             <div class="form-group">
+
               <label>Option C</label>
               <input id="qC">
+
             </div>
 
+
             <div class="form-group">
+
               <label>Option D</label>
               <input id="qD">
+
             </div>
 
+
             <div class="form-group">
+
               <label>Correct Answer</label>
 
               <select id="qCorrect">
+
                 <option value="A">A</option>
                 <option value="B">B</option>
                 <option value="C">C</option>
                 <option value="D">D</option>
+
               </select>
+
             </div>
 
+
             <div class="form-group">
+
               <label>Marks</label>
 
               <input
@@ -679,9 +884,12 @@
                 value="1"
                 min="0"
               >
+
             </div>
 
+
             <div class="form-group full">
+
               <label>Explanation</label>
 
               <textarea
@@ -689,15 +897,23 @@
                 rows="3"
                 placeholder="Explain the correct answer"
               ></textarea>
+
             </div>
 
           </div>
 
-          <button class="primary-btn" type="submit">
+
+          <button
+            class="primary-btn"
+            type="submit"
+          >
             Add Question
           </button>
 
-          <p id="questionMessage" class="form-message"></p>
+          <p
+            id="questionMessage"
+            class="form-message"
+          ></p>
 
         </form>
 
@@ -707,10 +923,17 @@
       <div class="content-card">
 
         <div class="card-header">
+
           <div>
+
             <h3>Your Questions</h3>
-            <p id="questionCount">0 questions</p>
+
+            <p id="questionCount">
+              0 questions
+            </p>
+
           </div>
+
         </div>
 
         <div id="questionBankList"></div>
@@ -725,10 +948,17 @@
     <section id="teacherScores" class="page hidden">
 
       <div class="page-header">
+
         <p class="eyebrow">TEACHER</p>
+
         <h2>Student Scores</h2>
-        <p>View complete student attempts.</p>
+
+        <p>
+          View complete student attempts.
+        </p>
+
       </div>
+
 
       <div class="content-card">
 
@@ -746,12 +976,25 @@
       <div class="exam-topbar">
 
         <div>
-          <p class="eyebrow">EXAM</p>
-          <h2 id="runningExamTitle">Exam</h2>
+
+          <p class="eyebrow">
+            EXAM
+          </p>
+
+          <h2 id="runningExamTitle">
+            Exam
+          </h2>
+
         </div>
 
+
         <div class="timer-box">
-          ⏱ <span id="examTimer">00:00</span>
+
+          ⏱
+          <span id="examTimer">
+            00:00
+          </span>
+
         </div>
 
       </div>
@@ -762,25 +1005,46 @@
         <div class="content-card exam-question-card">
 
           <div class="question-counter">
+
             Question
-            <span id="questionNumber">1</span>
+            <span id="questionNumber">
+              1
+            </span>
+
           </div>
+
 
           <h3 id="runningQuestionText"></h3>
 
-          <div id="runningOptions" class="options-list"></div>
+
+          <div
+            id="runningOptions"
+            class="options-list"
+          ></div>
+
 
           <div class="exam-actions">
 
-            <button id="previousBtn" class="secondary-btn">
+            <button
+              id="previousBtn"
+              class="secondary-btn"
+            >
               ← Previous
             </button>
 
-            <button id="nextBtn" class="primary-btn">
+
+            <button
+              id="nextBtn"
+              class="primary-btn"
+            >
               Next →
             </button>
 
-            <button id="submitBtn" class="danger-btn hidden">
+
+            <button
+              id="submitBtn"
+              class="danger-btn hidden"
+            >
               Submit Exam
             </button>
 
@@ -793,7 +1057,10 @@
 
           <h3>Questions</h3>
 
-          <div id="questionNavigation" class="question-navigation"></div>
+          <div
+            id="questionNavigation"
+            class="question-navigation"
+          ></div>
 
         </div>
 
@@ -808,11 +1075,17 @@
 
       <div class="page-header">
 
-        <p class="eyebrow">RESULT</p>
+        <p class="eyebrow">
+          RESULT
+        </p>
 
-        <h2>Exam Result</h2>
+        <h2>
+          Exam Result
+        </h2>
 
-        <p id="resultExamName">Exam</p>
+        <p id="resultExamName">
+          Exam
+        </p>
 
       </div>
 
@@ -820,23 +1093,46 @@
       <div class="result-summary">
 
         <div class="result-big-card">
+
           <span>Score</span>
-          <strong id="resultScore">0</strong>
+
+          <strong id="resultScore">
+            0
+          </strong>
+
         </div>
 
+
         <div class="result-big-card">
+
           <span>Percentage</span>
-          <strong id="resultPercentage">0%</strong>
+
+          <strong id="resultPercentage">
+            0%
+          </strong>
+
         </div>
 
+
         <div class="result-big-card">
+
           <span>Correct</span>
-          <strong id="resultCorrect">0</strong>
+
+          <strong id="resultCorrect">
+            0
+          </strong>
+
         </div>
 
+
         <div class="result-big-card">
+
           <span>Status</span>
-          <strong id="resultPassed">-</strong>
+
+          <strong id="resultPassed">
+            -
+          </strong>
+
         </div>
 
       </div>
@@ -851,15 +1147,26 @@
 
       <div class="result-actions">
 
-        <button id="resultReviewBtn" class="primary-btn">
+        <button
+          id="resultReviewBtn"
+          class="primary-btn"
+        >
           📖 View Complete Review
         </button>
 
-        <button id="resultReexamBtn" class="secondary-btn">
+
+        <button
+          id="resultReexamBtn"
+          class="secondary-btn"
+        >
           🔄 Re-Exam
         </button>
 
-        <button id="backToDashboardBtn" class="secondary-btn">
+
+        <button
+          id="backToDashboardBtn"
+          class="secondary-btn"
+        >
           Dashboard
         </button>
 
@@ -874,21 +1181,32 @@
 
       <div class="page-header">
 
-        <p class="eyebrow">REVIEW</p>
+        <p class="eyebrow">
+          REVIEW
+        </p>
 
-        <h2 id="reviewExamName">Exam Review</h2>
+        <h2 id="reviewExamName">
+          Exam Review
+        </h2>
 
         <p>
-          Question, options, your answer, correct answer and explanation.
+          Question, options, your answer,
+          correct answer and explanation.
         </p>
 
       </div>
 
 
-      <div id="reviewList" class="review-list"></div>
+      <div
+        id="reviewList"
+        class="review-list"
+      ></div>
 
 
-      <button id="reviewBackBtn" class="primary-btn">
+      <button
+        id="reviewBackBtn"
+        class="primary-btn"
+      >
         ← Back
       </button>
 
