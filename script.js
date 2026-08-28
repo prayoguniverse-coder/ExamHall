@@ -918,7 +918,6 @@ async function loadTeacherScores() {
 
 let builderInitialized = false;
 
-let builderQuestions = [];
 
 
 /* =========================================================
