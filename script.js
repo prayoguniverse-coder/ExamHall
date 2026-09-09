@@ -46,15 +46,40 @@ async function handleAuth(e) {
     const fullName = document.getElementById('auth-name').value;
     const role = document.getElementById('auth-role').value;
 
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error) return alert(error.message);
+    // 1. Supabase Auth Sign Up
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { full_name: fullName, role: role } // Metadata में Profile डेटा पास करें
+      }
+    });
 
-    await supabase.from('profiles').insert([{ id: data.user.id, full_name: fullName, role }]);
-    alert('Signup successful! Logging in...');
-    location.reload();
+    if (error) {
+      alert("Signup Failed: " + error.message);
+      return;
+    }
+
+    if (data.user) {
+      // 2. Insert into Profiles Table
+      const { error: profileError } = await supabase.from('profiles').upsert([
+        { id: data.user.id, full_name: fullName, role: role }
+      ]);
+
+      if (profileError) {
+        console.error("Profile Error:", profileError);
+      }
+
+      alert('Signup Successful! Checking session...');
+      location.reload();
+    }
   } else {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return alert(error.message);
+    // Login Logic
+    const { data, error } = await supabase.signInWithPassword({ email, password });
+    if (error) {
+      alert("Login Failed: " + error.message);
+      return;
+    }
     currentUser = data.user;
     await fetchProfile();
   }
