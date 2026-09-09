@@ -25,13 +25,14 @@ window.onload = async () => {
 };
 
 // Auth Tab Switch
-function switchAuthTab(type) {
+function switchAuthTab(type, e) {
   const isSignup = type === 'signup';
   document.getElementById('name-group').style.display = isSignup ? 'block' : 'none';
   document.getElementById('role-group').style.display = isSignup ? 'block' : 'none';
   document.getElementById('auth-btn').innerText = isSignup ? 'Sign Up' : 'Login';
+  
   document.querySelectorAll('.auth-tabs button').forEach(btn => btn.classList.remove('active'));
-  event.target.classList.add('active');
+  if (e && e.target) e.target.classList.add('active');
 }
 
 // Authentication Logic
