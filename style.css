@@ -877,3 +877,55 @@ button {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* ================= FINAL MOBILE / PERFORMANCE TWEAKS ================= */
+
+html { scroll-behavior: smooth; }
+img { max-width: 100%; height: auto; }
+
+button, .menu-btn, .option, .question-nav-btn {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (max-width: 650px) {
+  .auth-card { width: min(100%, 440px); margin: 14px; }
+  .page { min-width: 0; }
+  .content-card { padding: 15px; }
+  .card-header, .question-header, .action-bar {
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .exam-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bg);
+    padding-bottom: 10px;
+  }
+  .exam-question-card { padding: 16px; }
+  .exam-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+  }
+  .exam-actions .danger-btn {
+    grid-column: 1 / -1;
+  }
+  .question-navigation {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(38px, 1fr));
+    gap: 7px;
+  }
+  .question-nav-btn {
+    min-height: 38px;
+  }
+  .result-big-card strong { font-size: 26px; }
+  input, select, textarea, button { min-height: 42px; }
+}
+
+@media (max-width: 380px) {
+  .sidebar-menu { grid-template-columns: 1fr; }
+  .stats-grid, .result-summary { grid-template-columns: 1fr; }
+  .question-navigation { grid-template-columns: repeat(5, 1fr); }
+}
