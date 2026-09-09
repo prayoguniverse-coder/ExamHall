@@ -1,22 +1,21 @@
-// Ensure URL and Key are quoted correctly
-const SUPABASE_URL = "https://your-project-ref.supabase.co"; // अपना Supabase Project URL डालें
-const SUPABASE_KEY = "sb_publishable_wIN-aHetkbk4c8hpZ9e_pQ_mEJmV..."; // आपकी Publishable Key
+// 1. Apni Supabase Credentials Yahan Dalein
+const SUPABASE_URL = "https://your-project-id.supabase.co"; 
+const SUPABASE_KEY = "sb_publishable_wIN-aHetkbk4c8hpZ9e_pQ_mEJmV..."; 
 
-// Supabase initialization fix
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// 2. Safe Initialization (Variable Conflict Fix)
+let supabase;
+if (window.supabase) {
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+} else {
+  console.error("Supabase CDN Library script HTML me missing hai!");
+}
 
 let currentUser = null;
 let currentProfile = null;
-let activeExam = null;
-let activeAttempt = null;
-let examQuestions = [];
-let currentQuestionIndex = 0;
-let userAnswers = {}; // { question_id: option_choice }
-let markedForReview = new Set();
-let timerInterval = null;
 
-// Initialization
+// Page Load Event
 window.onload = async () => {
+  if (!supabase) return;
   const { data: { session } } = await supabase.auth.getSession();
   if (session) {
     currentUser = session.user;
@@ -24,82 +23,96 @@ window.onload = async () => {
   }
 };
 
-// Auth Tab Switch
-function switchAuthTab(type, e) {
+// Tab Switch
+function switchAuthTab(type) {
   const isSignup = type === 'signup';
   document.getElementById('name-group').style.display = isSignup ? 'block' : 'none';
   document.getElementById('role-group').style.display = isSignup ? 'block' : 'none';
   document.getElementById('auth-btn').innerText = isSignup ? 'Sign Up' : 'Login';
   
   document.querySelectorAll('.auth-tabs button').forEach(btn => btn.classList.remove('active'));
-  if (e && e.target) e.target.classList.add('active');
+  if (event && event.target) {
+    event.target.classList.add('active');
+  }
 }
 
-// Authentication Logic
+// Fixed Auth Handler
 async function handleAuth(e) {
   e.preventDefault();
+  if (!supabase) {
+    alert("Supabase initialize nahi hua. Page refresh karein.");
+    return;
+  }
+
   const email = document.getElementById('auth-email').value;
   const password = document.getElementById('auth-password').value;
   const isSignup = document.getElementById('auth-btn').innerText === 'Sign Up';
 
-  if (isSignup) {
-    const fullName = document.getElementById('auth-name').value;
-    const role = document.getElementById('auth-role').value;
+  try {
+    if (isSignup) {
+      const fullName = document.getElementById('auth-name').value;
+      const role = document.getElementById('auth-role').value;
 
-    // 1. Supabase Auth Sign Up
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name: fullName, role: role } // Metadata में Profile डेटा पास करें
+      // Sign Up
+      const { data, error } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+        options: { data: { full_name: fullName, role: role } }
+      });
+
+      if (error) throw error;
+
+      if (data.user) {
+        // Upsert Profile
+        const { error: profileErr } = await supabase
+          .from('profiles')
+          .upsert([{ id: data.user.id, full_name: fullName, role: role }]);
+
+        if (profileErr) console.error("Profile creation error:", profileErr);
+
+        alert("Account Banalela Aahe! Ab Login Karein.");
+        location.reload();
       }
-    });
+    } else {
+      // Login - Fixed Function Call: auth.signInWithPassword
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
 
-    if (error) {
-      alert("Signup Failed: " + error.message);
-      return;
+      if (error) throw error;
+
+      currentUser = data.user;
+      await fetchProfile();
     }
-
-    if (data.user) {
-      // 2. Insert into Profiles Table
-      const { error: profileError } = await supabase.from('profiles').upsert([
-        { id: data.user.id, full_name: fullName, role: role }
-      ]);
-
-      if (profileError) {
-        console.error("Profile Error:", profileError);
-      }
-
-      alert('Signup Successful! Checking session...');
-      location.reload();
-    }
-  } else {
-    // Login Logic
-    const { data, error } = await supabase.signInWithPassword({ email, password });
-    if (error) {
-      alert("Login Failed: " + error.message);
-      return;
-    }
-    currentUser = data.user;
-    await fetchProfile();
+  } catch (err) {
+    alert("Error: " + err.message);
+    console.error(err);
   }
 }
 
-// Fetch Profile and Navigate Dashboard
+// Fetch Profile
 async function fetchProfile() {
-  const { data } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
-  currentProfile = data;
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', currentUser.id)
+    .single();
 
+  if (error || !data) {
+    console.error("Profile error:", error);
+    return;
+  }
+
+  currentProfile = data;
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   document.getElementById('user-display').innerText = `${data.full_name} (${data.role.toUpperCase()})`;
 
   if (data.role === 'student') {
     document.getElementById('student-dashboard').style.display = 'block';
-    loadStudentDashboard();
   } else {
     document.getElementById('teacher-dashboard').style.display = 'block';
-    loadTeacherDashboard();
   }
 }
 
@@ -107,7 +120,6 @@ async function logout() {
   await supabase.auth.signOut();
   location.reload();
 }
-
 // ================= STUDENT EXAM ENGINE =================
 
 async function loadStudentDashboard() {
