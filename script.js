@@ -24,15 +24,24 @@ window.onload = async () => {
 };
 
 // Tab Switch
-function switchAuthTab(type) {
+function switchAuthTab(type, e) {
+  if (e) e.preventDefault(); // Form submit hone se rokein
+  
   const isSignup = type === 'signup';
+  
+  // Show / Hide Input Fields
   document.getElementById('name-group').style.display = isSignup ? 'block' : 'none';
   document.getElementById('role-group').style.display = isSignup ? 'block' : 'none';
+  
+  // Update Button Text
   document.getElementById('auth-btn').innerText = isSignup ? 'Sign Up' : 'Login';
   
-  document.querySelectorAll('.auth-tabs button').forEach(btn => btn.classList.remove('active'));
-  if (event && event.target) {
-    event.target.classList.add('active');
+  // Active Tab Highlight Logic
+  const buttons = document.querySelectorAll('.auth-tabs button');
+  buttons.forEach(btn => btn.classList.remove('active'));
+  
+  if (e && e.target) {
+    e.target.classList.add('active');
   }
 }
 
